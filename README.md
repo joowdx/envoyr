@@ -1,10 +1,8 @@
 <p align="center">
   <a href="https://envoyr.com" target="_blank">
-    <img src="https://raw.githubusercontent.com/jaslup16/envoyr/master/envoyr-logo.png" width="400" alt="Envoyr Logo">
+    <img src="https://raw.githubusercontent.com/jaslup16/envoyr/master/envoyr-logo1.png" width="400" alt="Envoyr Logo">
   </a>
 </p>
-
-
 
 ## Envoyr System Overview
 
