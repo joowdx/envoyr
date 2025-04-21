@@ -13,6 +13,7 @@ Envoyr is a modern document tracking system designed to streamline how organizat
 Whether you're handling sensitive legal paperwork, internal memos, or high-volume correspondence, Envoyr provides a secure, centralized platform to monitor movement, prevent loss, and maintain records with confidence.
 
 Key Features:
+
 📦 Document Journey Tracking: Visualize every stop in a document’s path—from sender to recipient.
 
 📍 Location Monitoring: Track handoffs with QR-Scanner checkpoints for enhanced transparency
