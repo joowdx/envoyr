@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasUlids, Notifiable, SoftDeletes;
@@ -32,6 +33,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'avatar',
         'office_id',
         'section_id',
+        'is_approved',
     ];
 
     /**
@@ -56,13 +58,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'password' => 'hashed',
             'role' => UserRole::class,
             'deactivated_at' => 'datetime',
+            'is_approved' => 'boolean',
         ];
     }
 
-    public function deactivate(): void
+    public function deactivate(User $deactivatedBy): void
     {
         $this->update([
             'deactivated_at' => now(),
+            'deactivated_by' => $deactivatedBy->id,
         ]);
     }
 

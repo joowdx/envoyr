@@ -22,7 +22,8 @@ class OfficeResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT;
+        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
+            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
     }
 
     public static function form(Form $form): Form

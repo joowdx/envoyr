@@ -2,19 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\UserRole;
-use App\Filament\Resources\UserResource\Pages;
-use App\Models\Office;
-use App\Models\Section;
-use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\User;
 use Filament\Tables;
+use App\Models\Office;
+use App\Enums\UserRole;
+use App\Models\Section;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\UserResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -24,14 +26,15 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT;
+        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
+            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->columns(3)
-            ->disabled(fn (User $record): bool => $record->trashed())
+            ->disabled(fn(Page $livewire) => $livewire instanceof EditRecord && $livewire->record->trashed())
             ->schema([
                 Forms\Components\FileUpload::make('avatar')
                     ->alignCenter()
@@ -59,6 +62,7 @@ class UserResource extends Resource
                             ->preload()
                             ->required()
                             ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('section_id', null))
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->required()
@@ -131,6 +135,11 @@ class UserResource extends Resource
                     ->label('Section')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('is_approved')
+                    ->label('Approved')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-clock'),         
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -166,6 +175,15 @@ class UserResource extends Resource
                 Tables\Filters\Filter::make('deactivated')
                     ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
                     ->label('Active'),
+                Tables\Filters\TernaryFilter::make('is_approved')
+                    ->label('Approved')
+                    ->trueLabel('Approved')
+                    ->falseLabel('Pending')
+                    ->queries(
+                        true: fn ($query) => $query->where('is_approved', true),
+                        false: fn ($query) => $query->where('is_approved', false),
+                    ),
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -186,7 +204,14 @@ class UserResource extends Resource
                     ->requiresConfirmation()
                     ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
                     ->action(fn (User $record) => $record->reactivate()),
-            ])
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record) => !$record->is_approved)
+                    ->action(fn (User $record) => $record->update(['is_approved' => true])),             
+                    ])
             ->bulkActions([
             ]);
     }
