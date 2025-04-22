@@ -16,11 +16,10 @@ class LoginResponse implements Responsable
         $user = $request->user();
 
         $route = match ($user->role) {
-            UserRole::ROOT => 'filament.root.pages.dashboard',
-            UserRole::ADMINISTRATOR => 'filament.administrator.pages.dashboard',
-            UserRole::LIAISON => 'filament.liaison.pages.dashboard',
-            UserRole::RECEIVER => 'filament.receiver.pages.dashboard',
-            UserRole::USER => 'filament.user.pages.dashboard',
+            UserRole::ROOT, UserRole::ADMINISTRATOR => 'filament.admin.pages.dashboard',
+            // UserRole::LIAISON => 'filament.liaison.pages.dashboard',
+            // UserRole::RECEIVER => 'filament.receiver.pages.dashboard',
+            // UserRole::USER => 'filament.user.pages.dashboard',
             default => 'filament.home.pages.',
         };
 

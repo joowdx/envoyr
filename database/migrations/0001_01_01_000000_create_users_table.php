@@ -21,10 +21,16 @@ return new class extends Migration
             $table->string('role')->default(UserRole::USER);
             $table->ulid('office_id');
             $table->ulid('section_id');
+            $table->ulid('approved_by');
+            $table->timestamp('approved_at')->nullable();
             $table->timestamp('deactivated_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
+        });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('approved_by')->references('id')->on('users')->onDelete('cascade');
         });
 
         Schema::create('resets', function (Blueprint $table) {

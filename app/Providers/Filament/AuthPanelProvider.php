@@ -23,12 +23,14 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Auth\Controllers\EmailVerificationController;
+use App\Filament\Auth\Pages\Redirect;
 
 class AuthPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->default()
             ->id('auth')
             ->path('auth')
             ->login()
@@ -44,7 +46,7 @@ class AuthPanelProvider extends PanelProvider
                 Widgets\FilamentInfoWidget::class,
             ])
             ->pages([
-                Pages\Dashboard::class,
+                Redirect::class,
                 Verification::class,
                 Approval::class,
             ])
@@ -58,13 +60,7 @@ class AuthPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-            ])
-            ->authMiddleware([
-                Authenticate::class,
-                Verification::class,
-                Approve::class,
-            ]);
-            
+            ]);          
     }
     public function boot(): void
     {

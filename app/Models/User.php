@@ -94,9 +94,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->belongsTo(Office::class);
     }
 
-
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
+    }
+
+    public function hasApprovedAccount(): bool
+    {
+        return $this->hasVerifiedEmail() && $this->is_approved;
     }
 }
