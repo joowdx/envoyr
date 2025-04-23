@@ -23,32 +23,36 @@ class Document extends Model
         'directive',
     ];
 
-    public function classifications(): BelongsTo
+    public function classification(): BelongsTo
     {
         return $this->belongsTo(Classification::class);
     }
 
-    public function users(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function offices(): BelongsTo
+    public function office(): BelongsTo
     {
         return $this->belongsTo(Office::class);
     }
 
-    public function sections(): BelongsTo
+    public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
     }
 
-    public function sources(): BelongsTo
+    public function source(): BelongsTo
     {
         return $this->belongsTo(Source::class);
     }
 
-    // transmittal
+    public function labels(): HasMany
+    {
+        return $this->hasMany(Label::class);
+    }
+
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');

@@ -12,12 +12,12 @@ class Label extends Pivot
 
     protected $table = 'labels';
 
-    public function documents(): BelongsTo
+    public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
     }
 
-    public function tags(): BelongsTo
+    public function tag(): BelongsTo
     {
         return $this->belongsTo(Tag::class);
     }
