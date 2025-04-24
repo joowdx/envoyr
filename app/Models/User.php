@@ -69,6 +69,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'deactivated_by' => $deactivatedBy->id,
         ]);
     }
+    public function deactivatedByUser()
+    {
+    return $this->belongsTo(User::class, 'deactivated_by');
+    }
+
 
     public function reactivate(): void
     {
@@ -98,7 +103,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->belongsTo(Section::class);
     }
+    
+    public function approve(): void
+    {
+    $this->update([
+        'is_approved' => true,
+        'approved_by' => \Illuminate\Support\Facades\Auth::user()?->id,
+        'approved_at' => now(),
+    ]);
+}
 
+    public function approvedByUser()
+    {
+    return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    
     public function hasApprovedAccount(): bool
     {
         return $this->hasVerifiedEmail() && $this->is_approved;

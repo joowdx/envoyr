@@ -19,9 +19,10 @@ return new class extends Migration
             $table->string('password');
             $table->string('avatar')->nullable();
             $table->string('role')->default(UserRole::USER);
+            $table->boolean('is_approved')->default(false);
             $table->ulid('office_id');
             $table->ulid('section_id');
-            $table->ulid('approved_by');
+            $table->ulid('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->timestamp('deactivated_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();

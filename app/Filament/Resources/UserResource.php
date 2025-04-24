@@ -11,12 +11,14 @@ use App\Models\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\UserResource\Pages;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
@@ -112,10 +114,6 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function canCreate(): bool
-    {
-        return false;
-    }
 
     public static function table(Table $table): Table
     {
@@ -135,15 +133,15 @@ class UserResource extends Resource
                     ->label('Section')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_approved')
-                    ->label('Approved')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-clock'),         
+                Tables\Columns\CheckboxColumn::make('is_approved')
+                    ->label('Approved'),
+                    // ->boolean()
+                    // ->trueIcon('heroicon-o-check-circle')
+                    // ->falseIcon('heroicon-o-clock'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -157,9 +155,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Deactivated By')
-                    ->getStateUsing(function (User $record) {
-                        return $record->deactivated_by ? User::find($record->deactivated_by)->name : null;
-                    }),
+                    ->getStateUsing(fn (User $record) => $record->deactivatedByUser?->name),
                 Tables\Columns\TextColumn::make('trashed')
                     ->label('Deleted At')
                     ->dateTime()
@@ -184,6 +180,18 @@ class UserResource extends Resource
                     ),        
             ])
             ->actions([
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool =>
+                        ! $record->is_approved && Auth::check() && UserResource::canApprove(Auth::user(), $record)
+                    )
+                    ->action(function (User $record) {
+                        $record->approve();
+                        Filament::notify('success', 'User approved successfully.');
+                    }),         
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\DeleteAction::make(),
@@ -201,9 +209,7 @@ class UserResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
                     ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
-                    ->action(fn (User $record) => $record->reactivate()),            
-                    ])
-            ->bulkActions([
+                    ->action(fn (User $record) => $record->reactivate()),      
             ]);
     }
 
@@ -218,18 +224,35 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+    public static function canApprove(User $actingUser, User $userToApprove): bool
+    {
+    if ($actingUser->role === UserRole::ROOT) {
+        return true; 
+    }
+
+    if ($actingUser->role === UserRole::ADMINISTRATOR && $actingUser->office_id === $userToApprove->office_id) {
+        return true; 
+    }
+
+    return false;
     }
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])->withTrashed()
-            ->where('id', '!=', Auth::id());
+            ])
+            ->withTrashed()
+            ->with(['deactivatedByUser'])
+            ->where('id', '!=', Auth::id()); 
+        if (Auth::user()?->role !== UserRole::ROOT) {
+            $query->where('office_id', Auth::user()->office_id); 
+        }
 
+        return $query;
     }
 }
