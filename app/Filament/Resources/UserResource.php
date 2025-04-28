@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Filament\Resources;
 
 use Filament\Forms;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\UserResource\Pages;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -128,7 +130,8 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('office.acronym')
                     ->label('Acronym')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->tooltip(fn (User $record) => $record->office?->name), // Tooltip for full office name
                 Tables\Columns\TextColumn::make('section.name')
                     ->label('Section')
                     ->searchable()
@@ -185,9 +188,11 @@ class UserResource extends Resource
                     )
                     ->action(function (User $record) {
                         $record->approve();
-                        Filament::notify('success', 'User approved successfully.');
-                    }),         
-                
+                        Notification::make()
+                            ->title('User approved successfully.')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
@@ -225,15 +230,8 @@ class UserResource extends Resource
     }
     public static function canApprove(User $actingUser, User $userToApprove): bool
     {
-    if ($actingUser->role === UserRole::ROOT) {
-        return true; 
-    }
-
-    if ($actingUser->role === UserRole::ADMINISTRATOR && $actingUser->office_id === $userToApprove->office_id) {
-        return true; 
-    }
-
-    return false;
+        return $actingUser->role === UserRole::ROOT ||
+               ($actingUser->role === UserRole::ADMINISTRATOR && $actingUser->office_id === $userToApprove->office_id);
     }
 
     public static function getEloquentQuery(): Builder
@@ -243,7 +241,7 @@ class UserResource extends Resource
                 SoftDeletingScope::class,
             ])
             ->withTrashed()
-            ->with(['deactivatedByUser'])
+            ->with(['office', 'section', 'deactivatedByUser'])
             ->where('id', '!=', Auth::id()); 
         if (Auth::user()?->role !== UserRole::ROOT) {
             $query->where('office_id', Auth::user()->office_id); 
