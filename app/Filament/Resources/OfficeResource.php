@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\UserRole;
 use App\Filament\Resources\OfficeResource\Pages;
+use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 use App\Models\Office;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -63,7 +64,7 @@ class OfficeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            UsersRelationManager::class,
         ];
     }
 

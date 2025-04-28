@@ -125,19 +125,14 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('role'),
-                Tables\Columns\TextColumn::make('office.name')
-                    ->label('Office')
+                Tables\Columns\TextColumn::make('office.acronym')
+                    ->label('Acronym')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('section.name')
                     ->label('Section')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\CheckboxColumn::make('is_approved')
-                    ->label('Approved'),
-                    // ->boolean()
-                    // ->trueIcon('heroicon-o-check-circle')
-                    // ->falseIcon('heroicon-o-clock'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -192,8 +187,9 @@ class UserResource extends Resource
                         $record->approve();
                         Filament::notify('success', 'User approved successfully.');
                     }),         
-                Tables\Actions\EditAction::make(),
+                
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
