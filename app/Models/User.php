@@ -34,6 +34,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'office_id',
         'section_id',
         'is_approved',
+        'deactivated_at',
+        'deactivated_by',
     ];
 
     /**

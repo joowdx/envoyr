@@ -24,6 +24,7 @@ return new class extends Migration
             $table->ulid('section_id');
             $table->ulid('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
+            $table->ulid('deactivated_by')->nullable();
             $table->timestamp('deactivated_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->softDeletes();
