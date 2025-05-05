@@ -14,13 +14,9 @@ Key Features:
 
 📦 Document Journey Tracking: Visualize every stop in a document’s path—from sender to recipient.
 
-📍 Location Monitoring: Track handoffs with QR-Scanner checkpoints for enhanced transparency
-
 🔐 Secure QR Codes: Attach smart QR codes to documents for instant access and authentication.
 
 🌓 Dark/Light Mode: Seamless user experience with theme switching for comfort and accessibility.
-
-👥 User Testimonials: Real feedback to build trust and showcase success stories.
 
 🛠️ Built with: HTML, Tailwind CSS, Font Awesome, and a modern tech stack.
 
