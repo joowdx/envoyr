@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Panels\Auth\Pages;
+namespace App\Filament\Auth\Pages;
 
 use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;

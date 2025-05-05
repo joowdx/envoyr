@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Panels\Auth\Pages;
+namespace App\Filament\Auth\Pages;
 
 use App\Filament\Auth\Concerns\BaseAuthPage;
 use Filament\Facades\Filament;

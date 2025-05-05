@@ -8,12 +8,13 @@ use Filament\Widgets;
 use Filament\PanelProvider;
 use App\Http\Middleware\Approve;
 use Filament\Support\Colors\Color;
+use App\Filament\Auth\Pages\Approval;
+use App\Filament\Auth\Pages\Redirect;
 use Illuminate\Support\Facades\Route;
 use App\Filament\Auth\Pages\Registration;
+use App\Filament\Auth\Pages\Verification;
 use Filament\Http\Middleware\Authenticate;
-use App\Filament\Panels\Auth\Pages\Approval;
 use Illuminate\Session\Middleware\StartSession;
-use App\Filament\Panels\Auth\Pages\Verification;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -23,7 +24,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Auth\Controllers\EmailVerificationController;
-use App\Filament\Auth\Pages\Redirect;
 
 class AuthPanelProvider extends PanelProvider
 {

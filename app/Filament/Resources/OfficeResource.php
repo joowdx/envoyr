@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\UserRole;
-use App\Filament\Resources\OfficeResource\Pages;
-use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
-use App\Models\Office;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Office;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Enums\UserRole;
+use App\Filament\Resources\OfficeResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 
 class OfficeResource extends Resource
 {
@@ -48,9 +48,8 @@ class OfficeResource extends Resource
                 Tables\Columns\TextColumn::make('acronym')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('users_count')
+                Tables\Columns\TextColumn::make('users_count') 
                     ->label('Users')
-                    ->searchable()
                     ->sortable(),
             ])
             ->filters([

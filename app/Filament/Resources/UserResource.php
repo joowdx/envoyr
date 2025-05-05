@@ -7,7 +7,6 @@ use Filament\Forms;
 use App\Models\User;
 use Filament\Tables;
 use App\Models\Office;
-use App\Enums\UserRole;
 use App\Models\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -16,11 +15,12 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Enums\UserRole;
 use App\Filament\Resources\UserResource\Pages;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
@@ -131,7 +131,7 @@ class UserResource extends Resource
                     ->label('Acronym')
                     ->searchable()
                     ->sortable()
-                    ->tooltip(fn (User $record) => $record->office?->name), // Tooltip for full office name
+                    ->tooltip(fn (User $record) => $record->office?->name),
                 Tables\Columns\TextColumn::make('section.name')
                     ->label('Section')
                     ->searchable()
@@ -204,13 +204,14 @@ class UserResource extends Resource
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => is_null($record->deactivated_at))
                         ->action(fn (User $record, User $user) => $record->deactivate($user)),
+                    Tables\Actions\Action::make('reactivate')
+                        ->label('Reactivate')
+                        ->icon('heroicon-o-check-circle')
+                        ->requiresConfirmation()
+                        ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
+                        ->action(fn (User $record) => $record->reactivate()),
                 ]),
-                Tables\Actions\Action::make('reactivate')
-                    ->label('Reactivate')
-                    ->icon('heroicon-o-check-circle')
-                    ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
-                    ->action(fn (User $record) => $record->reactivate()),      
+                      
             ]);
     }
 

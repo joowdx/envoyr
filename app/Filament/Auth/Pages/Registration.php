@@ -4,7 +4,6 @@ namespace App\Filament\Auth\Pages;
 
 use App\Models\User;
 use App\Models\Office;
-use App\Enums\UserRole;
 use App\Models\Section;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
@@ -22,6 +21,7 @@ use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
+use App\Filament\Resources\Enums\UserRole;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Http\Responses\Auth\RegistrationResponse;
