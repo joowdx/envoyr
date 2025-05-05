@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use App\Filament\Resources\Enums\UserRole;
+use App\Enums\UserRole;
 use App\Models\User;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse as Responsable;
 use Illuminate\Http\RedirectResponse;

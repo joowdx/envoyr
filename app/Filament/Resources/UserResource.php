@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\Enums\UserRole;
+use App\Enums\UserRole;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\Office;
 use App\Models\Section;
@@ -94,19 +94,19 @@ class UserResource extends Resource
                                 return Section::pluck('name', 'id');
                             })
                             ->createOptionForm([
-                            Forms\Components\Select::make('office_id')
-                                ->label('Office')
-                                ->relationship('office', 'name')
-                                ->required(),
-                            Forms\Components\TextInput::make('name')
-                                ->required()
-                                ->maxLength(255),
-                            Forms\Components\TextInput::make('head_name')
-                                ->required()
-                                ->maxLength(255),
-                            Forms\Components\TextInput::make('designation')
-                                ->required()
-                                ->maxLength(255),
+                                Forms\Components\Select::make('office_id')
+                                    ->label('Office')
+                                    ->relationship('office', 'name')
+                                    ->required(),
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('head_name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('designation')
+                                    ->required()
+                                    ->maxLength(255),
                             ])
                             ->createOptionUsing(fn (array $data): Section => Section::create($data)),
                     ]),

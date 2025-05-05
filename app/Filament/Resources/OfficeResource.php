@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\Enums\UserRole;
+use App\Enums\UserRole;
 use App\Filament\Resources\OfficeResource\Pages;
 use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 use App\Models\Office;
