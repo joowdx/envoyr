@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use App\Filament\Resources\Enums\UserRole;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('password');
             $table->string('avatar')->nullable();
             $table->string('role')->default(UserRole::USER);
-            $table->boolean('is_approved')->default(false);
             $table->ulid('office_id');
             $table->ulid('section_id');
             $table->ulid('approved_by')->nullable();

@@ -1,27 +1,23 @@
 <?php
 
-
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use App\Models\User;
-use Filament\Tables;
-use App\Models\Office;
-use App\Models\Section;
-use Filament\Forms\Form;
-use Filament\Pages\Page;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Facades\Filament;
-use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\Enums\UserRole;
 use App\Filament\Resources\UserResource\Pages;
+use App\Models\Office;
+use App\Models\Section;
+use App\Models\User;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -39,7 +35,7 @@ class UserResource extends Resource
     {
         return $form
             ->columns(3)
-            ->disabled(fn(Page $livewire) => $livewire instanceof EditRecord && $livewire->record->trashed())
+            ->disabled(fn (Page $livewire) => $livewire instanceof EditRecord && $livewire->record->trashed())
             ->schema([
                 Forms\Components\FileUpload::make('avatar')
                     ->alignCenter()
@@ -47,75 +43,75 @@ class UserResource extends Resource
                 Forms\Components\Group::make()
                     ->columnSpan(2)
                     ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Select::make('role')
-                    ->options(UserRole::class)
-                    ->required()
-                    ->default(UserRole::USER->value),
-                Forms\Components\Select::make('office_id')
-                    ->label('Office')
-                    ->searchable()
-                    ->relationship('office', 'name')
-                    ->getOptionLabelUsing(fn ($value): ?string => Office::find($value)?->name)
-                    ->placeholder('Select Office')
-                    ->preload()
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(fn (callable $set) => $set('section_id', null))
-                ->createOptionForm([
-                    Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('acronym')
-                        ->required()
-                        ->maxLength(255),
-                    Forms\Components\TextInput::make('head_name'),
-                    Forms\Components\TextInput::make('designation'),
-                        ])
-                    ->createOptionUsing(fn (array $data): Office => Office::create($data)),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Select::make('role')
+                            ->options(UserRole::class)
+                            ->required()
+                            ->default(UserRole::USER->value),
+                        Forms\Components\Select::make('office_id')
+                            ->label('Office')
+                            ->searchable()
+                            ->relationship('office', 'name')
+                            ->getOptionLabelUsing(fn ($value): ?string => Office::find($value)?->name)
+                            ->placeholder('Select Office')
+                            ->preload()
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('section_id', null))
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('acronym')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('head_name'),
+                                Forms\Components\TextInput::make('designation'),
+                            ])
+                            ->createOptionUsing(fn (array $data): Office => Office::create($data)),
 
-                Forms\Components\Select::make('section_id')
-                        ->label('Section')
-                        ->searchable()
-                        ->required()
-                        ->reactive()
-                        ->relationship('section', 'name')
-                        ->getOptionLabelUsing(fn ($value): ?string => Section::find($value)?->name)
-                        ->placeholder('Select Section')
-                        ->preload()
-                        ->options(function (callable $get) {
+                        Forms\Components\Select::make('section_id')
+                            ->label('Section')
+                            ->searchable()
+                            ->required()
+                            ->reactive()
+                            ->relationship('section', 'name')
+                            ->getOptionLabelUsing(fn ($value): ?string => Section::find($value)?->name)
+                            ->placeholder('Select Section')
+                            ->preload()
+                            ->options(function (callable $get) {
                                 $officeId = $get('office_id');
                                 if ($officeId) {
                                     return Section::where('office_id', $officeId)->pluck('name', 'id');
                                 }
+
                                 return Section::pluck('name', 'id');
                             })
-                    ->createOptionForm([
-                Forms\Components\Select::make('office_id')
-                        ->label('Office')
-                        ->relationship('office', 'name')
-                        ->required(),
-                Forms\Components\TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
-                Forms\Components\TextInput::make('head_name')
-                        ->required()
-                        ->maxLength(255),
-                Forms\Components\TextInput::make('designation')
-                        ->required()
-                        ->maxLength(255),
+                            ->createOptionForm([
+                            Forms\Components\Select::make('office_id')
+                                ->label('Office')
+                                ->relationship('office', 'name')
+                                ->required(),
+                            Forms\Components\TextInput::make('name')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('head_name')
+                                ->required()
+                                ->maxLength(255),
+                            Forms\Components\TextInput::make('designation')
+                                ->required()
+                                ->maxLength(255),
                             ])
-                ->createOptionUsing(fn (array $data): Section => Section::create($data)),
+                            ->createOptionUsing(fn (array $data): Section => Section::create($data)),
                     ]),
             ]);
     }
-
 
     public static function table(Table $table): Table
     {
@@ -175,7 +171,7 @@ class UserResource extends Resource
                     ->queries(
                         true: fn ($query) => $query->where('is_approved', true),
                         false: fn ($query) => $query->where('is_approved', false),
-                    ),        
+                    ),
             ])
             ->actions([
                 Tables\Actions\Action::make('approve')
@@ -183,8 +179,7 @@ class UserResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool =>
-                        ! $record->is_approved && Auth::check() && UserResource::canApprove(Auth::user(), $record)
+                    ->visible(fn (User $record): bool => ! $record->is_approved && Auth::check() && UserResource::canApprove(Auth::user(), $record)
                     )
                     ->action(function (User $record) {
                         $record->approve();
@@ -211,7 +206,7 @@ class UserResource extends Resource
                         ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
                         ->action(fn (User $record) => $record->reactivate()),
                 ]),
-                      
+
             ]);
     }
 
@@ -229,6 +224,7 @@ class UserResource extends Resource
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
+
     public static function canApprove(User $actingUser, User $userToApprove): bool
     {
         return $actingUser->role === UserRole::ROOT ||
@@ -243,9 +239,9 @@ class UserResource extends Resource
             ])
             ->withTrashed()
             ->with(['office', 'section', 'deactivatedByUser'])
-            ->where('id', '!=', Auth::id()); 
+            ->where('id', '!=', Auth::id());
         if (Auth::user()?->role !== UserRole::ROOT) {
-            $query->where('office_id', Auth::user()->office_id); 
+            $query->where('office_id', Auth::user()->office_id);
         }
 
         return $query;

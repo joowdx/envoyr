@@ -2,30 +2,29 @@
 
 namespace App\Filament\Auth\Pages;
 
-use App\Models\User;
+use App\Filament\Resources\Enums\UserRole;
 use App\Models\Office;
 use App\Models\Section;
-use Filament\Forms\Form;
-use Filament\Pages\Page;
+use App\Models\User;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
-use Filament\Pages\Auth\Register;
-use Illuminate\Support\HtmlString;
 use Filament\Events\Auth\Registered;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Wizard;
-use Illuminate\Support\Facades\Blade;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\FileUpload;
-use App\Filament\Resources\Enums\UserRole;
+use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
-use Filament\Notifications\Auth\VerifyEmail;
+use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\RegistrationResponse;
-use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Notifications\Auth\VerifyEmail;
+use Filament\Notifications\Notification;
+use Filament\Pages\Auth\Register;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 
 class Registration extends Register
 {
@@ -36,7 +35,7 @@ class Registration extends Register
     protected static string $layout = 'filament-panels::components.layout.base';
 
     protected static string $view = 'filament.auth.pages.registration';
-    
+
     public function register(): ?RegistrationResponse
     {
         try {
@@ -123,7 +122,7 @@ class Registration extends Register
                                 ->extraAlpineAttributes(['@keyup.enter' => $next])
                                 ->required(),
                         ]),
-                        Step::make('Credentials')
+                    Step::make('Credentials')
                         ->icon('heroicon-o-shield-check')
                         ->schema([
                             $this->getEmailFormComponent()
@@ -139,7 +138,7 @@ class Registration extends Register
                                 ->extraAttributes(['onkeydown' => "return event.key != 'Enter';"])
                                 ->extraAlpineAttributes(['@keyup.enter' => $next]),
                         ]),
-                        Step::make('Intent')
+                    Step::make('Intent')
                         ->icon('heroicon-o-bolt')
                         ->schema([
                             $this->getRoleFormComponent(),
@@ -150,54 +149,59 @@ class Registration extends Register
                     ->contained(false),
             ])
             ->statePath('data');
-}
+    }
+
     protected function getAvatarFormComponent(): Component
     {
-    return FileUpload::make('avatar')
-        ->alignCenter()
-        ->avatar()
-        ->directory('avatars');
+        return FileUpload::make('avatar')
+            ->alignCenter()
+            ->avatar()
+            ->directory('avatars');
     }
+
     protected function getDesignationFormComponent(): Component
     {
         return TextInput::make('designation')
             ->label('Designation')
             ->prefixIcon('heroicon-o-tag');
     }
+
     protected function getOfficeFormComponent(): Component
     {
-    $office = Office::pluck('name', 'id');
+        $office = Office::pluck('name', 'id');
 
-    return Select::make('office_id')
-        ->label('Office')
-        ->searchable()
-        ->reactive()
-        ->options($office)
-        ->disabled($office->isEmpty())
-        ->placeholder('Select Office')
-        ->prefixIcon('heroicon-o-building-office-2');
+        return Select::make('office_id')
+            ->label('Office')
+            ->searchable()
+            ->reactive()
+            ->options($office)
+            ->disabled($office->isEmpty())
+            ->placeholder('Select Office')
+            ->prefixIcon('heroicon-o-building-office-2');
     }
+
     public function getSectionFormComponent(): Component
     {
-    return Select::make('section_id')
-        ->label('Section')
-        ->searchable()
-        ->reactive()
-        ->options(function (callable $get) {
-            $officeId = $get('office_id');
+        return Select::make('section_id')
+            ->label('Section')
+            ->searchable()
+            ->reactive()
+            ->options(function (callable $get) {
+                $officeId = $get('office_id');
 
-            if ($officeId) {
-                return Section::where('office_id', $officeId)->pluck('name', 'id');
-            }
+                if ($officeId) {
+                    return Section::where('office_id', $officeId)->pluck('name', 'id');
+                }
 
-            return Section::pluck('name', 'id');
-        })
-        ->disabled(function (callable $get) {
-            $officeId = $get('office_id');
-            return Section::where('office_id', $officeId)->count() === 0;
-        })
-        ->placeholder('Select Section')
-        ->prefixIcon('heroicon-o-user-group');
+                return Section::pluck('name', 'id');
+            })
+            ->disabled(function (callable $get) {
+                $officeId = $get('office_id');
+
+                return Section::where('office_id', $officeId)->count() === 0;
+            })
+            ->placeholder('Select Section')
+            ->prefixIcon('heroicon-o-user-group');
     }
 
     protected function getEmailFormComponent(): Component
@@ -221,7 +225,7 @@ class Registration extends Register
             ->helperText('Subject for approval of the organization.')
             ->required();
     }
-    
+
     protected function getPurposeFormComponent(): Component
     {
         return Textarea::make('purpose')

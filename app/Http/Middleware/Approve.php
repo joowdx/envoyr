@@ -16,7 +16,7 @@ class Approve
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        
+
         if (! $user?->hasApprovedAccount()) {
             return redirect()->route('filament.auth.auth.account-approval.prompt');
         }

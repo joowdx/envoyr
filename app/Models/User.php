@@ -3,17 +3,17 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Filament\Panel;
-use Filament\Models\Contracts\HasAvatar;
-use Illuminate\Notifications\Notifiable;
 use App\Filament\Resources\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -71,11 +71,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'deactivated_by' => $deactivatedBy->id,
         ]);
     }
+
     public function deactivatedByUser()
     {
-    return $this->belongsTo(User::class, 'deactivated_by');
+        return $this->belongsTo(User::class, 'deactivated_by');
     }
-
 
     public function reactivate(): void
     {
@@ -87,7 +87,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->avatar
-            ? asset('storage/' . $this->avatar)
+            ? asset('storage/'.$this->avatar)
             : null;
     }
 
@@ -105,22 +105,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->belongsTo(Section::class);
     }
-    
+
     public function approve(): void
     {
-    $this->update([
-        'is_approved' => true,
-        'approved_by' => \Illuminate\Support\Facades\Auth::user()?->id,
-        'approved_at' => now(),
-    ]);
-}
+        $this->update([
+            'is_approved' => true,
+            'approved_by' => \Illuminate\Support\Facades\Auth::user()?->id,
+            'approved_at' => now(),
+        ]);
+    }
 
     public function approvedByUser()
     {
-    return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
-    
     public function hasApprovedAccount(): bool
     {
         return $this->hasVerifiedEmail() && $this->is_approved;

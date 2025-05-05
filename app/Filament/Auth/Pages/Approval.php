@@ -2,13 +2,13 @@
 
 namespace App\Filament\Auth\Pages;
 
+use App\Filament\Auth\Concerns\BaseAuthPage;
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\Verify;
+use App\Http\Responses\LoginResponse;
 use Filament\Facades\Filament;
 use Filament\Pages\SimplePage;
-use App\Http\Middleware\Verify;
-use App\Http\Middleware\Authenticate;
-use App\Http\Responses\LoginResponse;
 use Illuminate\Contracts\Support\Htmlable;
-use App\Filament\Auth\Concerns\BaseAuthPage;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
 class Approval extends SimplePage implements HasMiddleware

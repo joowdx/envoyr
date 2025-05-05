@@ -28,10 +28,12 @@ class Section extends Model
     {
         return $this->hasMany(Document::class);
     }
+
     public function transmittals(): HasMany
     {
         return $this->hasMany(Transmittal::class);
     }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

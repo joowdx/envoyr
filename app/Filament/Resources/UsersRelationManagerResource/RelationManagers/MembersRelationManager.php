@@ -7,8 +7,6 @@ use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MembersRelationManager extends RelationManager
 {
@@ -51,9 +49,8 @@ class MembersRelationManager extends RelationManager
 
 namespace App\Filament\Resources\OfficeResource\RelationManagers;
 
-use Filament\Forms;
-use Filament\Tables;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
 
 class UsersRelationManager extends RelationManager
 {
