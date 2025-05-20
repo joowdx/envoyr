@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Container\Attributes\Auth as AttributesAuth;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -106,11 +108,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->belongsTo(Section::class);
     }
 
-    public function approve(): void
+    public function approve(?Auth $user = null): void
     {
         $this->update([
-            'is_approved' => true,
-            'approved_by' => \Illuminate\Support\Facades\Auth::user()?->id,
+            'approved_by' => $user?->id ?? Auth::id(),
             'approved_at' => now(),
         ]);
     }
