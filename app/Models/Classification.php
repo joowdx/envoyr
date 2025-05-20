@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Classification extends Model
 {
     use HasUlids;
+
     protected $fillable = ['name'];
 
     public function documents(): HasMany

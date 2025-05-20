@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\UserRole;
 use App\Filament\Resources\SectionResource\Pages;
 use App\Models\Section;
 use Filament\Forms;
@@ -18,6 +19,12 @@ class SectionResource extends Resource
     protected static ?string $model = Section::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    public static function canViewAny(): bool
+    {
+        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
+            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
+    }
 
     public static function form(Form $form): Form
     {
