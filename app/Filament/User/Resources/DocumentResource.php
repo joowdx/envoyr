@@ -2,6 +2,8 @@
 
 namespace App\Filament\User\Resources;
 
+use App\Actions\DownloadQR;
+use App\Actions\GenerateQR;
 use App\Filament\User\Resources\DocumentResource\Pages;
 use App\Filament\User\Resources\DocumentResource\RelationManagers;
 use App\Models\Document;
@@ -22,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 class DocumentResource extends Resource
 {
@@ -189,6 +192,32 @@ class DocumentResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('generateQR')
+                    ->label('Generate QR')
+                    ->icon('heroicon-o-qr-code')
+                    ->modalWidth('md')
+                    ->modalContent(function (Document $record) {
+                        $qrCode = (new GenerateQR())->__invoke($record->code);
+                        return view('components.qr-code', [
+                            'qrCode' => $qrCode,
+                            'code' => $record->code
+                        ]);
+                    })
+                    ->modalFooterActions([
+                        Tables\Actions\Action::make('download')
+                            ->label('Download QR')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->action(function (Document $record) {
+                                $base64 = (new DownloadQR())->__invoke($record);
+                                return Response::streamDownload(
+                                    function () use ($base64) {
+                                        echo base64_decode($base64);
+                                    },
+                                    'qr-code.pdf',
+                                    ['Content-Type' => 'application/pdf']
+                                );
+                            }),
+                    ]),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
