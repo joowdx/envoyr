@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\UserRole;
 use App\Filament\Resources\OfficeResource\Pages;
+use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 use App\Models\Office;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,7 +23,8 @@ class OfficeResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT;
+        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
+            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
     }
 
     public static function form(Form $form): Form
@@ -48,7 +50,6 @@ class OfficeResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('users_count')
                     ->label('Users')
-                    ->searchable()
                     ->sortable(),
             ])
             ->filters([
@@ -62,7 +63,7 @@ class OfficeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            UsersRelationManager::class,
         ];
     }
 

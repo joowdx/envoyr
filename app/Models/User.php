@@ -7,13 +7,17 @@ use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
+use Illuminate\Container\Attributes\Auth as AttributesAuth;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasUlids, Notifiable, SoftDeletes;
@@ -31,6 +35,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'avatar',
         'office_id',
         'section_id',
+        'is_approved',
+        'deactivated_at',
+        'deactivated_by',
     ];
 
     /**
@@ -55,14 +62,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             'password' => 'hashed',
             'role' => UserRole::class,
             'deactivated_at' => 'datetime',
+            'is_approved' => 'boolean',
         ];
     }
 
-    public function deactivate(): void
+    public function deactivate(User $deactivatedBy): void
     {
         $this->update([
             'deactivated_at' => now(),
+            'deactivated_by' => $deactivatedBy->id,
         ]);
+    }
+
+    public function deactivatedByUser()
+    {
+        return $this->belongsTo(User::class, 'deactivated_by');
     }
 
     public function reactivate(): void
@@ -84,13 +98,31 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         return true;
     }
 
-    public function office()
+    public function office(): BelongsTo
     {
         return $this->belongsTo(Office::class);
     }
 
-    public function section()
+    public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class);
+    }
+
+    public function approve(?Auth $user = null): void
+    {
+        $this->update([
+            'approved_by' => $user?->id ?? Auth::id(),
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function hasApprovedAccount(): bool
+    {
+        return $this->hasVerifiedEmail() && $this->is_approved;
     }
 }

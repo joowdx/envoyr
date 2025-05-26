@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Storage;
 
 class Attachment extends Model
 {
@@ -26,12 +26,12 @@ class Attachment extends Model
 
     public static function booted(): void
     {
-        static::deleting(fn(self $attachment) => $attachment->purge());
+        static::deleting(fn (self $attachment) => $attachment->purge());
     }
 
     public function purge(): void
     {
-        $this->files->each(fn($file) => Storage::delete($file));
+        $this->files->each(fn ($file) => Storage::delete($file));
     }
 
     public function attachable(): MorphTo
