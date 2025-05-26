@@ -133,7 +133,7 @@ class DocumentResource extends Resource
                             ->label('Office Origin')
                             ->columnSpan(6)
                             ->formatStateUsing(function ($state, $record) {
-                                return $state . ' (' . $record->section->name . ')';
+                                return $state.' ('.$record->section->name.')';
                             }),
                     ])
                     ->columns(6),
@@ -165,7 +165,7 @@ class DocumentResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title')
                     ->limit(60)
-                    ->tooltip(fn(Tables\Columns\TextColumn $column): ?string => $column->getState()),
+                    ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => $column->getState()),
                 Tables\Columns\TextColumn::make('classification.name')
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
@@ -181,6 +181,9 @@ class DocumentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
+                Tables\Filters\Filter::make('deactivated')
+                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
+                    ->label('Active'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

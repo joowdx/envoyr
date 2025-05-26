@@ -19,8 +19,8 @@ class LoginResponse implements Responsable
             UserRole::ROOT, UserRole::ADMINISTRATOR => 'filament.admin.pages.dashboard',
             // UserRole::LIAISON => 'filament.liaison.pages.dashboard',
             // UserRole::RECEIVER => 'filament.receiver.pages.dashboard',
-            // UserRole::USER => 'filament.user.pages.dashboard',
-            default => 'filament.home.pages.',
+            UserRole::USER => 'filament.user.pages.dashboard',
+            default => abort(403),
         };
 
         return redirect()->route($route);
