@@ -58,7 +58,7 @@ class UserResource extends Resource
                             ->label('Office')
                             ->searchable()
                             ->relationship('office', 'name')
-                            ->getOptionLabelUsing(fn ($value): ?string => Office::find($value)?->name)
+                            ->getOptionLabelUsing(fn ($value): ?string => optional(Office::find($value))->name)
                             ->placeholder('Select Office')
                             ->preload()
                             ->required()
@@ -164,13 +164,13 @@ class UserResource extends Resource
                 Tables\Filters\Filter::make('deactivated')
                     ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
                     ->label('Active'),
-                Tables\Filters\TernaryFilter::make('is_approved')
+                Tables\Filters\TernaryFilter::make('approved_at')
                     ->label('Approved')
                     ->trueLabel('Approved')
                     ->falseLabel('Pending')
                     ->queries(
-                        true: fn ($query) => $query->where('is_approved', true),
-                        false: fn ($query) => $query->where('is_approved', false),
+                        true: fn ($query) => $query->whereNotNull('approved_at'),
+                        false: fn ($query) => $query->whereNull('approved_at'),
                     ),
             ])
             ->actions([
@@ -179,7 +179,7 @@ class UserResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! $record->is_approved && Auth::check() && UserResource::canApprove(Auth::user(), $record)
+                    ->visible(fn (User $record): bool => ! $record->approved_at && Auth::check() && UserResource::canApprove(Auth::user(), $record)
                     )
                     ->action(function (User $record) {
                         $record->approve();
@@ -198,7 +198,7 @@ class UserResource extends Resource
                         ->icon('heroicon-o-x-circle')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => is_null($record->deactivated_at))
-                        ->action(fn (User $record, User $user) => $record->deactivate($user)),
+                        ->action(fn (User $record) => $record->deactivate(Auth::user())),
                     Tables\Actions\Action::make('reactivate')
                         ->label('Reactivate')
                         ->icon('heroicon-o-check-circle')

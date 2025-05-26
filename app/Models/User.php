@@ -35,7 +35,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'avatar',
         'office_id',
         'section_id',
-        'is_approved',
+        'approved_by',
+        'approved_at',
         'deactivated_at',
         'deactivated_by',
     ];
@@ -55,16 +56,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role' => UserRole::class,
-            'deactivated_at' => 'datetime',
-            'is_approved' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password'          => 'hashed',
+        'role'              => UserRole::class,
+        'deactivated_at'    => 'datetime',
+    ];
 
     public function deactivate(User $deactivatedBy): void
     {
@@ -108,7 +105,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return $this->belongsTo(Section::class);
     }
 
-    public function approve(?Auth $user = null): void
+    public function approve(?User $user = null): void
     {
         $this->update([
             'approved_by' => $user?->id ?? Auth::id(),
@@ -123,6 +120,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function hasApprovedAccount(): bool
     {
-        return $this->hasVerifiedEmail() && $this->is_approved;
+        return $this->hasVerifiedEmail() && isset($this->approved_at);
     }
 }
