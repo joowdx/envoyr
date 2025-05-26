@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
             $table->boolean('digtal')->default(false);
             $table->boolean('directive')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
