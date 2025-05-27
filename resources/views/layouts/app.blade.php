@@ -119,3 +119,7 @@
       }
     </style>
   </head>
+  <body class="transition-colors duration-300 font-sans">
+    @section('content')
+  </body>
+<html>     
