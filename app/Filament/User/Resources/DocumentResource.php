@@ -4,6 +4,7 @@ namespace App\Filament\User\Resources;
 
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
+use App\Filament\Actions\ReceiveDocumentAction; // Add this import
 use App\Filament\User\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;

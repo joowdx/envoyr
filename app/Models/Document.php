@@ -80,8 +80,8 @@ class Document extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
-    public function transmittals(): HasMany
+    public function transmittal()
     {
-        return $this->hasMany(Transmittal::class);
+        return $this->hasOne(Transmittal::class);
     }
 }
