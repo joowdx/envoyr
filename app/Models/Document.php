@@ -29,26 +29,21 @@ class Document extends Model
     public static function booted(): void
     {
         static::forceDeleting(function (self $document) {
-            $document->attachments()->delete();
+            $document->attachment->delete();
+
+            $document->actions->each->delete();
         });
 
         static::creating(function (self $document) {
-            $attempts = 0;
-            $maxAttempts = 50;
+            $faker = fake()->unique();
 
             do {
-                $attempts++;
+                $codes = collect(range(1, 10))->map(fn () => $faker->bothify('??????####'))->toArray();
 
-                $timestamp = now()->format('ymd');
-                $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-                $code = $timestamp.$random;
+                $available = array_diff($codes, self::whereIn('code', $codes)->pluck('code')->toArray());
+            } while (empty($available));
 
-                if ($attempts > $maxAttempts) {
-                    throw new \Exception('Unable to generate unique document code');
-                }
-            } while (self::where('code', $code)->exists());
-
-            $document->code = $code;
+            $document->code = reset($available);
         });
     }
 

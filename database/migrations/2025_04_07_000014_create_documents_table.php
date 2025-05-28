@@ -18,8 +18,8 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('code', 50)->unique();
-            $table->string('title', 500);
+            $table->string('code')->unique();
+            $table->string('title');
             $table->foreignIdFor(Classification::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
