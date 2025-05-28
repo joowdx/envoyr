@@ -3,9 +3,9 @@
 namespace App\Filament\Actions;
 
 use App\Models\Document;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -16,8 +16,11 @@ class ReceiveDocumentAction extends Action
         parent::setUp();
 
         $this->name('receive-document');
+
         $this->label('Receive');
+
         $this->icon('heroicon-o-inbox-arrow-down');
+
         $this->modalSubmitActionLabel('Receive');
 
         $this->form([
@@ -29,13 +32,14 @@ class ReceiveDocumentAction extends Action
                         $document = Document::where('code', $value)->first();
 
                         if (! $document) {
-                            $fail('Document with this code does not exist.');
+                            $fail('Document not found.');
 
                             return;
                         }
 
                         // Use activeTransmittal to get unreceived transmittal
                         $transmittal = $document->activeTransmittal;
+
                         if (! $transmittal) {
                             $fail('No active transmittal found for this document or it has already been received.');
 
@@ -63,20 +67,20 @@ class ReceiveDocumentAction extends Action
                         ->first();
 
                     if (! $document) {
-                        throw new \Exception('Document not found.');
+                        throw new Exception('Document not found.');
                     }
 
                     $transmittal = $document->activeTransmittal;
                     if (! $transmittal) {
-                        throw new \Exception('No active transmittal found or document already received.');
+                        throw new Exception('No active transmittal found or document already received.');
                     }
 
                     if ($transmittal->to_office_id !== Auth::user()->office_id) {
-                        throw new \Exception('You are not authorized to receive this document.');
+                        throw new Exception('You are not authorized to receive this document.');
                     }
 
                     if ($transmittal->received_at) {
-                        throw new \Exception('This document has already been received.');
+                        throw new Exception('This document has already been received.');
                     }
 
                     $transmittal->update([
@@ -85,23 +89,14 @@ class ReceiveDocumentAction extends Action
                     ]);
                 });
 
-                Notification::make()
-                    ->title('Success')
-                    ->body('Document received successfully.')
-                    ->success()
-                    ->icon('heroicon-o-check-circle')
-                    ->send();
-
-                $this->redirect(request()->header('Referer'));
-
-            } catch (\Exception $e) {
-                Notification::make()
-                    ->title('Error')
-                    ->body($e->getMessage())
-                    ->danger()
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->send();
+                $this->success();
+            } catch (Exception) {
+                $this->failure();
             }
         });
+
+        $this->successNotificationTitle('Document Received');
+
+        $this->failureNotificationTitle('Failed to receive document');
     }
 }
