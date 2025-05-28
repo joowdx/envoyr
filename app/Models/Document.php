@@ -82,22 +82,25 @@ class Document extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
-    // For getting latest transmittal
-    public function transmittal(): HasOne
-    {
-        return $this->hasOne(Transmittal::class)->ofMany('created_at', 'max');
-    }
-
     // For getting all transmittals
     public function transmittals(): HasMany
     {
         return $this->hasMany(Transmittal::class);
     }
 
+    // For getting latest transmittal
+    public function transmittal(): HasOne
+    {
+        return $this->transmittals()
+            ->one()
+            ->ofMany('created_at', 'max');
+    }
+
     // For getting active (unreceived) transmittal
     public function activeTransmittal(): HasOne
     {
-        return $this->hasOne(Transmittal::class)
+        return $this->transmittals()
+            ->one()
             ->ofMany([
                 'created_at' => 'max',
             ], function ($query) {
