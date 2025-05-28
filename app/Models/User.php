@@ -121,4 +121,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->hasVerifiedEmail() && isset($this->approved_at);
     }
+
+    public function hasOffice(): bool
+    {
+        return $this->office_id !== null;
+    }
 }
