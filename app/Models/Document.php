@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,26 +23,32 @@ class Document extends Model
         'section_id',
         'source_id',
         'directive',
+        'digital',
     ];
 
     public static function booted(): void
     {
         static::forceDeleting(function (self $document) {
-            $document->attachment->delete();
-
-            $document->actions->each->delete();
+            $document->attachments()->delete();
         });
 
         static::creating(function (self $document) {
-            $faker = fake();
+            $attempts = 0;
+            $maxAttempts = 50;
 
             do {
-                $codes = collect(range(1, 10))->map(fn () => $faker->bothify('??????####'))->toArray();
+                $attempts++;
 
-                $available = array_diff($codes, self::whereIn('code', $codes)->pluck('code')->toArray());
-            } while (empty($available));
+                $timestamp = now()->format('ymd');
+                $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                $code = $timestamp.$random;
 
-            $document->code = reset($available);
+                if ($attempts > $maxAttempts) {
+                    throw new \Exception('Unable to generate unique document code');
+                }
+            } while (self::where('code', $code)->exists());
+
+            $document->code = $code;
         });
     }
 
@@ -80,8 +87,26 @@ class Document extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
-    public function transmittal()
+    // For getting latest transmittal
+    public function transmittal(): HasOne
     {
-        return $this->hasOne(Transmittal::class);
+        return $this->hasOne(Transmittal::class)->ofMany('created_at', 'max');
+    }
+
+    // For getting all transmittals
+    public function transmittals(): HasMany
+    {
+        return $this->hasMany(Transmittal::class);
+    }
+
+    // For getting active (unreceived) transmittal
+    public function activeTransmittal(): HasOne
+    {
+        return $this->hasOne(Transmittal::class)
+            ->ofMany([
+                'created_at' => 'max',
+            ], function ($query) {
+                $query->whereNull('received_at');
+            });
     }
 }
