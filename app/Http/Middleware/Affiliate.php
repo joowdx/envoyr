@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserHasOffice
+class Affiliate
 {
     /**
      * Handle an incoming request.
@@ -22,7 +22,7 @@ class EnsureUserHasOffice
 
         $user = $request->user();
 
-        if (! $user?->hasOffice()) {
+        if (! $user?->hasOffice() || ! $user?->hasSection()) {
             return redirect()->route('filament.user.pages.required-office');
         }
 

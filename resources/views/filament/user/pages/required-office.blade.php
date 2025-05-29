@@ -13,23 +13,39 @@
                 </h2>
 
                 <p class="text-base text-gray-500 dark:text-gray-400">
-                    You must be associated with an office to access this page.
+                    You must be associated with both an office and a section to access this page.
                 </p>
             </div>
 
-            <div class="w-full pt-4">
-                <div class="bg-primary-50 dark:bg-primary-500/10 rounded-lg p-4">
-                    <p class="text-sm text-primary-700 dark:text-primary-300 text-center">
-                        Please contact your administrator to request office assignment.
-                    </p>
+            @if($this->isAdministrator())
+                <div class="w-full pt-4">
+                    <div class="bg-primary-50 dark:bg-primary-500/10 rounded-lg p-4">
+                        <p class="text-sm text-primary-700 dark:text-primary-300 text-center">
+                            As an administrator, you can assign a section to yourself.
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="w-full pt-4">
-                <a href="mailto:admin@example.com" class="block w-full px-4 py-2 text-sm font-medium text-center text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                    Contact Administrator
-                </a>
-            </div>
+                <form wire:submit="assign" class="w-full space-y-4">
+                    {{ $this->form }}
+
+                    <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-center text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200">
+                        Assign
+                    </button>
+                </form>
+            @else
+                <div class="w-full pt-4">
+                    <div class="bg-primary-50 dark:bg-primary-500/10 rounded-lg p-4">
+                        <p class="text-sm text-primary-700 dark:text-primary-300 text-center">
+                            Please contact your administrator to request office and section assignment.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w-full pt-4">
+                    {{ $this->logoutAction }}
+                </div>
+            @endif
         </div>
     </div>
 </div> 
