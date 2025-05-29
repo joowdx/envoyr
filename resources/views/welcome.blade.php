@@ -1,8 +1,8 @@
 @extends('layouts.app')
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-dark shadow-md">
+    <header class="sticky top-0 z-50 bg-black dark:bg-gray-800 shadow-md">
       <div class="max-w-8xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-primary">Envoyr</h1>
+        <h1 class="text-2xl font-bold text-primary dark:text-pink-400">Envoyr</h1>
         <div class="flex items-center gap-4">
           <button
             onclick="toggleLightMode()"
@@ -12,12 +12,12 @@
             <i id="theme-icon" class="fas fa-moon"></i>
           </button>
           <button
-            class="text-sm px-4 py-2 border border-primary text-black dark:text-white rounded hover:bg-primary transition-colors duration-300"
+            class="text-sm px-4 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
           >
             Login
           </button>
           <button
-            class="text-sm px-4 py-2 bg-primary text-white rounded hover:bg-pink-400 transition-colors duration-300"
+            class="text-sm px-4 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
           >
             Sign Up
           </button>
@@ -29,7 +29,7 @@
     <section class="min-h-screen bg-black text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-left">
       <div class="max-w-3xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
-          Track Documents <span class="text-primary">Smarter</span>
+          Track Documents <span class="text-pink-400">Smarter</span>
         </h2>
         <p class="text-lg mb-4 text-gray-300">
           Envoyr makes document tracking seamless, efficient, and fully transparent.
@@ -43,7 +43,7 @@
       </div>
       <div class="fade-in-scale flex justify-center">
         <img
-          src="{{ asset('images/heroIMG1.webp') }}"
+          src="{{ Vite::asset('public/images/heroIMG1.webp') }}"
           alt="Person handling documents"
           class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
         />
@@ -51,31 +51,31 @@
     </section>
 
     <!-- Features -->
-    <section id="features" class="py-20 bg-dark px-6">
+    <section id="features" class="py-20 bg-black dark:bg-gray-800 px-6">
       <div class="max-w-6xl mx-auto text-center mb-16">
-        <h3 class="text-4xl font-bold text-primary">Key Features</h3>
+        <h3 class="text-4xl font-bold text-primary dark:text-white">Key Features</h3>
       </div>
       <div class="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
         <div class="bg-black text-primary p-8 rounded-xl shadow-md hover:shadow-lg transition">
           <i class="fas fa-file-alt text-4xl text-white mb-4"></i>
-          <h4 class="text-xl font-bold mb-2">Document Tracker</h4>
-          <p class="text-gray-300">Monitor documents as they move across offices in real-time.</p>
+          <h4 class="text-xl text-primary dark:text-pink-400 font-bold mb-2">Document Tracker</h4>
+          <p class="text-white dark:text-white">Monitor documents as they move across offices in real-time.</p>
         </div>
         <div class="bg-black text-primary p-8 rounded-xl shadow-md hover:shadow-lg transition">
           <i class="fas fa-qrcode text-4xl text-white mb-4"></i>
-          <h4 class="text-xl font-bold mb-2">QR Code Integration</h4>
-          <p class="text-gray-300">Each document gets a unique, scannable code for fast updates.</p>
+          <h4 class="text-xl text-primary dark:text-pink-400 font-bold mb-2">QR Code Integration</h4>
+          <p class="text-white dark:text-white">Each document gets a unique, scannable code for fast updates.</p>
         </div>
         <div class="bg-black text-primary p-8 rounded-xl shadow-md hover:shadow-lg transition">
           <i class="fas fa-map-marker-alt text-4xl text-white mb-4"></i>
-          <h4 class="text-xl font-bold mb-2">Live Location</h4>
-          <p class="text-gray-300">Know exactly where any document is—anytime, anywhere.</p>
+          <h4 class="text-xl text-primary dark:text-pink-400 font-bold mb-2">Live Location</h4>
+          <p class="text-white dark:text-white">Know exactly where any document is—anytime, anywhere.</p>
         </div>
       </div>
     </section>
 
     <!-- Steps -->
-    <section class="min-h-screen flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-900 to-gray-800">
+    <section class="min-h-screen bg-black flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-900 to-gray-800">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl items-center">
         <div class="flex justify-center">
           <img
@@ -85,7 +85,7 @@
           />
         </div>
         <div class="space-y-6">
-          <h3 class="text-4xl font-bold text-primary text-center md:text-left">How It Works</h3>
+          <h3 class="text-4xl font-bold text-white dark:text-pink-400 text-center md:text-left">How It Works</h3>
 
           <!-- Step 1 -->
           <div class="flex bg-gray-700 rounded-lg overflow-hidden shadow-lg">
@@ -94,8 +94,8 @@
               <span class="uppercase text-xs tracking-widest">Step</span>
             </div>
             <div class="p-6 text-primary text-left">
-              <h4 class="text-xl font-semibold">Create & Register</h4>
-              <p class="text-gray-300">Originating office creates and inputs the document into the system.</p>
+              <h4 class="text-xl text-primary dark:text-white font-semibold">Create & Register</h4>
+              <p class="text-white dark:text-white">Originating office creates and inputs the document into the system.</p>
             </div>
           </div>
 
@@ -106,8 +106,8 @@
               <span class="uppercase text-xs tracking-widest">Step</span>
             </div>
             <div class="p-6 text-left">
-              <h4 class="text-xl text-primary font-semibold">Assign QR Code</h4>
-              <p class="text-gray-300">System generates a unique code for the document to enable fast scans.</p>
+              <h4 class="text-xl text-primary dark:text-white font-semibold">Assign QR Code</h4>
+              <p class="text-white dark:text-white">System generates a unique code for the document to enable fast scans.</p>
             </div>
           </div>
 
@@ -118,8 +118,8 @@
               <span class="uppercase text-xs tracking-widest">Step</span>
             </div>
             <div class="p-6 text-left">
-              <h4 class="text-xl text-primary font-semibold">Track & Update</h4>
-              <p class="text-gray-300">QR code scans update the location and status in real-time.</p>
+              <h4 class="text-xl text-primary dark:text-white font-semibold">Track & Update</h4>
+              <p class="text-white dark:text-white">QR code scans update the location and status in real-time.</p>
             </div>
           </div>
         </div>
@@ -127,8 +127,8 @@
     </section>
 
     <!-- CTA -->
-    <section class="bg-gradient-to-r from-primary to-pink-400 text-white py-20 text-center px-6">
-      <h3 class="text-4xl font-extrabold mb-4">Start Tracking Smarter Today</h3>
+    <section class="bg-black dark:bg-gray-800 text-black dark:text-white py-20 text-center px-6">
+      <h3 class="text-4xl font-extrabold mb-4">Start Tracking <span class="text-pink-400">Smarter</span> Today</h3>
       <p class="text-lg mb-6">Sign up now and streamline your document workflow with Envoyr.</p>
       <a
         href="#"
@@ -139,7 +139,7 @@
     </section>
 
     <!-- Tech Stack -->
-    <section class="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-20">
+    <section class="min-h-screen bg-black bg-gradient-to-br from-gray-900 to-gray-800 text-white flex flex-col items-center justify-center px-6 py-20">
       <h2 class="text-4xl font-bold mb-4">The tech <span class="text-p400">STACK</span></h2>
       <p class="text-gray-400 max-w-xl text-center">
         The technologies we use to build this application. We use the latest technologies to build this application.
@@ -167,9 +167,9 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-center py-6">
-      <p class="text-sm text-gray-400">&copy; 2025 Envoyr. All rights reserved.</p>
-      <div class="flex justify-center gap-4 mt-3 text-primary">
+    <footer class="bg-black dark:bg-gray-800 text-center py-6">
+      <p class="text-sm text-white dark:text-white">&copy; 2025 Envoyr. All rights reserved.</p>
+      <div class="flex justify-center gap-4 mt-3 text-white">
         <a href="#"><i class="fab fa-facebook-f hover:text-white"></i></a>
         <a href="#"><i class="fab fa-twitter hover:text-white"></i></a>
         <a href="#"><i class="fab fa-linkedin-in hover:text-white"></i></a>
