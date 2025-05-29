@@ -15,10 +15,15 @@ class EnsureUserHasOffice
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip the check if we're already on the RequiredOffice page
+        if ($request->routeIs('filament.user.pages.required-office')) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if (! $user?->hasOffice()) {
-            return response()->view('errors.no-office', [], 403);
+            return redirect()->route('filament.user.pages.required-office');
         }
 
         return $next($request);
