@@ -2,26 +2,26 @@
 
 namespace App\Filament\User\Resources;
 
+use App\Actions\DownloadQR;
+use App\Actions\GenerateQR;
 use App\Filament\User\Resources\DocumentResource\Pages;
-use App\Filament\User\Resources\DocumentResource\RelationManagers;
 use App\Models\Document;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Actions\CreateAction;
-use Filament\Infolists\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 
 class DocumentResource extends Resource
 {
@@ -29,13 +29,13 @@ class DocumentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-
-    //Display Documents only for the user's office
+    // Display Documents only for the user's office
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->where('office_id', Auth::user()->office_id);
+            ->where('office_id', Auth::user()->office_id)
+            ->with(['classification', 'source', 'user', 'office', 'section']);
     }
 
     // Prevent users from viewing a document if it has been deleted
@@ -73,6 +73,7 @@ class DocumentResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
+                            ->native(false)
                             ->createOptionAction(function (Action $action) {
                                 return $action->slideOver();
                             })
@@ -134,7 +135,7 @@ class DocumentResource extends Resource
                             ->label('Office Origin')
                             ->columnSpan(6)
                             ->formatStateUsing(function ($state, $record) {
-                                return $state . ' (' . $record->section->name . ')';
+                                return $state.' ('.$record->section->name.')';
                             }),
                     ])
                     ->columns(6),
@@ -166,7 +167,7 @@ class DocumentResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title')
                     ->limit(60)
-                    ->tooltip(fn(Tables\Columns\TextColumn $column): ?string => $column->getState()),
+                    ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => $column->getState()),
                 Tables\Columns\TextColumn::make('classification.name')
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
@@ -183,12 +184,40 @@ class DocumentResource extends Resource
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
                 Tables\Filters\Filter::make('deactivated')
-                    ->query(fn(Builder $query): Builder => $query->whereNull('deactivated_at'))
+                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
                     ->label('Active'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('generateQR')
+                    ->label('Generate QR')
+                    ->icon('heroicon-o-qr-code')
+                    ->modalWidth('md')
+                    ->modalContent(function (Document $record) {
+                        $qrCode = (new GenerateQR)($record->code);
+
+                        return view('components.qr-code', [
+                            'qrCode' => $qrCode,
+                            'code' => $record->code,
+                        ]);
+                    })
+                    ->modalFooterActions([
+                        Tables\Actions\Action::make('download')
+                            ->label('Download QR')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->action(function (Document $record) {
+                                $base64 = (new DownloadQR)($record);
+
+                                return Response::streamDownload(
+                                    function () use ($base64) {
+                                        echo base64_decode($base64);
+                                    },
+                                    'qr-code.pdf',
+                                    ['Content-Type' => 'application/pdf']
+                                );
+                            }),
+                    ]),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
@@ -196,11 +225,10 @@ class DocumentResource extends Resource
             ]);
     }
 
-
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 

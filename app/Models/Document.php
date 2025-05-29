@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,6 +23,7 @@ class Document extends Model
         'section_id',
         'source_id',
         'directive',
+        'digital',
     ];
 
     public static function booted(): void
@@ -33,10 +35,10 @@ class Document extends Model
         });
 
         static::creating(function (self $document) {
-            $faker = fake();
+            $faker = fake()->unique();
 
             do {
-                $codes = collect(range(1, 10))->map(fn() => $faker->bothify('??????####'))->toArray();
+                $codes = collect(range(1, 10))->map(fn () => $faker->bothify('??????####'))->toArray();
 
                 $available = array_diff($codes, self::whereIn('code', $codes)->pluck('code')->toArray());
             } while (empty($available));
@@ -44,7 +46,6 @@ class Document extends Model
             $document->code = reset($available);
         });
     }
-
 
     public function classification(): BelongsTo
     {
@@ -81,8 +82,29 @@ class Document extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
+    // For getting all transmittals
     public function transmittals(): HasMany
     {
         return $this->hasMany(Transmittal::class);
+    }
+
+    // For getting latest transmittal
+    public function transmittal(): HasOne
+    {
+        return $this->transmittals()
+            ->one()
+            ->ofMany('created_at', 'max');
+    }
+
+    // For getting active (unreceived) transmittal
+    public function activeTransmittal(): HasOne
+    {
+        return $this->transmittals()
+            ->one()
+            ->ofMany([
+                'created_at' => 'max',
+            ], function ($query) {
+                $query->whereNull('received_at');
+            });
     }
 }

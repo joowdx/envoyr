@@ -6,17 +6,17 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class GenerateQR
 {
-    public function __invoke(string $code, array $documentData = []): string
+    public function __invoke(string $code): string
     {
-        $data = array_merge([
-            'code' => $code,
-            'generated_at' => now()->toDateTimeString(),
-        ], $documentData);
-
         $qr = QrCode::size(300)
-            ->format('svg')
-            ->generate(json_encode($data));
+            ->format('png')
+            ->errorCorrection('H')  // Highest error correction level
+            ->style('round')        // Rounded corners for better aesthetics
+            ->eye('circle')         // Circular eye patterns
+            ->margin(1)            // Minimal margin to maximize QR code size
+            ->generate($code);
 
-        return base64_encode($qr);
+        // Return as data URI for <img> tag
+        return 'data:image/png;base64,'.base64_encode($qr);
     }
 }

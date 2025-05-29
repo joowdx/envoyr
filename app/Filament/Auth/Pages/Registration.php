@@ -2,7 +2,7 @@
 
 namespace App\Filament\Auth\Pages;
 
-use App\Filament\Resources\Enums\UserRole;
+use App\Enums\UserRole;
 use App\Models\Office;
 use App\Models\Section;
 use App\Models\User;
