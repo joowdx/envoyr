@@ -33,10 +33,8 @@ class RequiredOffice extends Page implements HasForms
 
     public function mount(): void
     {
-        $user = Auth::user();
-
-        if ($user->office_id) {
-            $this->data['office_id'] = $user->office_id;
+        if (Auth::user()->office_id) {
+            $this->data['office_id'] = Auth::user()->office_id;
         }
 
         $this->form->fill($this->data);
@@ -44,9 +42,6 @@ class RequiredOffice extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $user = Auth::user();
-        $hasOffice = $user->office_id !== null;
-
         return $form
             ->schema([
                 Select::make('office_id')
@@ -57,7 +52,7 @@ class RequiredOffice extends Page implements HasForms
                     ->preload()
                     ->live()
                     ->afterStateUpdated(fn(callable $set) => $set('section_id', null))
-                    ->hidden($hasOffice),
+                    ->hidden(Auth::user()->office_id !== null),
                 Select::make('section_id')
                     ->label('Section')
                     ->options(function (callable $get) {
@@ -80,12 +75,7 @@ class RequiredOffice extends Page implements HasForms
 
     public function assign(): void
     {
-        $data = $this->form->getState();
-
-        Auth::user()->update([
-            'office_id' => $data['office_id'],
-            'section_id' => $data['section_id'],
-        ]);
+        Auth::user()->update($this->form->getState());
 
         Notification::make()
             ->title('Office and section assigned successfully')
@@ -117,8 +107,7 @@ class RequiredOffice extends Page implements HasForms
 
     public function isAdministrator(): bool
     {
-        $user = Auth::user();
-        return $user?->role === UserRole::ADMINISTRATOR || $user?->role === UserRole::ROOT;
+        return Auth::user()?->role === UserRole::ADMINISTRATOR || Auth::user()?->role === UserRole::ROOT;
     }
 
     public function logoutAction(): FilamentAction
