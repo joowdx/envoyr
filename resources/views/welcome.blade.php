@@ -43,9 +43,9 @@
       </div>
       <div class="fade-in-scale flex justify-center">
         <img
-          src="{{ Vite::asset('resources/images/heroIMG1.webp') }}"
+          src="{{ Vite::asset('resources/images/heroIMG2.webp') }}"
           alt="Person handling documents"
-          onerror="this.src='/images/heroIMG1.webp';"
+          onerror="this.src='resources/images/heroIMG2.webp';"
           class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
         />
       </div>
