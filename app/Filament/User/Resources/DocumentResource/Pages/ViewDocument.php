@@ -16,7 +16,7 @@ class ViewDocument extends ViewRecord
     {
         return [
             Actions\Action::make('generateQR')
-                ->label('Generate QR')
+                ->label('QR')
                 ->icon('heroicon-o-qr-code')
                 ->modalWidth('md')
                 ->modalContent(function () {

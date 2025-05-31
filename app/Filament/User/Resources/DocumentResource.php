@@ -191,7 +191,7 @@ class DocumentResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('generateQR')
-                    ->label('Generate QR')
+                    ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
                     ->modalContent(function (Document $record) {
@@ -227,9 +227,7 @@ class DocumentResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     public static function getPages(): array

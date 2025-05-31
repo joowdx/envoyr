@@ -40,7 +40,7 @@ RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
 RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
-RUN npm install -g puppeteer
+RUN npm -g i n && n stable && n prune && npm install -g puppeteer
 RUN su - sail -c "npx puppeteer browsers install chrome"
 
 COPY --from=phpswoole/swoole:php8.3 /usr/local/lib/php/extensions/no-debug-non-zts-20230831/swoole.so /usr/lib/php/20230831/
