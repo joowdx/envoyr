@@ -85,7 +85,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->avatar
-            ? asset('storage/'.$this->avatar)
+            ? asset('storage/' . $this->avatar)
             : null;
     }
 
@@ -120,5 +120,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     public function hasApprovedAccount(): bool
     {
         return $this->hasVerifiedEmail() && isset($this->approved_at);
+    }
+
+    public function hasOffice(): bool
+    {
+        return $this->office_id !== null;
+    }
+
+    public function hasSection(): bool
+    {
+        return $this->section_id !== null;
     }
 }
