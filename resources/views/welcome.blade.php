@@ -42,13 +42,13 @@
         </a>
       </div>
       <div class="fade-in-scale flex justify-center">
-        <img
-          src="{{ Vite::asset('resources/images/heroIMG2.webp') }}"
-          alt="Person handling documents"
-          onerror="this.src='resources/images/heroIMG2.webp';"
-          class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
-        />
-      </div>
+  <img
+    src="/images/heroIMG2.webp"
+    alt="Person handling documents"
+    onerror="this.src='/images/heroIMG2.webp';"
+    class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
+  />
+</div>
     </section>
 
     <!-- Features -->
@@ -80,7 +80,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl items-center">
         <div class="flex justify-center">
           <img
-            src="{{ Vite::asset('resources/images/HowItWorksIMG1.webp') }}"
+            src="images/HowItWorksIMG1.webp"
             alt="Person handling documents"
             class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
           />
@@ -147,22 +147,22 @@
       </p>
       <div class="mt-12 grid grid-cols-3 gap-4 place-items-center">
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/php-logo.png') }}" alt="PHP" class="h-10" />
+          <img src="images/php-logo.png" alt="PHP" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/laravel_logo.png') }}" alt="Laravel" class="h-10" />
+          <img src="images/laravel_logo.png" alt="Laravel" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/filament-logo.jpg') }}" alt="Filament" class="h-10" />
+          <img src="images/filament-logo.jpg" alt="Filament" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/tailwind-logo.webp') }}" alt="TailwindCSS" class="h-10" />
+          <img src="images/tailwind-logo.webp" alt="TailwindCSS" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/next.js-logo.png') }}" alt="NextJS" class="h-10" />
+          <img src="images/next.js-logo.png" alt="NextJS" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="{{ Vite::asset('resources/images/github-logo.png') }}" alt="GitHub" class="h-10" />
+          <img src="images/github-logo.png" alt="GitHub" class="h-10" />
         </div>
       </div>
     </section>
