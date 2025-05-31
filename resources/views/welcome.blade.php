@@ -37,13 +37,13 @@
         <p class="text-lg mb-8 text-gray-300">
           Powered by smart QR codes.
         </p>
-        <a href="#features" class="bg-primary text-white px-6 py-3 rounded font-semibold text-lg hover:bg-pink-400 transition">
+        <a href="#features" class="bg-primary text-white px-6 py-3 rounded border border-indigo-500 font-semibold text-lg hover:bg-pink-400 transition">
           Get Started
         </a>
       </div>
       <div class="fade-in-scale flex justify-center">
         <img
-          src="{{ Vite::asset('public/images/heroIMG1.webp') }}"
+          src="{{ Vite::asset('resources/images/heroIMG1.webp') }}"
           alt="Person handling documents"
           class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
         />
@@ -79,7 +79,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl items-center">
         <div class="flex justify-center">
           <img
-            src="{{ asset('images/HowItWorksIMG1.webp') }}"
+            src="{{ Vite::asset('resources/images/HowItWorksIMG1.webp') }}"
             alt="Person handling documents"
             class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
           />
@@ -146,22 +146,22 @@
       </p>
       <div class="mt-12 grid grid-cols-3 gap-4 place-items-center">
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/php-logo.png" alt="PHP" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/php-logo.png') }}" alt="PHP" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/laravel_logo.png" alt="Laravel" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/laravel_logo.png') }}" alt="Laravel" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/filament-logo.jpg" alt="Filament" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/filament-logo.jpg') }}" alt="Filament" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/tailwind-logo.webp" alt="TailwindCSS" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/tailwind-logo.webp') }}" alt="TailwindCSS" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/next.js-logo.png" alt="NextJS" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/next.js-logo.png') }}" alt="NextJS" class="h-10" />
         </div>
         <div class="bg-gray-800 p-6 rounded-xl flex items-center justify-center w-24 h-24 shadow-lg">
-          <img src="images/github-logo.png" alt="GitHub" class="h-10" />
+          <img src="{{ Vite::asset('resources/images/github-logo.png') }}" alt="GitHub" class="h-10" />
         </div>
       </div>
     </section>
