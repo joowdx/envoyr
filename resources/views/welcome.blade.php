@@ -4,23 +4,20 @@
       <div class="max-w-8xl mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-primary dark:text-pink-400">Envoyr</h1>
         <div class="flex items-center gap-4">
-          <button
-            onclick="toggleLightMode()"
-            aria-label="Toggle dark/light mode"
-            class="text-sm px-4 py-2 rounded border border-indigo-500 dark:border-pink-400 text-indigo-600 dark:text-pink-400 hover:bg-indigo-100 dark:hover:bg-pink-900 transition flex items-center gap-2"
-          >
-            <i id="theme-icon" class="fas fa-moon"></i>
-          </button>
-          <button
-            class="text-sm px-4 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
-          >
-            Login
-          </button>
-          <button
-            class="text-sm px-4 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
-          >
-            Sign Up
-          </button>
+          <div class="flex justify-end w-full">
+                        @include('theme-switcher')
+          </div>
+        <div class="flex space-x-4">
+            <button
+              class="text-sm px-4 py-1 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
+            >
+              Login
+            </button>
+            <button
+              class="text-sm px-6 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300 whitespace-nowrap"
+            >
+              Sign Up
+            </button>
         </div>
       </div>
     </header>
@@ -179,41 +176,41 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme');
-        const html = document.documentElement;
+  const savedTheme = localStorage.getItem('theme');
+  const html = document.documentElement;
 
-        if (savedTheme === 'dark') {
-          html.classList.add('dark');
-          html.classList.remove('light');
-        } else {
-          html.classList.remove('dark');
-          html.classList.add('light');
-        }
+  if (savedTheme === 'dark') {
+    html.classList.add('dark');
+    html.classList.remove('light');
+  } else {
+    html.classList.remove('dark');
+    html.classList.add('light');
+  }
 
-        updateToggleIcon();
+  updateToggleIcon();
 
-        window.toggleLightMode = function () {
-          const isDark = html.classList.contains('dark');
+  window.toggleLightMode = function () {
+    const isDark = html.classList.contains('dark');
 
-          if (isDark) {
-            html.classList.remove('dark');
-            html.classList.add('light');
-            localStorage.setItem('theme', 'light');
-          } else {
-            html.classList.remove('light');
-            html.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-          }
+    if (isDark) {
+      html.classList.remove('dark');
+      html.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      html.classList.remove('light');
+      html.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
 
-          updateToggleIcon();
-        };
+    updateToggleIcon();
+  };
 
-        function updateToggleIcon() {
-          const icon = document.getElementById('theme-icon');
-          const isDark = document.documentElement.classList.contains('dark');
-          icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-          icon.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
-        }
-      });
+  function updateToggleIcon() {
+    const icon = document.getElementById('theme-icon');
+    const isDark = document.documentElement.classList.contains('dark');
+    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    icon.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  }
+});
     </script>
 
