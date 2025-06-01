@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Enums\UserRole;
+use App\Filament\Actions\Tables\UnpublishAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -37,12 +38,13 @@ class DocumentResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return ! $record->trashed();
+        return ! $record->trashed() && $record->isDraft();
     }
 
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(2)
             ->schema([
                 Forms\Components\Grid::make(2)
                     ->schema([
@@ -51,19 +53,12 @@ class DocumentResource extends Resource
                             ->inline()
                             ->rule('required')
                             ->markAsRequired(),
-                        // Forms\Components\Toggle::make('electronic')
-                        //     ->label('Electronic copy only')
-                        //     ->inline()
-                        //     ->rule('required')
-                        //     ->markAsRequired()
-                        //     ->live()
-                        //     ->default(1),
                     ]),
                 Forms\Components\TextInput::make('title')
                     ->rule('required')
                     ->markAsRequired()
-                    ->columnSpanFull()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->columnSpanFull(),
                 Forms\Components\Select::make('classification_id')
                     ->label('Classification')
                     ->relationship('classification', 'name')
@@ -117,10 +112,10 @@ class DocumentResource extends Resource
                                 Forms\Components\Grid::make(2)
                                     ->hidden(fn (callable $get) => $get('electronic'))
                                     ->schema([
-                                        Forms\Components\TextInput::make('context.copies')
+                                        Forms\Components\TextInput::make('context.pages')
                                             ->minValue(1)
                                             ->rule('numeric'),
-                                        Forms\Components\TextInput::make('context.pages')
+                                        Forms\Components\TextInput::make('context.copies')
                                             ->minValue(1)
                                             ->rule('numeric'),
                                     ]),
@@ -137,7 +132,7 @@ class DocumentResource extends Resource
         return $infolist
             ->schema([
                 Section::make('Document Information')
-                    ->columns(6)
+                    ->columns(2)
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Infolists\Components\TextEntry::make('title')
@@ -147,11 +142,9 @@ class DocumentResource extends Resource
                             ->extraAttributes(['class' => 'font-mono'])
                             ->copyable()
                             ->copyMessage('Copied!')
-                            ->copyMessageDuration(1500)
-                            ->columnSpan(2),
+                            ->copyMessageDuration(1500),
                         Infolists\Components\TextEntry::make('classification.name')
-                            ->label('Classification')
-                            ->columnSpan(2),
+                            ->label('Classification'),
                     ]),
                 Section::make('Source Origin')
                     ->icon('heroicon-o-building-office')
@@ -167,16 +160,18 @@ class DocumentResource extends Resource
                     ->columns(6),
                 Section::make('Metadata')
                     ->icon('heroicon-o-information-circle')
+                    ->columns(3)
                     ->schema([
                         Infolists\Components\TextEntry::make('user.name')
-                            ->label('Created By')
-                            ->columnSpan(3),
+                            ->label('Created By'),
                         Infolists\Components\TextEntry::make('created_at')
                             ->label('Created At')
+                            ->dateTime(),
+                        Infolists\Components\TextEntry::make('published_at')
+                            ->label('Published At')
                             ->dateTime()
-                            ->columnSpan(3),
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
                     ])
-                    ->columns(6),
             ]);
     }
 
@@ -192,28 +187,46 @@ class DocumentResource extends Resource
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
                     ->label('Source'),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (Document $record): string => $record->isPublished() ? 'success' : 'gray')
+                    ->formatStateUsing(fn (Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
+                    ->getStateUsing(fn (Document $record): string => $record->isPublished() ? 'published' : 'draft'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->placeholder('All')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            fn (Builder $query, $value): Builder => match ($value) {
+                                'draft' => $query->whereNull('published_at'),
+                                'published' => $query->whereNotNull('published_at'),
+                                default => $query,
+                            }
+                        );
+                    }),
                 Tables\Filters\TrashedFilter::make('trashed'),
-                Tables\Filters\Filter::make('deactivated')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
-                    ->label('Active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
+                UnpublishAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
+                    ->visible(fn (Document $record): bool => $record->isPublished())
                     ->modalContent(function (Document $record) {
                         $qrCode = (new GenerateQR)($record->code);
 
@@ -238,7 +251,10 @@ class DocumentResource extends Resource
                                 );
                             }),
                     ]),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make()
+                        ->visible(fn (Document $record): bool => $record->isDraft()),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
                 ]),

@@ -25,6 +25,11 @@ class Document extends Model
         'office_id',
         'section_id',
         'source_id',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
     ];
 
     public static function booted(): void
@@ -44,6 +49,33 @@ class Document extends Model
 
             $document->code = reset($available);
         });
+    }
+
+    public function publish(): bool
+    {
+        // Check if already published
+        if ($this->isPublished()) {
+            return false;
+        }
+
+        // Update the document
+        return $this->update([
+            'published_at' => now(),
+        ]);
+    }
+
+    // ✅ Add unpublish method
+    public function unpublish(): bool
+    {
+        // Check if not published
+        if ($this->isDraft()) {
+            return false;
+        }
+
+        // Update the document
+        return $this->update([
+            'published_at' => null,
+        ]);
     }
 
     public function classification(): BelongsTo
@@ -114,5 +146,16 @@ class Document extends Model
             ], function ($query) {
                 $query->whereNull('received_at');
             });
+    }
+
+    // Add helper methods
+    public function isPublished(): bool
+    {
+        return filled($this->published_at);
+    }
+
+    public function isDraft(): bool
+    {
+        return is_null($this->published_at);
     }
 }
