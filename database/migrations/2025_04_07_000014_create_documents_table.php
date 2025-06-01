@@ -27,19 +27,18 @@ return new class extends Migration
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Section::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
-            $table->boolean('digital')->default(false);
             $table->boolean('directive')->default(false);
+            $table->boolean('digital')->default(false);
             $table->timestamp('published_at')->nullable();
-            $table->timestamp('unpublished_at')->nullable();
-            $table->string('status')->default('draft');
+            
             
             $table->softDeletes();
             $table->timestamps();
 
             $table->index(['office_id', 'created_at']); // Office + date queries
             $table->index(['office_id', 'deleted_at']); // Soft delete queries by office
-            $table->index('created_at'); // Date-based sorting/filtering
-            $table->index(['status', 'published_at', 'unpublished_at']);
+            $table->index('created_at'); 
+            $table->index('published_at'); // Publication status queries
         });
     }
 

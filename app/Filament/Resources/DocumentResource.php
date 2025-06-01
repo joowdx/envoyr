@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Enums\UserRole;
+use App\Filament\Actions\Tables\UnpublishAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -161,11 +162,6 @@ class DocumentResource extends Resource
                             ->dateTime()
                             ->columnSpan(3)
                             ->visible(fn (Document $record): bool => $record->isPublished()),
-                        Infolists\Components\TextEntry::make('unpublished_at')
-                            ->label('Unpublished At')
-                            ->dateTime()
-                            ->columnSpan(2)
-                            ->visible(fn (Document $record): bool => $record->isPublished()),
                     ])
                     ->columns(6),
 
@@ -190,12 +186,9 @@ class DocumentResource extends Resource
                     ->label('Source'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'draft' => 'gray',
-                        'published' => 'success',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
+                    ->color(fn (Document $record): string => $record->isPublished() ? 'success' : 'gray')
+                    ->formatStateUsing(fn (Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
+                    ->getStateUsing(fn (Document $record): string => $record->isPublished() ? 'published' : 'draft'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
                     ->toggleable(),
@@ -211,13 +204,24 @@ class DocumentResource extends Resource
                     ->options([
                         'draft' => 'Draft',
                         'published' => 'Published',
-                    ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            fn (Builder $query, $value): Builder => match ($value) {
+                                'draft' => $query->whereNull('published_at'),
+                                'published' => $query->whereNotNull('published_at'),
+                                default => $query,
+                            }
+                        );
+                    }),
             ])
             ->actions([
-                // ✅ Edit only available for drafts
+                UnpublishAction::make()
+                    ->visible(fn (Document $record): bool => $record->isPublished()),
                 Tables\Actions\EditAction::make()
-                    ->visible(fn (Document $record): bool => $record->isDraft()),
-                Tables\Actions\ViewAction::make(),
+                    ->visible(fn (Document $record): bool => $record->isDraft()),                    
+                Tables\Actions\ViewAction::make(), 
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
@@ -247,6 +251,7 @@ class DocumentResource extends Resource
                                 );
                             }),
                     ]),
+        
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),

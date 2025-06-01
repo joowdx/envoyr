@@ -28,13 +28,10 @@ class Document extends Model
         'directive',
         'digital',
         'published_at',
-        'unpublished_at',        
-        'status',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
-        'unpublished_at' => 'datetime',  
     ];
 
     public static function booted(): void
@@ -69,8 +66,7 @@ class Document extends Model
         // Update the document
         return $this->update([
             'published_at' => now(),
-            'unpublished_at' => null,  // Clear unpublished timestamp
-            'status' => 'published',
+
         ]);
     }
 
@@ -85,8 +81,6 @@ class Document extends Model
         // Update the document
         return $this->update([
             'published_at' => null,
-            'unpublished_at' => now(),
-            'status' => 'draft',
         ]);
     }
 
@@ -159,12 +153,6 @@ class Document extends Model
         return is_null($this->published_at);
     }
 
-
-    public function wasUnpublished(): bool
-    {
-        return !is_null($this->unpublished_at);
-    }
-
     // Add scopes
     public function scopePublished($query)
     {
@@ -174,12 +162,5 @@ class Document extends Model
     public function scopeDraft($query)
     {
         return $query->whereNull('published_at');
-    }
-
-
-    public function scopeRecentlyUnpublished($query, $days = 7)
-    {
-        return $query->whereNotNull('unpublished_at')
-                     ->where('unpublished_at', '>=', now()->subDays($days));
     }
 }

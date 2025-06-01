@@ -1,10 +1,9 @@
 <?php
-// filepath: /Users/johnfordleonielbalignot/paperchase/app/Filament/Actions/UnpublishAction.php
 
 namespace App\Filament\Actions\Tables;
 
 use App\Models\Document;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +48,6 @@ class UnpublishAction extends Action
 
                     $record->update([
                         'published_at' => null,
-                        'status' => 'draft',
                     ]);
 
                 });

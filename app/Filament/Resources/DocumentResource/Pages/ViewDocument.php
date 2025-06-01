@@ -5,12 +5,10 @@ namespace App\Filament\Resources\DocumentResource\Pages;
 use Filament\Actions;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
-
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Actions\PublishAction;
 use Filament\Resources\Pages\ViewRecord;
-use App\Filament\Actions\Tables\UnpublishAction;
-use App\Filament\User\Resources\DocumentResource;
+use App\Filament\Resources\DocumentResource;
 
 class ViewDocument extends ViewRecord
 {
@@ -22,10 +20,6 @@ class ViewDocument extends ViewRecord
             PublishAction::make()
                 ->visible(fn (): bool => 
                     $this->record->isDraft() && $this->record->user_id === Auth::id()
-                ),
-            UnpublishAction::make()
-                ->visible(fn (): bool => 
-                    $this->record->isPublished() && $this->record->user_id === Auth::id()
                 ),
             Actions\Action::make('generateQR')
                 ->label('Generate QR Code')

@@ -4,7 +4,6 @@ namespace App\Filament\Actions;
 
 use App\Models\Document;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,69 +14,64 @@ class PublishAction extends Action
     {
         parent::setUp();
 
-        $this->name('publish-document');
+        $this->name('publish');
 
-        $this->label('Publish Document');
+        $this->label('Publish');
 
-        $this->icon('heroicon-o-paper-airplane');
+        $this->icon('heroicon-o-eye');
 
         $this->color('success');
 
-        $this->modalSubmitActionLabel('Publish');
+        $this->modalSubmitActionLabel('Publish Document');
 
         $this->modalHeading('Publish Document');
 
-        $this->modalDescription('Once published, this document will be finalized and cannot be edited. You will be able to generate QR codes for tracking.');
-
-        $this->form([
-            Textarea::make('publish_notes')
-                ->label('Publication Notes')
-                ->placeholder('Add any final notes or comments about this publication...')
-                ->rows(3)
-                ->maxLength(500),
-        ]);
+        $this->modalDescription('Are you sure you want to publish this document? Once published, it cannot be edited.');
 
         $this->requiresConfirmation();
 
-        $this->modalIcon('heroicon-o-check-circle');
+        $this->modalIcon('heroicon-o-eye');
 
         $this->action(function (array $data, Document $record): void {
             try {
                 DB::transaction(function () use ($data, $record) {
                     // Check if document is already published
-                    if ($record->published_at) {
-                        throw new \Exception('This document has already been published.');
+                    if ($record->isPublished()) {
+                        throw new \Exception('This document is already published.');
                     }
 
-                    // Update document with publication data
+                    // Check if user has permission to publish
+                    if ($record->user_id !== Auth::id()) {
+                        throw new \Exception('You can only publish documents you created.');
+                    }
+
+                    // Update document to published status
                     $record->update([
                         'published_at' => now(),
-                        'unpublished_at' => null,  
-                        'status' => 'published',
                     ]);
+
                 });
 
                 // Success notification
                 Notification::make()
                     ->title('Document Published Successfully')
-                    ->body("Document '{$record->title}' has been published and is now finalized. You can now generate QR codes for tracking.")
+                    ->body("Document '{$record->title}' is now published and cannot be edited.")
                     ->success()
                     ->send();
 
             } catch (\Exception $e) {
                 // Error notification
                 Notification::make()
-                    ->title('Publication Failed')
+                    ->title('Publish Failed')
                     ->body($e->getMessage())
                     ->danger()
                     ->send();
             }
         });
 
-        // Only show action if document is not published yet
+        // Only show for draft documents
         $this->visible(function (Document $record): bool {
-            return is_null($record->published_at) && 
-                   $record->user_id === Auth::id();
+            return $record->isDraft();
         });
     }
 }

@@ -2,8 +2,7 @@
 
 namespace App\Filament\Resources\DocumentResource\Pages;
 
-use App\Filament\Actions\PublishAction;
-use App\Filament\User\Resources\DocumentResource;
+use App\Filament\Resources\DocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -14,7 +13,6 @@ class EditDocument extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            PublishAction::make(),
             Actions\DeleteAction::make(),
             Actions\ForceDeleteAction::make(),
         ];
