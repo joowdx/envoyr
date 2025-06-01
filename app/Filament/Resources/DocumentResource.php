@@ -43,62 +43,86 @@ class DocumentResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-
             ->schema([
-                Grid::Make(1)
+                Forms\Components\Grid::make(2)
                     ->schema([
-                        Forms\Components\Grid::make(2)
-                            ->schema([
-                                Forms\Components\Toggle::make('dissemination')
-                                    ->label('For dissemination only')
-                                    ->inline()
-                                    ->rule('required')
-                                    ->markAsRequired(),
-                                Forms\Components\Toggle::make('electronic')
-                                    ->label('Electronic copy only')
-                                    ->inline()
-                                    ->rule('required')
-                                    ->markAsRequired()
-                                    ->live(),
-                            ]),
-                        Forms\Components\TextInput::make('title')
+                        Forms\Components\Toggle::make('dissemination')
+                            ->label('For dissemination only')
+                            ->inline()
                             ->rule('required')
-                            ->markAsRequired()
-                            ->maxLength(255),
-                        Forms\Components\Select::make('classification_id')
-                            ->label('Classification')
-                            ->relationship('classification', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->rule('required')
-                            ->markAsRequired()
-                            ->native(false)
-                            ->createOptionAction(function (Action $action) {
-                                return $action
-                                    ->slideOver()
-                                    ->modalWidth('md');
-                            })
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->rule('required')
-                                    ->markAsRequired(),
-                            ]),
-                        Forms\Components\Select::make('source_id')
-                            ->relationship('source', 'name')
-                            ->preload()
-                            ->searchable()
-                            ->createOptionAction(function (Action $action) {
-                                return $action
-                                    ->slideOver()
-                                    ->modalWidth('md');
-                            })
-                            ->createOptionForm([
-                                TextInput::make('name')
-                                    ->rule('required')
-                                    ->markAsRequired(),
-                            ]),
-
+                            ->markAsRequired(),
+                        // Forms\Components\Toggle::make('electronic')
+                        //     ->label('Electronic copy only')
+                        //     ->inline()
+                        //     ->rule('required')
+                        //     ->markAsRequired()
+                        //     ->live()
+                        //     ->default(1),
                     ]),
+                Forms\Components\TextInput::make('title')
+                    ->rule('required')
+                    ->markAsRequired()
+                    ->columnSpanFull()
+                    ->maxLength(255),
+                Forms\Components\Select::make('classification_id')
+                    ->label('Classification')
+                    ->relationship('classification', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->rule('required')
+                    ->markAsRequired()
+                    ->native(false)
+                    ->createOptionAction(function (Action $action) {
+                        return $action
+                            ->slideOver()
+                            ->modalWidth('md');
+                    })
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->rule('required')
+                            ->markAsRequired(),
+                    ]),
+                Forms\Components\Select::make('source_id')
+                    ->relationship('source', 'name')
+                    ->preload()
+                    ->searchable()
+                    ->createOptionAction(function (Action $action) {
+                        return $action
+                            ->slideOver()
+                            ->modalWidth('md');
+                    })
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->rule('required')
+                            ->markAsRequired(),
+                    ]),
+                Forms\Components\Grid::make()
+                    ->relationship('enclosure')
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\Repeater::make('attachments')
+                            ->relationship()
+                            ->addActionLabel('Add attachment')
+                            ->columnSpanFull()
+                            ->grid(3)
+                            ->orderColumn('sort')
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->rule('required')
+                                    ->markAsRequired(),
+                                Forms\Components\Grid::make(2)
+                                    ->schema([
+                                        Forms\Components\TextInput::make('context.copies')
+                                            ->minValue(1)
+                                            ->rule('numeric'),
+                                        Forms\Components\TextInput::make('context.pages')
+                                            ->minValue(1)
+                                            ->rule('numeric'),
+                                    ]),
+                                Forms\Components\Textarea::make('remarks')
+                                    ->maxLength(4096),
+                            ])
+                    ])
             ]);
     }
 
