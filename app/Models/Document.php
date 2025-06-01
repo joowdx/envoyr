@@ -17,13 +17,13 @@ class Document extends Model
     protected $fillable = [
         'code',
         'title',
+        'dissemination',
+        'electronic',
         'classification_id',
         'user_id',
         'office_id',
         'section_id',
         'source_id',
-        'directive',
-        'digital',
     ];
 
     public static function booted(): void
@@ -82,13 +82,11 @@ class Document extends Model
         return $this->morphMany(Attachment::class, 'attachable');
     }
 
-    // For getting all transmittals
     public function transmittals(): HasMany
     {
         return $this->hasMany(Transmittal::class);
     }
 
-    // For getting latest transmittal
     public function transmittal(): HasOne
     {
         return $this->transmittals()
@@ -96,7 +94,6 @@ class Document extends Model
             ->ofMany('created_at', 'max');
     }
 
-    // For getting active (unreceived) transmittal
     public function activeTransmittal(): HasOne
     {
         return $this->transmittals()
