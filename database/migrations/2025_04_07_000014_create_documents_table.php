@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Section::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Source::class)->nullable()->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
 

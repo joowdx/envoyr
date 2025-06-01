@@ -14,8 +14,8 @@ class ListDocuments extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
             ReceiveDocumentAction::make(),
+            Actions\CreateAction::make(),
         ];
     }
 }

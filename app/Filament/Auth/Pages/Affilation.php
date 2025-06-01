@@ -125,7 +125,7 @@ class Affilation extends SimplePage implements HasMiddleware
             ->success()
             ->send();
 
-        $this->redirect('/user');
+        $this->redirect(route('filament.app.pages.dashboard'));
     }
 
     public function getTitle(): string

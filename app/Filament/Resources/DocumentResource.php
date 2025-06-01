@@ -30,13 +30,11 @@ class DocumentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    // Prevent users from viewing a document if it has been deleted
     public static function canView(Model $record): bool
     {
         return ! $record->trashed();
     }
 
-    // Prevent users from editing a document if it has been deleted
     public static function canEdit(Model $record): bool
     {
         return ! $record->trashed();
@@ -49,40 +47,45 @@ class DocumentResource extends Resource
             ->schema([
                 Grid::Make(1)
                     ->schema([
-
-                        Forms\Components\Toggle::make('directive')
-                            ->label('Directive')
+                        Forms\Components\Toggle::make('dissemination')
                             ->inline()
-                            ->required(),
-
+                            ->rule('required')
+                            ->markAsRequired(),
                         Forms\Components\TextInput::make('title')
-                            ->required()
+                            ->rule('required')
+                            ->markAsRequired()
                             ->maxLength(255),
-
                         Forms\Components\Select::make('classification_id')
                             ->label('Classification')
                             ->relationship('classification', 'name')
                             ->searchable()
                             ->preload()
-                            ->required()
+                            ->rule('required')
+                            ->markAsRequired()
                             ->native(false)
                             ->createOptionAction(function (Action $action) {
-                                return $action->slideOver();
+                                return $action
+                                    ->slideOver()
+                                    ->modalWidth('md');
                             })
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Classification Name')
-                                    ->required(),
+                                    ->rule('required')
+                                    ->markAsRequired(),
                             ]),
-
                         Forms\Components\Select::make('source_id')
                             ->relationship('source', 'name')
                             ->preload()
                             ->searchable()
+                            ->createOptionAction(function (Action $action) {
+                                return $action
+                                    ->slideOver()
+                                    ->modalWidth('md');
+                            })
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Source Name')
-                                    ->required(),
+                                    ->rule('required')
+                                    ->markAsRequired(),
                             ]),
 
                     ]),

@@ -40,7 +40,7 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'name' => 'Root',
             'email' => 'root@local.dev',
-            'password' => Hash::make('$2y$12$AhM2U/ZllWkWFJA.9GI6heCOwPl/JnESmEsOlbZ57KlF0VJOIV1hK'),
+            'password' => '$2y$12$AhM2U/ZllWkWFJA.9GI6heCOwPl/JnESmEsOlbZ57KlF0VJOIV1hK',
             'email_verified_at' => now(),
             'approved_at' => now(),
             'role' => UserRole::ROOT,
