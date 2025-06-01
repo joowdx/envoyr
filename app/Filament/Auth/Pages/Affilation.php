@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\User\Pages;
+namespace App\Filament\Auth\Pages;
 
 use App\Enums\UserRole;
 use App\Filament\Auth\Concerns\BaseAuthPage;

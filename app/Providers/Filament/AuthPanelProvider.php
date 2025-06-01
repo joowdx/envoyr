@@ -3,11 +3,11 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\Controllers\EmailVerificationController;
+use App\Filament\Auth\Pages\Affilation;
 use App\Filament\Auth\Pages\Approval;
 use App\Filament\Auth\Pages\Redirect;
 use App\Filament\Auth\Pages\Registration;
 use App\Filament\Auth\Pages\Verification;
-use App\Filament\User\Pages\Affilation;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
