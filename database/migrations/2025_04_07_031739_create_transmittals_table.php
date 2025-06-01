@@ -27,7 +27,6 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'to_user_id')->constrained()->cascadeOnDelete();
             $table->text('remarks')->nullable();
             $table->datetime('received_at')->nullable();
-            $table->foreignIdFor(User::class, 'received_by_id')->nullable()->constrained()->cascadeOnDelete();
             $table->boolean('pick_up')->default(false);
             $table->timestamps();
 

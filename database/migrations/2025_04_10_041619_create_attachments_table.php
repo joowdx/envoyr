@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Enclosure;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,7 @@ return new class extends Migration
             $table->string('remarks', 2048)->nullable();
             $table->json('files');
             $table->json('paths');
-            $table->ulidMorphs('attachable');
+            $table->foreignIdFor(Enclosure::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -15,8 +15,7 @@ class Attachment extends Model
         'remarks',
         'files',
         'paths',
-        'attachable_id',
-        'attachable_type',
+        'enclosure_id',
     ];
 
     protected $casts = [

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,9 +30,7 @@ class Document extends Model
     public static function booted(): void
     {
         static::forceDeleting(function (self $document) {
-            $document->attachment->delete();
-
-            $document->actions->each->delete();
+            $document->attachments->each->delete();
         });
 
         static::creating(function (self $document) {
@@ -77,9 +76,21 @@ class Document extends Model
         return $this->hasMany(Label::class);
     }
 
-    public function attachments(): MorphMany
+    public function enclosures(): HasMany
     {
-        return $this->morphMany(Attachment::class, 'attachable');
+        return $this->hasMany(Enclosure::class);
+    }
+
+    public function enclosure(): HasOne
+    {
+        return $this->enclosures()
+            ->one()
+            ->ofMany();
+    }
+
+    public function attachments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Attachment::class, Enclosure::class);
     }
 
     public function transmittals(): HasMany
