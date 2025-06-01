@@ -47,10 +47,20 @@ class DocumentResource extends Resource
             ->schema([
                 Grid::Make(1)
                     ->schema([
-                        Forms\Components\Toggle::make('dissemination')
-                            ->inline()
-                            ->rule('required')
-                            ->markAsRequired(),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Toggle::make('dissemination')
+                                    ->label('For dissemination only')
+                                    ->inline()
+                                    ->rule('required')
+                                    ->markAsRequired(),
+                                Forms\Components\Toggle::make('electronic')
+                                    ->label('Electronic copy only')
+                                    ->inline()
+                                    ->rule('required')
+                                    ->markAsRequired()
+                                    ->live(),
+                            ]),
                         Forms\Components\TextInput::make('title')
                             ->rule('required')
                             ->markAsRequired()
@@ -97,44 +107,34 @@ class DocumentResource extends Resource
         return $infolist
             ->schema([
                 Section::make('Document Information')
+                    ->columns(6)
                     ->icon('heroicon-o-document-text')
                     ->schema([
+                        Infolists\Components\TextEntry::make('title')
+                            ->columnSpanFull()
+                            ->weight('bold'),
                         Infolists\Components\TextEntry::make('code')
                             ->extraAttributes(['class' => 'font-mono'])
                             ->copyable()
                             ->copyMessage('Copied!')
                             ->copyMessageDuration(1500)
                             ->columnSpan(2),
-                        Infolists\Components\TextEntry::make('title')
-                            ->columnSpan(6)
-                            ->weight('bold'),
-                    ])
-                    ->columns(6),
-
-                Section::make('Classification')
-                    ->icon('heroicon-o-tag')
-                    ->schema([
                         Infolists\Components\TextEntry::make('classification.name')
                             ->label('Classification')
-                            ->columnSpan(3),
-                        Infolists\Components\TextEntry::make('source.name')
-                            ->label('Source')
-                            ->columnSpan(3),
-                    ])
-                    ->columns(6),
-
-                Section::make('Origin Information')
+                            ->columnSpan(2),
+                    ]),
+                Section::make('Source Origin')
                     ->icon('heroicon-o-building-office')
                     ->schema([
                         Infolists\Components\TextEntry::make('office.name')
-                            ->label('Office Origin')
-                            ->columnSpan(6)
-                            ->formatStateUsing(function ($state, $record) {
-                                return $state.' ('.$record->section->name.')';
-                            }),
+                            ->label('Office Source')
+                            ->columnSpan(3),
+                        Infolists\Components\TextEntry::make('source.name')
+                            ->label('External Source')
+                            ->placeholder('None')
+                            ->columnSpan(3),
                     ])
                     ->columns(6),
-
                 Section::make('Metadata')
                     ->icon('heroicon-o-information-circle')
                     ->schema([
@@ -147,11 +147,6 @@ class DocumentResource extends Resource
                             ->columnSpan(3),
                     ])
                     ->columns(6),
-
-                Section::make('Transmittal Details')
-                    ->icon('heroicon-o-map')
-                    ->schema([])
-                    ->columns(3),
             ]);
     }
 
