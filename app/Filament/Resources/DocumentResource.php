@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\User\Resources;
+namespace App\Filament\Resources;
 
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
-use App\Filament\User\Resources\DocumentResource\Pages;
+use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;

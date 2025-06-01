@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\User\Resources\DocumentResource\Pages;
+namespace App\Filament\Resources\DocumentResource\Pages;
 
-use App\Filament\User\Resources\DocumentResource;
+use App\Filament\Resources\DocumentResource;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 
