@@ -34,7 +34,7 @@ class PublishAction extends Action
 
         $this->action(function (array $data, Document $record): void {
             try {
-                DB::transaction(function () use ($data, $record) {
+                DB::transaction(function () use ($record) {
                     // Check if document is already published
                     if ($record->isPublished()) {
                         throw new \Exception('This document is already published.');

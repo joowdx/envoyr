@@ -27,13 +27,13 @@ return new class extends Migration
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Section::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Source::class)->nullable()->constrained()->nullOnDelete();
-            $table->timestamp('published_at')->nullable();           
+            $table->timestamp('published_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
             $table->index(['office_id', 'created_at']); // Office + date queries
             $table->index(['office_id', 'deleted_at']); // Soft delete queries by office
-            $table->index('created_at'); 
+            $table->index('created_at');
             $table->index('published_at'); // Publication status queries
         });
     }

@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 
 class Document extends Model
 {
@@ -55,7 +54,6 @@ class Document extends Model
         });
     }
 
-
     public function publish(): bool
     {
         // Check if already published
@@ -91,7 +89,7 @@ class Document extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class); 
+        return $this->belongsTo(User::class);
     }
 
     public function office(): BelongsTo
@@ -145,7 +143,7 @@ class Document extends Model
     // Add helper methods
     public function isPublished(): bool
     {
-        return !is_null($this->published_at);
+        return ! is_null($this->published_at);
     }
 
     public function isDraft(): bool

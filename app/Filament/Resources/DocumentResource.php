@@ -33,12 +33,12 @@ class DocumentResource extends Resource
 
     public static function canView(Model $record): bool
     {
-        return !$record->trashed();
+        return ! $record->trashed();
     }
 
     public static function canEdit(Model $record): bool
     {
-        return !$record->trashed() && $record->isDraft();
+        return ! $record->trashed() && $record->isDraft();
     }
 
     public static function form(Form $form): Form
@@ -220,8 +220,8 @@ class DocumentResource extends Resource
                 UnpublishAction::make()
                     ->visible(fn (Document $record): bool => $record->isPublished()),
                 Tables\Actions\EditAction::make()
-                    ->visible(fn (Document $record): bool => $record->isDraft()),                    
-                Tables\Actions\ViewAction::make(), 
+                    ->visible(fn (Document $record): bool => $record->isDraft()),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
@@ -251,7 +251,7 @@ class DocumentResource extends Resource
                                 );
                             }),
                     ]),
-        
+
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),

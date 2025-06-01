@@ -3,8 +3,8 @@
 namespace App\Filament\Actions\Tables;
 
 use App\Models\Document;
-use Filament\Tables\Actions\Action;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -40,11 +40,9 @@ class UnpublishAction extends Action
                         throw new \Exception('This document is already in draft status.');
                     }
 
-
                     if ($record->user_id !== Auth::id()) {
                         throw new \Exception('You can only unpublish documents you created.');
                     }
-
 
                     $record->update([
                         'published_at' => null,
@@ -71,7 +69,7 @@ class UnpublishAction extends Action
 
         // Only show action if document is published
         $this->visible(function (Document $record): bool {
-            return $record->isPublished() && 
+            return $record->isPublished() &&
                    $record->user_id === Auth::id();
         });
     }
