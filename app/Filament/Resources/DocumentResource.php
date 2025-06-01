@@ -38,13 +38,12 @@ class DocumentResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return ! $record->trashed();
+        return ! $record->trashed() && $record->isDraft();
     }
 
     public static function form(Form $form): Form
     {
         return $form
-
             ->schema([
                 Grid::Make(1)
                     ->schema([
@@ -88,7 +87,6 @@ class DocumentResource extends Resource
                                     ->rule('required')
                                     ->markAsRequired(),
                             ]),
-
                     ]),
             ]);
     }
@@ -107,10 +105,19 @@ class DocumentResource extends Resource
                             ->copyMessageDuration(1500)
                             ->columnSpan(2),
                         Infolists\Components\TextEntry::make('title')
-                            ->columnSpan(6)
+                            ->columnSpan(4)
                             ->weight('bold'),
+                        Infolists\Components\TextEntry::make('status')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'draft' => 'gray',
+                                'published' => 'success',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                            ->columnSpan(2),
                     ])
-                    ->columns(6),
+                    ->columns(8),
 
                 Section::make('Classification')
                     ->icon('heroicon-o-tag')
@@ -146,6 +153,15 @@ class DocumentResource extends Resource
                             ->label('Created At')
                             ->dateTime()
                             ->columnSpan(3),
+                        Infolists\Components\TextEntry::make('publishedBy.name')
+                            ->label('Published By')
+                            ->columnSpan(3)
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
+                        Infolists\Components\TextEntry::make('published_at')
+                            ->label('Published At')
+                            ->dateTime()
+                            ->columnSpan(3)
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
                     ])
                     ->columns(6),
 
@@ -168,6 +184,11 @@ class DocumentResource extends Resource
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
                     ->label('Source'),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (Document $record): string => $record->isPublished() ? 'success' : 'gray')
+                    ->formatStateUsing(fn (Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
+                    ->getStateUsing(fn (Document $record): string => $record->isPublished() ? 'published' : 'draft'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
                     ->toggleable(),
@@ -179,9 +200,21 @@ class DocumentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
-                Tables\Filters\Filter::make('deactivated')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
-                    ->label('Active'),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            fn (Builder $query, $value): Builder => match ($value) {
+                                'draft' => $query->whereNull('published_at'),
+                                'published' => $query->whereNotNull('published_at'),
+                                default => $query,
+                            }
+                        );
+                    }),
             ])
             ->actions([
                 ReceiveDocumentAction::make()
@@ -200,6 +233,7 @@ class DocumentResource extends Resource
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
+                    ->visible(fn (Document $record): bool => $record->isPublished())
                     ->modalContent(function (Document $record) {
                         $qrCode = (new GenerateQR)($record->code);
 
@@ -224,6 +258,7 @@ class DocumentResource extends Resource
                                 );
                             }),
                     ]),
+
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),

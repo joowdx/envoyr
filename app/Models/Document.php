@@ -37,7 +37,6 @@ class Document extends Model
         'electronic' => 'boolean',
     ];
 
-    // ✅ Add these helper methods
     public function isDraft(): bool
     {
         return $this->status === 'draft';
