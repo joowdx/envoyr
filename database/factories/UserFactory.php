@@ -29,19 +29,21 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => UserRole::USER,
-            'avatar' => $this->faker->imageUrl(),
-            'office_id' => 1,
-            'section_id' => 1,
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Set root user account.
      */
-    public function unverified(): static
+    public function root(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'name' => 'Root',
+            'email' => 'root@local.dev',
+            'password' => Hash::make('$2y$12$AhM2U/ZllWkWFJA.9GI6heCOwPl/JnESmEsOlbZ57KlF0VJOIV1hK'),
+            'email_verified_at' => now(),
+            'approved_at' => now(),
+            'role' => UserRole::ROOT,
         ]);
     }
 }
