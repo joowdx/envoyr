@@ -5,17 +5,15 @@ namespace App\Filament\User\Pages;
 use App\Enums\UserRole;
 use App\Models\Office;
 use App\Models\Section;
+use Filament\Actions\Action as FilamentAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Actions\Action as FilamentAction;
-use Filament\Facades\Filament;
 
 class RequiredOffice extends Page implements HasForms
 {
@@ -51,14 +49,14 @@ class RequiredOffice extends Page implements HasForms
                     ->searchable()
                     ->preload()
                     ->live()
-                    ->afterStateUpdated(fn(callable $set) => $set('section_id', null))
+                    ->afterStateUpdated(fn (callable $set) => $set('section_id', null))
                     ->hidden(Auth::user()->office_id !== null),
                 Select::make('section_id')
                     ->label('Section')
                     ->options(function (callable $get) {
                         $officeId = $get('office_id') ?? Auth::user()->office_id;
 
-                        if (!$officeId) {
+                        if (! $officeId) {
                             return [];
                         }
 
@@ -118,12 +116,13 @@ class RequiredOffice extends Page implements HasForms
             ->size('md')
             ->extraAttributes([
                 'class' => 'w-full transition-colors duration-200',
-                'style' => 'width: 100%;'
+                'style' => 'width: 100%;',
             ])
             ->action(function () {
                 Filament::auth()->logout();
                 session()->invalidate();
                 session()->regenerateToken();
+
                 return redirect('/');
             });
     }
