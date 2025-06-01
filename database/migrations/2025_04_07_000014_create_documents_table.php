@@ -27,12 +27,16 @@ return new class extends Migration
             $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
             $table->boolean('digital')->default(false);
             $table->boolean('directive')->default(false);
+            $table->timestamp('published_at')->nullable();
+            $table->string('status')->default('draft');
+            
             $table->softDeletes();
             $table->timestamps();
 
             $table->index(['office_id', 'created_at']); // Office + date queries
             $table->index(['office_id', 'deleted_at']); // Soft delete queries by office
             $table->index('created_at'); // Date-based sorting/filtering
+            $table->index(['status', 'published_at']);
         });
     }
 
@@ -41,6 +45,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documents');
+        Schema::table('documents', function (Blueprint $table) {
+            $table->dropForeign(['published_by_id']);
+            $table->dropIndex(['status', 'published_at']);
+            $table->dropColumn(['published_at', 'published_by_id', 'publish_notes', 'status']);
+        });
     }
 };

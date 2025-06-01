@@ -29,7 +29,6 @@ class DocumentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    // Display Documents only for the user's office
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -38,26 +37,23 @@ class DocumentResource extends Resource
             ->with(['classification', 'source', 'user', 'office', 'section']);
     }
 
-    // Prevent users from viewing a document if it has been deleted
     public static function canView(Model $record): bool
     {
-        return ! $record->trashed();
+        return !$record->trashed();
     }
 
-    // Prevent users from editing a document if it has been deleted
+    // ✅ Prevent editing if document is published or deleted
     public static function canEdit(Model $record): bool
     {
-        return ! $record->trashed();
+        return !$record->trashed() && $record->isDraft();
     }
 
     public static function form(Form $form): Form
     {
         return $form
-
             ->schema([
                 Grid::Make(1)
                     ->schema([
-
                         Forms\Components\Toggle::make('directive')
                             ->label('Directive')
                             ->inline()
@@ -92,7 +88,6 @@ class DocumentResource extends Resource
                                     ->label('Source Name')
                                     ->required(),
                             ]),
-
                     ]),
             ]);
     }
@@ -111,10 +106,19 @@ class DocumentResource extends Resource
                             ->copyMessageDuration(1500)
                             ->columnSpan(2),
                         Infolists\Components\TextEntry::make('title')
-                            ->columnSpan(6)
+                            ->columnSpan(4)
                             ->weight('bold'),
+                        Infolists\Components\TextEntry::make('status')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'draft' => 'gray',
+                                'published' => 'success',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                            ->columnSpan(2),
                     ])
-                    ->columns(6),
+                    ->columns(8),
 
                 Section::make('Classification')
                     ->icon('heroicon-o-tag')
@@ -150,6 +154,16 @@ class DocumentResource extends Resource
                             ->label('Created At')
                             ->dateTime()
                             ->columnSpan(3),
+                        // ✅ Show publication info if published
+                        Infolists\Components\TextEntry::make('publishedBy.name')
+                            ->label('Published By')
+                            ->columnSpan(3)
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
+                        Infolists\Components\TextEntry::make('published_at')
+                            ->label('Published At')
+                            ->dateTime()
+                            ->columnSpan(3)
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
                     ])
                     ->columns(6),
 
@@ -172,6 +186,15 @@ class DocumentResource extends Resource
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
                     ->label('Source'),
+                // ✅ Add status column
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'published' => 'success',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
                     ->toggleable(),
@@ -183,17 +206,23 @@ class DocumentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
-                Tables\Filters\Filter::make('deactivated')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
-                    ->label('Active'),
+                // ✅ Add status filter
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'published' => 'Published',
+                    ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // ✅ Edit only available for drafts
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (Document $record): bool => $record->isDraft()),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
+                    ->visible(fn (Document $record): bool => $record->isPublished())
                     ->modalContent(function (Document $record) {
                         $qrCode = (new GenerateQR)($record->code);
 

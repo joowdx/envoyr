@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Document extends Model
 {
@@ -24,6 +25,12 @@ class Document extends Model
         'source_id',
         'directive',
         'digital',
+        'published_at',
+        'status',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
     ];
 
     public static function booted(): void
@@ -47,6 +54,21 @@ class Document extends Model
         });
     }
 
+    // ✅ Add the publish method
+    public function publish(): bool
+    {
+        // Check if already published
+        if ($this->isPublished()) {
+            return false;
+        }
+
+        // Update the document
+        return $this->update([
+            'published_at' => now(),
+            'status' => 'published',
+        ]);
+    }
+
     public function classification(): BelongsTo
     {
         return $this->belongsTo(Classification::class);
@@ -54,7 +76,7 @@ class Document extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class); 
     }
 
     public function office(): BelongsTo
@@ -106,5 +128,27 @@ class Document extends Model
             ], function ($query) {
                 $query->whereNull('received_at');
             });
+    }
+
+    // Add helper methods
+    public function isPublished(): bool
+    {
+        return !is_null($this->published_at);
+    }
+
+    public function isDraft(): bool
+    {
+        return is_null($this->published_at);
+    }
+
+    // Add scopes
+    public function scopePublished($query)
+    {
+        return $query->whereNotNull('published_at');
+    }
+
+    public function scopeDraft($query)
+    {
+        return $query->whereNull('published_at');
     }
 }
