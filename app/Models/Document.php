@@ -24,8 +24,6 @@ class Document extends Model
         'office_id',
         'section_id',
         'source_id',
-        'directive',
-        'digital',
         'published_at',
     ];
 
@@ -64,7 +62,6 @@ class Document extends Model
         // Update the document
         return $this->update([
             'published_at' => now(),
-
         ]);
     }
 
@@ -143,22 +140,11 @@ class Document extends Model
     // Add helper methods
     public function isPublished(): bool
     {
-        return ! is_null($this->published_at);
+        return filled($this->published_at);
     }
 
     public function isDraft(): bool
     {
         return is_null($this->published_at);
-    }
-
-    // Add scopes
-    public function scopePublished($query)
-    {
-        return $query->whereNotNull('published_at');
-    }
-
-    public function scopeDraft($query)
-    {
-        return $query->whereNull('published_at');
     }
 }
