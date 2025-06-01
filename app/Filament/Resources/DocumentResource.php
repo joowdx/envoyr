@@ -221,7 +221,6 @@ class DocumentResource extends Resource
                 Tables\Filters\TrashedFilter::make('trashed'),
             ])
             ->actions([
-                UnpublishAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
@@ -253,6 +252,7 @@ class DocumentResource extends Resource
                     ]),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
+                    UnpublishAction::make(),
                     Tables\Actions\EditAction::make()
                         ->visible(fn (Document $record): bool => $record->isDraft()),
                     Tables\Actions\RestoreAction::make(),
