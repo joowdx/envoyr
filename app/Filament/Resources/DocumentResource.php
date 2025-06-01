@@ -106,11 +106,16 @@ class DocumentResource extends Resource
                             ->columnSpanFull()
                             ->grid(3)
                             ->orderColumn('sort')
+                            ->itemLabel(fn ($state) => $state['electronic'] ? 'Electronic' : 'Physical')
                             ->schema([
+                                Forms\Components\Toggle::make('electronic')
+                                    ->hidden(fn ($record) => $record?->exists),
                                 Forms\Components\TextInput::make('title')
                                     ->rule('required')
-                                    ->markAsRequired(),
+                                    ->markAsRequired()
+                                    ->hidden(fn (callable $get) => $get('electronic')),
                                 Forms\Components\Grid::make(2)
+                                    ->hidden(fn (callable $get) => $get('electronic'))
                                     ->schema([
                                         Forms\Components\TextInput::make('context.copies')
                                             ->minValue(1)
@@ -120,6 +125,7 @@ class DocumentResource extends Resource
                                             ->rule('numeric'),
                                     ]),
                                 Forms\Components\Textarea::make('remarks')
+                                    ->hidden(fn (callable $get) => $get('electronic'))
                                     ->maxLength(4096),
                             ])
                     ])

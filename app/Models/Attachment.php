@@ -35,7 +35,7 @@ class Attachment extends Model
 
     public function purge(): void
     {
-        $this->files->each(fn ($file) => Storage::delete($file));
+        $this->file?->each(fn ($file) => Storage::delete($file));
     }
 
     public function enclosure(): BelongsTo
