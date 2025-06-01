@@ -21,12 +21,16 @@ class ReceiveDocumentAction extends Action
 
         $this->icon('heroicon-o-inbox-arrow-down');
 
+        $this->slideOver();
+
+        $this->modalWidth('md');
+
         $this->modalSubmitActionLabel('Receive');
 
         $this->form([
             TextInput::make('code')
-                ->label('Document Code')
-                ->required()
+                ->markAsRequired()
+                ->rule('required')
                 ->rule(function () {
                     return function ($attribute, $value, $fail) {
                         $document = Document::where('code', $value)->first();

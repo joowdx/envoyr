@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\User\Resources\DocumentResource\Pages;
+namespace App\Filament\Resources\DocumentResource\Pages;
 
 use Filament\Actions;
 use App\Actions\DownloadQR;

@@ -20,6 +20,8 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('code')->unique();
             $table->string('title');
+            $table->boolean('electronic')->default(false);
+            $table->boolean('dissemination')->default(false);
             $table->foreignIdFor(Classification::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();

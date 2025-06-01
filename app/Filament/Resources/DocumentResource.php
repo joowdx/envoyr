@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Filament\User\Resources;
+namespace App\Filament\Resources;
 
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
-use App\Filament\User\Resources\DocumentResource\Pages;
+use App\Enums\UserRole;
+use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
@@ -27,22 +28,13 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->where('office_id', Auth::user()->office_id)
-            ->with(['classification', 'source', 'user', 'office', 'section']);
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function canView(Model $record): bool
     {
         return !$record->trashed();
     }
 
-    // ✅ Prevent editing if document is published or deleted
     public static function canEdit(Model $record): bool
     {
         return !$record->trashed() && $record->isDraft();
@@ -54,39 +46,45 @@ class DocumentResource extends Resource
             ->schema([
                 Grid::Make(1)
                     ->schema([
-                        Forms\Components\Toggle::make('directive')
-                            ->label('Directive')
+                        Forms\Components\Toggle::make('dissemination')
                             ->inline()
-                            ->required(),
-
+                            ->rule('required')
+                            ->markAsRequired(),
                         Forms\Components\TextInput::make('title')
-                            ->required()
+                            ->rule('required')
+                            ->markAsRequired()
                             ->maxLength(255),
-
                         Forms\Components\Select::make('classification_id')
                             ->label('Classification')
                             ->relationship('classification', 'name')
                             ->searchable()
                             ->preload()
-                            ->required()
+                            ->rule('required')
+                            ->markAsRequired()
                             ->native(false)
                             ->createOptionAction(function (Action $action) {
-                                return $action->slideOver();
+                                return $action
+                                    ->slideOver()
+                                    ->modalWidth('md');
                             })
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Classification Name')
-                                    ->required(),
+                                    ->rule('required')
+                                    ->markAsRequired(),
                             ]),
-
                         Forms\Components\Select::make('source_id')
                             ->relationship('source', 'name')
                             ->preload()
                             ->searchable()
+                            ->createOptionAction(function (Action $action) {
+                                return $action
+                                    ->slideOver()
+                                    ->modalWidth('md');
+                            })
                             ->createOptionForm([
                                 TextInput::make('name')
-                                    ->label('Source Name')
-                                    ->required(),
+                                    ->rule('required')
+                                    ->markAsRequired(),
                             ]),
                     ]),
             ]);
@@ -269,5 +267,16 @@ class DocumentResource extends Resource
             'edit' => Pages\EditDocument::route('/{record}/edit'),
             'view' => Pages\ViewDocument::route('/{record}'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->when(Auth::user()->role !== UserRole::ROOT, function (Builder $query) {
+                $query->where('office_id', Auth::user()->office_id);
+            });
     }
 }
