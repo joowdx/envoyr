@@ -41,12 +41,12 @@ class ListDocuments extends ListRecords
                 ->icon('heroicon-o-inbox-arrow-down')
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereHas('transmittals', function (Builder $subQuery) {
-                        $subQuery->where('office_id', Auth::user()->office_id)  // ✅ Changed from receiver_office_id
+                        $subQuery->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
                                  ->whereNull('received_at'); // Not yet received
                     })
                 )
                 ->badge(fn () => Document::whereHas('transmittals', function (Builder $query) {
-                    $query->where('office_id', Auth::user()->office_id)  // ✅ Changed from receiver_office_id
+                    $query->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
                           ->whereNull('received_at');
                 })->count()),
 
@@ -54,12 +54,12 @@ class ListDocuments extends ListRecords
                 ->icon('heroicon-o-check-circle')
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereHas('transmittals', function (Builder $subQuery) {
-                        $subQuery->where('office_id', Auth::user()->office_id)  // ✅ Changed from receiver_office_id
+                        $subQuery->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
                                  ->whereNotNull('received_at'); // Already received
                     })
                 )
                 ->badge(fn () => Document::whereHas('transmittals', function (Builder $query) {
-                    $query->where('office_id', Auth::user()->office_id)  // ✅ Changed from receiver_office_id
+                    $query->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
                           ->whereNotNull('received_at');
                 })->count()),
 

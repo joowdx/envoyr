@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Enums\UserRole;
+use App\Filament\Actions\Tables\ReceiveDocumentAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -183,7 +184,17 @@ class DocumentResource extends Resource
                     ->label('Active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ReceiveDocumentAction::make()
+                    ->label('Receive')
+                    ->visible(fn (Document $record): bool => 
+                        $record->transmittals()
+                            ->where('to_office_id', Auth::user()->office_id)
+                            ->whereNull('received_at')
+                            ->exists()
+                    ),
+
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (Document $record): bool => $record->isDraft()),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
