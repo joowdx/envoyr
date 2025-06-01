@@ -75,94 +75,101 @@ flowchart TD
 ```mermaid
 erDiagram
 Document {
-ulid id
-string code
-string title
-ulid classification_id
-ulid user_id
-ulid office_id
-ulid section_id
-ulid source_id
-datetime created_at
-boolean directive
+  ulid id
+  string code
+  string title
+  boolean dissemination
+  boolean electronic
+  ulid classification_id
+  ulid user_id
+  ulid office_id
+  ulid section_id
+  ulid source_id
+  datetime created_at
 }
 Classification {
-ulid id
-string name
-string description
+  ulid id
+  string name
+  string description
 }
 Office {
-ulid id
-string name
-string head_name
-string designation
-string acronym
+  ulid id
+  string name
+  string head_name
+  string designation
+  string acronym
 }
 Sources{
-ulid id
-string name
+  ulid id
+  string name
 }
 Section {
-ulid id
-string name
-ulid office_id
-string head_name
-string designation
+  ulid id
+  string name
+  ulid office_id
+  string head_name
+  string designation
 }
 Transmittal {
-ulid id
-ulid document_id
-ulid from_office_id
-ulid to_office_id
-ulid from_section_id
-ulid to_section_id
-int from_user_id
-int to_user_id
-text remarks
-datetime received_at
-boolean pick_up
+  ulid id
+  ulid document_id
+  ulid from_office_id
+  ulid to_office_id
+  ulid from_section_id
+  ulid to_section_id
+  int from_user_id
+  int to_user_id
+  text remarks
+  datetime received_at
+  boolean pick_up
 }
 Contents {
-ulid id
-ulid transmittal_id
-int copies
-int pages_per_copy
-string control_number
-string particulars
-string payee
-double amount
+  ulid id
+  ulid transmittal_id
+  int copies
+  int pages_per_copy
+  string control_number
+  string particulars
+  string payee
+  double amount
 }
 User {
-ulid id
-ulid office_id
-ulid section_id
-string name
-string email
-string password
-string role
-string avatar
+  ulid id
+  ulid office_id
+  ulid section_id
+  string name
+  string email
+  string password
+  string role
+  string avatar
+}
+Enclosure {
+  ulid id
+  string name
+  ulid document_id
+  ulid transmittal_id
 }
 Attachments{
-ulid id
-string remarks
-json files
-json paths
-ulid attachable_id
-string attachable_type
+  ulid id
+  string remarks
+  json files
+  json paths
+  ulid enclosure_id
 }
 
-    Transmittal }|--|| Document : "includes"
-    Section || -- }| User : "has"
-    Office || -- }| User : "has"
-    Contents }|--|| Transmittal : "under"
-    Transmittal }|--|| User : "sent by"
-    Transmittal }|--|| User : "received by"
-    Office ||--o{ Section : "has"
-    Document }| -- || User : "can make"
-    Office || -- }| Document : "can make"
-    Section || -- }| Document : "can make"
-    Classification ||--|{ Document : "classified as"
-    Document }| -- o| Sources : "can have"
-    Document || -- }| Attachments : "has many"
-    Transmittal || -- }| Attachments : "has many"
-``` 
+Transmittal }|--|| Document : "includes"
+Section || -- |{ User : "has"
+Office || -- |{ User : "has"
+Contents }|--|| Transmittal : "under"
+Transmittal }|--|| User : "sent by"
+Transmittal }|--|| User : "received by"
+Office ||--o{ Section : "has"
+Document }| -- || User : "can make"
+Office || -- |{ Document : "can make"
+Section || -- |{ Document : "can make"
+Classification ||--|{ Document : "classified as"
+Document }| -- o| Sources : "can have"
+Document || -- |{ Enclosure : "has many"
+Transmittal || -- || Enclosure : "has many"
+Enclosure || -- |{ Attachments : "has many"
+```
