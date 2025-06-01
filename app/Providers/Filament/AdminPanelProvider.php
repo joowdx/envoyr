@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\Affiliate;
 use App\Http\Middleware\Approve;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\Verify;
@@ -53,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 Verify::class,
                 Approve::class,
+                Affiliate::class,
             ]);
     }
 }

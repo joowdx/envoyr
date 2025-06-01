@@ -7,6 +7,7 @@ use App\Filament\Auth\Pages\Approval;
 use App\Filament\Auth\Pages\Redirect;
 use App\Filament\Auth\Pages\Registration;
 use App\Filament\Auth\Pages\Verification;
+use App\Filament\User\Pages\Affilation;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -46,6 +47,7 @@ class AuthPanelProvider extends PanelProvider
                 Redirect::class,
                 Verification::class,
                 Approval::class,
+                Affilation::class,
             ])
             ->middleware([
                 EncryptCookies::class,

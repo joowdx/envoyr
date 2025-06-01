@@ -54,9 +54,9 @@ class UserPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                Affiliate::class,
                 Verify::class,
                 Approve::class,
+                Affiliate::class,
             ]);
     }
 }

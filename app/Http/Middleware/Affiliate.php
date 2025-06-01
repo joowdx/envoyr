@@ -16,14 +16,14 @@ class Affiliate
     public function handle(Request $request, Closure $next): Response
     {
         // Skip the check if we're already on the RequiredOffice page
-        if ($request->routeIs('filament.user.pages.required-office')) {
+        if ($request->routeIs('filament.auth.auth.user-affiliation.prompt')) {
             return $next($request);
         }
 
         $user = $request->user();
 
         if (! $user?->hasOffice() || ! $user?->hasSection()) {
-            return redirect()->route('filament.user.pages.required-office');
+            return redirect()->route('filament.auth.auth.user-affiliation.prompt');
         }
 
         return $next($request);

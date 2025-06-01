@@ -119,8 +119,7 @@ class Registration extends Register
                                 ->required(),
                             $this->getSectionFormComponent()
                                 ->extraAttributes(['onkeydown' => "return event.key != 'Enter';"])
-                                ->extraAlpineAttributes(['@keyup.enter' => $next])
-                                ->required(),
+                                ->extraAlpineAttributes(['@keyup.enter' => $next]),
                         ]),
                     Step::make('Credentials')
                         ->icon('heroicon-o-shield-check')
@@ -194,11 +193,6 @@ class Registration extends Register
                 }
 
                 return Section::pluck('name', 'id');
-            })
-            ->disabled(function (callable $get) {
-                $officeId = $get('office_id');
-
-                return Section::where('office_id', $officeId)->count() === 0;
             })
             ->placeholder('Select Section')
             ->prefixIcon('heroicon-o-user-group');
