@@ -154,7 +154,6 @@ class DocumentResource extends Resource
                             ->label('Created At')
                             ->dateTime()
                             ->columnSpan(3),
-                        // ✅ Show publication info if published
                         Infolists\Components\TextEntry::make('publishedBy.name')
                             ->label('Published By')
                             ->columnSpan(3)
@@ -163,6 +162,11 @@ class DocumentResource extends Resource
                             ->label('Published At')
                             ->dateTime()
                             ->columnSpan(3)
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
+                        Infolists\Components\TextEntry::make('unpublished_at')
+                            ->label('Unpublished At')
+                            ->dateTime()
+                            ->columnSpan(2)
                             ->visible(fn (Document $record): bool => $record->isPublished()),
                     ])
                     ->columns(6),
@@ -186,7 +190,6 @@ class DocumentResource extends Resource
                     ->label('Classification'),
                 Tables\Columns\TextColumn::make('source.name')
                     ->label('Source'),
-                // ✅ Add status column
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -206,7 +209,6 @@ class DocumentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
-                // ✅ Add status filter
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'draft' => 'Draft',

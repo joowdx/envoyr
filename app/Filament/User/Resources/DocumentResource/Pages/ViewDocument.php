@@ -2,13 +2,15 @@
 
 namespace App\Filament\User\Resources\DocumentResource\Pages;
 
+use Filament\Actions;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
-use App\Filament\Actions\PublishAction;
-use App\Filament\User\Resources\DocumentResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
+
 use Illuminate\Support\Facades\Auth;
+use App\Filament\Actions\PublishAction;
+use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Actions\Tables\UnpublishAction;
+use App\Filament\User\Resources\DocumentResource;
 
 class ViewDocument extends ViewRecord
 {
@@ -17,7 +19,14 @@ class ViewDocument extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            PublishAction::make(),
+            PublishAction::make()
+                ->visible(fn (): bool => 
+                    $this->record->isDraft() && $this->record->user_id === Auth::id()
+                ),
+            UnpublishAction::make()
+                ->visible(fn (): bool => 
+                    $this->record->isPublished() && $this->record->user_id === Auth::id()
+                ),
             Actions\Action::make('generateQR')
                 ->label('Generate QR Code')
                 ->icon('heroicon-o-qr-code')

@@ -52,6 +52,7 @@ class PublishAction extends Action
                     // Update document with publication data
                     $record->update([
                         'published_at' => now(),
+                        'unpublished_at' => null,  
                         'status' => 'published',
                     ]);
                 });
