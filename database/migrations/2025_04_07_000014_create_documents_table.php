@@ -26,12 +26,8 @@ return new class extends Migration
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Section::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
-            $table->boolean('directive')->default(false);
-            $table->boolean('digital')->default(false);
-            $table->timestamp('published_at')->nullable();
-            
-            
+            $table->foreignIdFor(Source::class)->nullable()->constrained()->nullOnDelete();
+            $table->timestamp('published_at')->nullable();           
             $table->softDeletes();
             $table->timestamps();
 

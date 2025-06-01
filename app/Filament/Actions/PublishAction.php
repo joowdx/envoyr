@@ -55,7 +55,7 @@ class PublishAction extends Action
                 // Success notification
                 Notification::make()
                     ->title('Document Published Successfully')
-                    ->body("Document '{$record->title}' is now published and cannot be edited.")
+                    ->body("Document '{$record->title}' is now published.")
                     ->success()
                     ->send();
 
@@ -63,7 +63,6 @@ class PublishAction extends Action
                 // Error notification
                 Notification::make()
                     ->title('Publish Failed')
-                    ->body($e->getMessage())
                     ->danger()
                     ->send();
             }
