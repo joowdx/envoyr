@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
+use App\Enums\UserRole;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -27,16 +28,7 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    // Display Documents only for the user's office
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->where('office_id', Auth::user()->office_id)
-            ->with(['classification', 'source', 'user', 'office', 'section']);
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     // Prevent users from viewing a document if it has been deleted
     public static function canView(Model $record): bool
@@ -238,5 +230,16 @@ class DocumentResource extends Resource
             'edit' => Pages\EditDocument::route('/{record}/edit'),
             'view' => Pages\ViewDocument::route('/{record}'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->when(Auth::user()->role !== UserRole::ROOT, function (Builder $query) {
+                $query->where('office_id', Auth::user()->office_id);
+            });
     }
 }

@@ -22,8 +22,8 @@ class SectionResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
-            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
+        return Auth::user()?->role === UserRole::ROOT ||
+            Auth::user()?->role === UserRole::ADMINISTRATOR;
     }
 
     public static function form(Form $form): Form
@@ -88,7 +88,6 @@ class SectionResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])->withTrashed()
-            ->where('id', '!=', Auth::id());
+            ]);
     }
 }

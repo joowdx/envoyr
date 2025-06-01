@@ -9,6 +9,8 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 
 class EditUser extends EditRecord
@@ -18,44 +20,24 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('restore_user')
-                ->label('Restore User')
-                ->icon('heroicon-o-arrow-uturn-left')
-                ->visible(fn (User $record) => $record->trashed())
-                ->action(fn (User $record) => $record->restore())
-                ->color('success'),
+            Action::make('change_password')
+                ->label('Change Password')
+                ->form([
+                    TextInput::make('password')
+                        ->label('New Password')
+                        ->password()
+                        ->markAsRequired()
+                        ->rule('required')
+                        ->minLength(8),
+                ])
+                ->action(fn (array $data, User $record) => $record->update($data))
+                ->hidden(fn (User $record) => $record->trashed())
+                ->requiresConfirmation()
+                ->color('warning'),
+            RestoreAction::make(),
             ActionGroup::make([
-                Action::make('change_password')
-                    ->label('Change Password')
-                    ->form([
-                        \Filament\Forms\Components\TextInput::make('password')
-                            ->label('New Password')
-                            ->password()
-                            ->required()
-                            ->minLength(8),
-                    ])
-                    ->action(function (array $data, User $record): void {
-                        $record->update([
-                            'password' => bcrypt($data['password']),
-                        ]);
-                    })
-                    ->hidden(fn (User $record) => $record->trashed())
-                    ->requiresConfirmation()
-                    ->color('warning'),
-                DeleteAction::make()
-                    ->requiresConfirmation()
-                    ->action(function (User $record): void {
-                        $record->delete();
-                    })
-                    ->color('danger')
-                    ->label('Delete'),
-                ForceDeleteAction::make()
-                    ->requiresConfirmation()
-                    ->action(function (User $record): void {
-                        $record->forceDelete();
-                    })
-                    ->color('danger')
-                    ->label('Permanently Delete'),
+                DeleteAction::make(),
+                ForceDeleteAction::make(),
 
             ])
                 ->label('Danger Actions')
