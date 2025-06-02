@@ -138,6 +138,13 @@ class Document extends Model
         return $this->hasMany(Transmittal::class);
     }
 
+    public function transmittal(): HasOne
+    {
+        return $this->transmittals()
+            ->one()
+            ->ofMany();
+    }
+
     public function activeTransmittal(): HasOne
     {
         return $this->transmittals()
