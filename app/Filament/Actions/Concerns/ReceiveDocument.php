@@ -4,6 +4,7 @@ namespace App\Filament\Actions\Concerns;
 
 use App\Models\Document;
 use Exception;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ trait ReceiveDocument
 
         $this->color('success');
 
-        $this->modalHeading('Receive Document');
+        $this->modalHeading('Receive document');
 
         $this->modalDescription('Mark this document as received by your office.');
 
@@ -28,95 +29,70 @@ trait ReceiveDocument
 
         $this->modalIcon('heroicon-o-inbox-arrow-down');
 
+        $this->form([
+            TextInput::make('code')
+                ->visible(fn (?Document $record): bool => is_null($record))
+                ->rule('required')
+                ->markAsRequired()
+                ->rule(function () {
+                    return function ($attribute, $value, $fail) {
+                        $document = Document::firstWhere('code', $value);
+
+                        if (! $document) {
+                            $fail('Document not found.');
+
+                            return;
+                        }
+
+                        $transmittal = $document->activeTransmittal;
+
+                        if (! $transmittal || $transmittal->to_office_id !== Auth::user()->office_id) {
+                            $fail('You are not authorized to receive this document.');
+                        }
+                    };
+                })
+                ->validationMessages([
+                    'required' => 'Document code is required.',
+                    'exists' => 'Document not found.',
+                ]),
+        ]);
+
         $this->modalSubmitActionLabel(function (?Document $record): string {
             if (! $record) {
-                return 'Receive Document';
+                return 'Receive';
             }
 
-            return $record->electronic ? 'Download & Receive' : 'Receive Document';
+            return $record->electronic ? 'Download' : 'Receive';
         });
 
-        $this->action(function (Document $record): void {
+        $this->action(function (?Document $record, array $data): void {
+            $record = $record ?? Document::where($data);
+
             try {
+                if ($record->electronic && $record->attachments->isNotEmpty()) {
+                    $this->handleElectronicDocumentDownload();
+                }
+
                 DB::transaction(function () use ($record) {
-                    $transmittal = $record->activeTransmittal;
-
-                    if (is_null($transmittal)) {
-                        throw new Exception('No pending transmittal found for this document.');
-                    }
-
-                    if ($transmittal->to_office_id !== Auth::user()->office_id) {
-                        throw new Exception('This document is not intended for your office.');
-                    }
-
-                    $transmittal->update([
+                    $record->activeTransmittal->update([
                         'received_at' => now(),
                         'to_user_id' => Auth::id(),
                     ]);
                 });
 
-                $this->sendCustomSuccessNotification($record);
+                $this->success();
 
-                if ($record->electronic && $record->attachment && $record->attachment->files->isNotEmpty()) {
-                    $this->handleElectronicDocumentDownload($record);
-                }
-
-            } catch (Exception $e) {
-                $this->sendCustomFailureNotification($e->getMessage());
+            } catch (Exception) {
+                $this->failure();
             }
         });
     }
 
-    protected function handleElectronicDocumentDownload(Document $record): void
-    {
-        $attachment = $record->attachment;
-        if ($attachment && $attachment->files->isNotEmpty()) {
-            $fileName = $attachment->paths->first();
-
-            Notification::make()
-                ->title('Document Received & Ready for Download')
-                ->body("Electronic document '{$fileName}' is ready for download.")
-                ->success()
-                ->actions([
-                    \Filament\Notifications\Actions\Action::make('download')
-                        ->label('Download File')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->url(route('document.download', $record->id))
-                        ->openUrlInNewTab(),
-                ])
-                ->persistent()
-                ->send();
-        }
-    }
-
-    protected function sendCustomSuccessNotification(Document $record): void
-    {
-
-        if (! $record->electronic) {
-            Notification::make()
-                ->title($this->getSuccessNotificationTitle())
-                ->body("Document '{$record->title}' has been marked as received by your office.")
-                ->success()
-                ->send();
-        }
-    }
-
-    protected function sendCustomFailureNotification(string $message): void
+    protected function handleElectronicDocumentDownload(): void
     {
         Notification::make()
-            ->title($this->getFailureNotificationTitle())
-            ->body($message)
-            ->danger()
+            ->title('Document download under development')
+            ->body('This feature is not implemented yet as it is currently under development.')
             ->send();
-    }
-
-    public function getSuccessNotificationTitle(): string
-    {
-        return 'Document Received Successfully';
-    }
-
-    public function getFailureNotificationTitle(): string
-    {
-        return 'Receive Failed';
     }
 }
