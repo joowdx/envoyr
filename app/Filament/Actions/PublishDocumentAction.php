@@ -8,7 +8,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class PublishAction extends Action
+class PublishDocumentAction extends Action
 {
     protected function setUp(): void
     {

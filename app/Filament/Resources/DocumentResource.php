@@ -7,7 +7,7 @@ use App\Actions\GenerateQR;
 use App\Enums\UserRole;
 use App\Filament\Actions\Tables\ReceiveDocumentAction;
 use App\Filament\Actions\Tables\TransmitDocumentAction;
-use App\Filament\Actions\Tables\UnpublishAction;
+use App\Filament\Actions\Tables\UnpublishDocumentAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -265,7 +265,7 @@ class DocumentResource extends Resource
                     ]),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
-                    UnpublishAction::make(),
+                    UnpublishDocumentAction::make(),
                     Tables\Actions\EditAction::make()
                         ->visible(fn (Document $record): bool => $record->isDraft()),
                     Tables\Actions\RestoreAction::make(),

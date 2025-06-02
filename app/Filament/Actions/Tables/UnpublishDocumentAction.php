@@ -8,7 +8,7 @@ use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class UnpublishAction extends Action
+class UnpublishDocumentAction extends Action
 {
     protected function setUp(): void
     {
@@ -67,10 +67,10 @@ class UnpublishAction extends Action
             }
         });
 
-        // Only show action if document is published
         $this->visible(function (Document $record): bool {
             return $record->isPublished() &&
-                   $record->user_id === Auth::id();
+                $record->transmittal === null &&
+                $record->user_id === Auth::id();
         });
     }
 }
