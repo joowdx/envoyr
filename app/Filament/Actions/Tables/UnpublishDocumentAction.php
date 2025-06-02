@@ -3,6 +3,7 @@
 namespace App\Filament\Actions\Tables;
 
 use App\Models\Document;
+use Exception;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
@@ -22,48 +23,43 @@ class UnpublishDocumentAction extends Action
 
         $this->color('warning');
 
+        $this->requiresConfirmation();
+
         $this->modalSubmitActionLabel('Unpublish');
 
-        $this->modalHeading('Unpublish Document');
+        $this->modalHeading('Unpublish document');
 
-        $this->modalDescription('This will revert the document back to draft status. The document will become editable again, but QR codes will no longer be available.');
-
-        $this->requiresConfirmation();
+        $this->modalDescription('This will revert the document back to draft status.');
 
         $this->modalIcon('heroicon-o-exclamation-triangle');
 
         $this->action(function (Document $record): void {
             try {
                 DB::transaction(function () use ($record) {
-
                     if ($record->isDraft()) {
-                        throw new \Exception('This document is already in draft status.');
+                        throw new Exception('This document is already in draft status.');
+                    }
+
+                    if ($record->transmittal) {
+                        throw new Exception('This document can no longer be unpublished.');
                     }
 
                     if ($record->user_id !== Auth::id()) {
-                        throw new \Exception('You can only unpublish documents you created.');
+                        throw new Exception('You can only unpublish documents you created.');
                     }
 
                     $record->update([
                         'published_at' => null,
                     ]);
-
                 });
 
-                // Success notification
                 Notification::make()
-                    ->title('Document Unpublished Successfully')
+                    ->title('Document unpublished successfully')
                     ->body("Document '{$record->title}' has been reverted to draft status and is now editable.")
                     ->warning()
                     ->send();
-
-            } catch (\Exception $e) {
-                // Error notification
-                Notification::make()
-                    ->title('Unpublish Failed')
-                    ->body($e->getMessage())
-                    ->danger()
-                    ->send();
+            } catch (Exception) {
+                $this->failure();
             }
         });
 
@@ -72,5 +68,7 @@ class UnpublishDocumentAction extends Action
                 $record->transmittal === null &&
                 $record->user_id === Auth::id();
         });
+
+        $this->failureNotificationTitle('Unpublish failed');
     }
 }

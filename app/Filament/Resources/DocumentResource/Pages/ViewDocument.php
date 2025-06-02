@@ -19,8 +19,7 @@ class ViewDocument extends ViewRecord
     {
         return [
             TransmitDocumentAction::make(),
-            PublishDocumentAction::make()
-                ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
+            PublishDocumentAction::make(),
             Actions\Action::make('generateQR')
                 ->label('QR')
                 ->icon('heroicon-o-qr-code')

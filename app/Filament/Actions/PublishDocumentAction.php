@@ -3,8 +3,8 @@
 namespace App\Filament\Actions;
 
 use App\Models\Document;
+use Exception;
 use Filament\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -14,63 +14,44 @@ class PublishDocumentAction extends Action
     {
         parent::setUp();
 
-        $this->name('publish');
+        $this->name('publish-document');
 
         $this->label('Publish');
 
-        $this->icon('heroicon-o-eye');
+        $this->icon('heroicon-o-arrow-up-tray');
 
         $this->color('success');
 
-        $this->modalSubmitActionLabel('Publish Document');
-
-        $this->modalHeading('Publish Document');
-
-        $this->modalDescription('Are you sure you want to publish this document? Once published, it cannot be edited.');
-
         $this->requiresConfirmation();
 
-        $this->modalIcon('heroicon-o-eye');
+        $this->modalHeading('Publish document');
 
-        $this->action(function (array $data, Document $record): void {
+        $this->modalDescription('Are you sure you want to publish this document?');
+
+        $this->modalIcon('heroicon-o-arrow-up-tray');
+
+        $this->action(function (Document $record): void {
             try {
                 DB::transaction(function () use ($record) {
-                    // Check if document is already published
                     if ($record->isPublished()) {
-                        throw new \Exception('This document is already published.');
+                        throw new Exception('This document is already published.');
                     }
 
-                    // Check if user has permission to publish
-                    if ($record->user_id !== Auth::id()) {
-                        throw new \Exception('You can only publish documents you created.');
-                    }
-
-                    // Update document to published status
                     $record->update([
                         'published_at' => now(),
                     ]);
-
                 });
 
-                // Success notification
-                Notification::make()
-                    ->title('Document Published Successfully')
-                    ->body("Document '{$record->title}' is now published.")
-                    ->success()
-                    ->send();
-
-            } catch (\Exception $e) {
-                // Error notification
-                Notification::make()
-                    ->title('Publish Failed')
-                    ->danger()
-                    ->send();
+                $this->success();
+            } catch (Exception) {
+                $this->failure();
             }
         });
 
-        // Only show for draft documents
-        $this->visible(function (Document $record): bool {
-            return $record->isDraft();
-        });
+        $this->visible(fn (Document $record) => $record->isDraft());
+
+        $this->successNotificationTitle('Document published successfully');
+
+        $this->failureNotificationTitle('Publishing failed');
     }
 }
