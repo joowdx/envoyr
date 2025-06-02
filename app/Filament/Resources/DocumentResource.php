@@ -80,7 +80,7 @@ class DocumentResource extends Resource
                     ->preload()
                     ->searchable()
                     ->hint('Select the source of the document if it is from an external entity')
-                    ->helperText('Is this from COA, DILG, DICT, etc.?')
+                    ->helperText('Was this received from COA, DILG, DICT, etc.?')
                     ->createOptionAction(function (Action $action) {
                         return $action
                             ->slideOver()
@@ -234,11 +234,6 @@ class DocumentResource extends Resource
                 TransmitDocumentAction::make(),
                 ReceiveDocumentAction::make()
                     ->label('Receive'),
-                UnpublishAction::make()
-                    ->visible(fn (Document $record): bool => $record->isPublished()),
-                Tables\Actions\EditAction::make()
-                    ->visible(fn (Document $record): bool => $record->isDraft()),
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
