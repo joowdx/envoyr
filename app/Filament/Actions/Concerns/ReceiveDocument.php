@@ -36,15 +36,17 @@ trait ReceiveDocument
             return $record->electronic ? 'Download & Receive' : 'Receive Document';
         });
 
-        $this->action(function (array $data, Document $record): void {
+        $this->action(function (Document $record): void {
             try {
                 DB::transaction(function () use ($record) {
-                    $transmittal = $record->activeTransmittal()
-                        ->where('to_office_id', Auth::user()->office_id)
-                        ->first();
+                    $transmittal = $record->activeTransmittal;
 
-                    if (! $transmittal) {
+                    if (is_null($transmittal)) {
                         throw new Exception('No pending transmittal found for this document.');
+                    }
+
+                    if ($transmittal->to_office_id !== Auth::user()->office_id) {
+                        throw new Exception('This document is not intended for your office.');
                     }
 
                     $transmittal->update([
