@@ -36,17 +36,12 @@ class Document extends Model
 
     public function isDraft(): bool
     {
-        return $this->status === 'draft';
+        return is_null($this->published_at);
     }
 
     public function isPublished(): bool
     {
-        return $this->status === 'published';
-    }
-
-    public function wasUnpublished(): bool
-    {
-        return !is_null($this->unpublished_at);
+        return !is_null($this->published_at);
     }
 
 
@@ -134,9 +129,9 @@ class Document extends Model
                 $document->code = reset($available);
             }
 
-            // Set default status if not provided
-            if (empty($document->status)) {
-                $document->status = 'draft';
+            // Documents start as drafts (published_at = null) by default
+            if (is_null($document->published_at)) {
+                $document->published_at = null;
             }
         });
     }
