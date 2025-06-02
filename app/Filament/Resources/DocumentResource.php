@@ -100,7 +100,7 @@ class DocumentResource extends Resource
                             ->addActionLabel('Add attachment')
                             ->columnSpanFull()
                             ->orderColumn('sort')
-                            ->hint('Specify the attachments enclosed within the document')
+                            ->hint('Specify the attachments enclosed with the document')
                             ->helperText('What are the files or documents attached?')
                             ->itemLabel(fn ($state) => $state['title'])
                             ->collapsed()
