@@ -46,19 +46,13 @@ class DocumentResource extends Resource
         return $form
             ->columns(2)
             ->schema([
-                Forms\Components\Grid::make(2)
-                    ->schema([
-                        Forms\Components\Toggle::make('dissemination')
-                            ->label('For dissemination only')
-                            ->inline()
-                            ->rule('required')
-                            ->markAsRequired(),
-                    ]),
                 Forms\Components\TextInput::make('title')
                     ->rule('required')
                     ->markAsRequired()
                     ->maxLength(255)
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->hint('Add a descriptive title for the document')
+                    ->helperText('What is the document about?'),
                 Forms\Components\Select::make('classification_id')
                     ->label('Classification')
                     ->relationship('classification', 'name')
@@ -67,6 +61,8 @@ class DocumentResource extends Resource
                     ->rule('required')
                     ->markAsRequired()
                     ->native(false)
+                    ->hint('Classify the document for better organization')
+                    ->helperText('Is this a memorandum, invitation, request, etc.?')
                     ->createOptionAction(function (Action $action) {
                         return $action
                             ->slideOver()
@@ -81,6 +77,8 @@ class DocumentResource extends Resource
                     ->relationship('source', 'name')
                     ->preload()
                     ->searchable()
+                    ->hint('Select the source of the document if it is from an external entity')
+                    ->helperText('Is this from COA, DILG, DICT, etc.?')
                     ->createOptionAction(function (Action $action) {
                         return $action
                             ->slideOver()
@@ -99,23 +97,33 @@ class DocumentResource extends Resource
                             ->relationship()
                             ->addActionLabel('Add attachment')
                             ->columnSpanFull()
-                            ->grid(3)
                             ->orderColumn('sort')
-                            ->itemLabel(fn ($state) => $state['electronic'] ? 'Electronic' : 'Physical')
+                            ->hint('Specify the attachments enclosed within the document')
+                            ->helperText('What are the files or documents attached?')
+                            ->itemLabel(fn ($state) => $state['title'])
+                            ->collapsed()
+                            ->required()
                             ->schema([
                                 Forms\Components\Toggle::make('electronic')
-                                    ->hidden(fn ($record) => $record?->exists),
+                                    ->hidden(),
                                 Forms\Components\TextInput::make('title')
                                     ->rule('required')
                                     ->markAsRequired()
                                     ->hidden(fn (callable $get) => $get('electronic')),
-                                Forms\Components\Grid::make(2)
+                                Forms\Components\Grid::make(3)
                                     ->hidden(fn (callable $get) => $get('electronic'))
                                     ->schema([
+                                        Forms\Components\TextInput::make('context.control')
+                                            ->label('Control #'),
                                         Forms\Components\TextInput::make('context.pages')
                                             ->minValue(1)
                                             ->rule('numeric'),
                                         Forms\Components\TextInput::make('context.copies')
+                                            ->minValue(1)
+                                            ->rule('numeric'),
+                                        Forms\Components\TextInput::make('context.particulars'),
+                                        Forms\Components\TextInput::make('context.payee'),
+                                        Forms\Components\TextInput::make('context.amount')
                                             ->minValue(1)
                                             ->rule('numeric'),
                                     ]),
