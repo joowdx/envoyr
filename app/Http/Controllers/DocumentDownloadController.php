@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -19,7 +18,7 @@ class DocumentDownloadController extends Controller
     public function __invoke(Document $document): StreamedResponse
     {
         // Check if document is electronic and has attachments
-        if (!$document->electronic || !$document->attachment || $document->attachment->files->isEmpty()) {
+        if (! $document->electronic || ! $document->attachment || $document->attachment->files->isEmpty()) {
             abort(404, 'Electronic document file not found.');
         }
 
@@ -29,7 +28,7 @@ class DocumentDownloadController extends Controller
             ->whereNotNull('received_at')
             ->first();
 
-        if (!$transmittal) {
+        if (! $transmittal) {
             abort(403, 'You do not have permission to download this document.');
         }
 
@@ -38,7 +37,7 @@ class DocumentDownloadController extends Controller
         $fileName = $attachment->paths->first();
 
         // Check if file exists in storage
-        if (!Storage::exists($firstFile)) {
+        if (! Storage::exists($firstFile)) {
             abort(404, 'Document file not found in storage.');
         }
 

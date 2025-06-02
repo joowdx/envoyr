@@ -220,11 +220,10 @@ class DocumentResource extends Resource
             ->actions([
                 ReceiveDocumentAction::make()
                     ->label('Receive')
-                    ->visible(fn (Document $record): bool => 
-                        $record->transmittals()
-                            ->where('to_office_id', Auth::user()->office_id)
-                            ->whereNull('received_at')
-                            ->exists()
+                    ->visible(fn (Document $record): bool => $record->transmittals()
+                        ->where('to_office_id', Auth::user()->office_id)
+                        ->whereNull('received_at')
+                        ->exists()
                     ),
 
                 UnpublishAction::make()

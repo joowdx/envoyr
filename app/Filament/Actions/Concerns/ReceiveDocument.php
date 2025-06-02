@@ -4,11 +4,9 @@ namespace App\Filament\Actions\Concerns;
 
 use App\Models\Document;
 use Exception;
-use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 trait ReceiveDocument
 {
@@ -26,50 +24,37 @@ trait ReceiveDocument
 
         $this->modalDescription('Mark this document as received by your office.');
 
-        $this->form([
-            Textarea::make('receive_notes')
-                ->label('Receive Notes (Optional)')
-                ->placeholder('Add any notes about receiving this document...')
-                ->rows(3)
-                ->maxLength(500),
-        ]);
-
         $this->requiresConfirmation();
 
         $this->modalIcon('heroicon-o-inbox-arrow-down');
 
-        // Set the modal submit action label based on whether document is electronic
         $this->modalSubmitActionLabel(function (?Document $record): string {
-            if (!$record) {
+            if (! $record) {
                 return 'Receive Document';
             }
+
             return $record->electronic ? 'Download & Receive' : 'Receive Document';
         });
 
         $this->action(function (array $data, Document $record): void {
             try {
-                DB::transaction(function () use ($data, $record) {
-                    // Find the transmittal for this office
-                    $transmittal = $record->transmittals()
+                DB::transaction(function () use ($record) {
+                    $transmittal = $record->activeTransmittal()
                         ->where('to_office_id', Auth::user()->office_id)
-                        ->whereNull('received_at')
                         ->first();
 
-                    if (!$transmittal) {
+                    if (! $transmittal) {
                         throw new Exception('No pending transmittal found for this document.');
                     }
 
-                    // Mark as received
                     $transmittal->update([
                         'received_at' => now(),
-                        'received_by_id' => Auth::id(),
+                        'to_user_id' => Auth::id(),
                     ]);
                 });
 
-                // Show success notification
                 $this->sendCustomSuccessNotification($record);
 
-                // For electronic documents, trigger download after successful receive
                 if ($record->electronic && $record->attachment && $record->attachment->files->isNotEmpty()) {
                     $this->handleElectronicDocumentDownload($record);
                 }
@@ -79,14 +64,13 @@ trait ReceiveDocument
             }
         });
 
-        // Only show for documents with pending transmittals to user's office
         $this->visible(function (?Document $record): bool {
-            if (!$record) {
+            if (! $record) {
                 return false;
             }
-            return $record->transmittals()
+
+            return $record->activeTransmittal()
                 ->where('to_office_id', Auth::user()->office_id)
-                ->whereNull('received_at')
                 ->exists();
         });
     }
@@ -96,8 +80,7 @@ trait ReceiveDocument
         $attachment = $record->attachment;
         if ($attachment && $attachment->files->isNotEmpty()) {
             $fileName = $attachment->paths->first();
-            
-            // Create a success notification with download link
+
             Notification::make()
                 ->title('Document Received & Ready for Download')
                 ->body("Electronic document '{$fileName}' is ready for download.")
@@ -116,9 +99,8 @@ trait ReceiveDocument
 
     protected function sendCustomSuccessNotification(Document $record): void
     {
-        // Only send this notification for non-electronic documents
-        // Electronic documents get their own notification with download link
-        if (!$record->electronic) {
+
+        if (! $record->electronic) {
             Notification::make()
                 ->title($this->getSuccessNotificationTitle())
                 ->body("Document '{$record->title}' has been marked as received by your office.")

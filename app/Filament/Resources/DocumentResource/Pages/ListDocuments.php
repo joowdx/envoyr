@@ -42,12 +42,12 @@ class ListDocuments extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereHas('transmittals', function (Builder $subQuery) {
                         $subQuery->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
-                                 ->whereNull('received_at'); // Not yet received
+                            ->whereNull('received_at'); // Not yet received
                     })
                 )
                 ->badge(fn () => Document::whereHas('transmittals', function (Builder $query) {
                     $query->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
-                          ->whereNull('received_at');
+                        ->whereNull('received_at');
                 })->count()),
 
             'received' => Tab::make('Received Documents')
@@ -55,12 +55,12 @@ class ListDocuments extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereHas('transmittals', function (Builder $subQuery) {
                         $subQuery->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
-                                 ->whereNotNull('received_at'); // Already received
+                            ->whereNotNull('received_at'); // Already received
                     })
                 )
                 ->badge(fn () => Document::whereHas('transmittals', function (Builder $query) {
                     $query->where('to_office_id', Auth::user()->office_id)  // ✅ Use to_office_id
-                          ->whereNotNull('received_at');
+                        ->whereNotNull('received_at');
                 })->count()),
 
             // 'draft' => Tab::make('Draft Documents')

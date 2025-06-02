@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\Actions\Action;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
@@ -41,9 +41,8 @@ class Document extends Model
 
     public function isPublished(): bool
     {
-        return !is_null($this->published_at);
+        return ! is_null($this->published_at);
     }
-
 
     public function publish(): bool
     {
@@ -56,7 +55,6 @@ class Document extends Model
         ]);
     }
 
-
     public function unpublish(): bool
     {
         if ($this->isDraft()) {
@@ -67,7 +65,6 @@ class Document extends Model
             'published_at' => null,
         ]);
     }
-
 
     public function classification(): BelongsTo
     {
@@ -99,6 +96,17 @@ class Document extends Model
         return $this->hasMany(Transmittal::class);
     }
 
+    public function activeTransmittal(): HasOne
+    {
+        return $this->transmittals()
+            ->one()
+            ->ofMany([
+                'created_at' => 'max',
+            ], function ($query) {
+                $query->whereNull('received_at');
+            });
+    }
+
     public function attachment(): HasOne
     {
         return $this->hasOne(Attachment::class);
@@ -108,7 +116,6 @@ class Document extends Model
     {
         return $this->morphMany(Action::class, 'actionable');
     }
-
 
     public static function booted(): void
     {
@@ -129,7 +136,6 @@ class Document extends Model
                 $document->code = reset($available);
             }
 
-            // Documents start as drafts (published_at = null) by default
             if (is_null($document->published_at)) {
                 $document->published_at = null;
             }
