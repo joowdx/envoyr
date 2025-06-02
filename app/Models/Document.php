@@ -26,13 +26,10 @@ class Document extends Model
         'section_id',
         'source_id',
         'published_at',
-        'unpublished_at',
-        'status',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
-        'unpublished_at' => 'datetime',
         'dissemination' => 'boolean',
         'electronic' => 'boolean',
     ];
@@ -62,8 +59,6 @@ class Document extends Model
 
         return $this->update([
             'published_at' => now(),
-            'unpublished_at' => null,
-            'status' => 'published',
         ]);
     }
 
@@ -76,8 +71,6 @@ class Document extends Model
 
         return $this->update([
             'published_at' => null,
-            'unpublished_at' => now(),
-            'status' => 'draft',
         ]);
     }
 
