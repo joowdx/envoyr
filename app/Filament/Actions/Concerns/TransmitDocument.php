@@ -27,7 +27,7 @@ trait TransmitDocument
 
         $this->modalSubmitActionLabel('Transmit');
 
-        $this->modalHeading('Transmit Document');
+        $this->modalHeading('Transmit document');
 
         $this->modalDescription('Transmit this document to another office or section.');
 
