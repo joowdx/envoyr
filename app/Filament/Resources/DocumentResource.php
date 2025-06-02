@@ -208,7 +208,7 @@ class DocumentResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
-                            $data['value'],
+                            @$data['value'],
                             fn (Builder $query, $value): Builder => match ($value) {
                                 'draft' => $query->whereNull('published_at'),
                                 'published' => $query->whereNotNull('published_at'),
