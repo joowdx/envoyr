@@ -23,7 +23,7 @@ class ReceiveDocumentAction extends Action
             }
 
             return $record->activeTransmittal &&
-                $record->activeTransmittal->office_id === Auth::user()->office_id;
+                $record->activeTransmittal->to_office_id === Auth::user()->office_id;
         });
     }
 }
