@@ -14,6 +14,8 @@ class Transmittal extends Model
 
     protected $fillable = [
         'purpose',
+        'remarks',
+        'pick_up',
         'document_id',
         'from_office_id',
         'to_office_id',
@@ -21,10 +23,8 @@ class Transmittal extends Model
         'to_section_id',
         'from_user_id',
         'to_user_id',
-        'remarks',
+        'liaison_id',
         'received_at',
-        'received_by_id',
-        'pick_up',
     ];
 
     protected $casts = [

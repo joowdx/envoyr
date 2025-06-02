@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DocumentResource\Pages;
 
 use App\Filament\Actions\PublishAction;
+use App\Filament\Actions\TransmitDocumentAction;
 use App\Filament\Resources\DocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -15,6 +16,7 @@ class EditDocument extends EditRecord
     {
         return [
             PublishAction::make(),
+            TransmitDocumentAction::make(),
             Actions\DeleteAction::make(),
             Actions\ForceDeleteAction::make(),
         ];

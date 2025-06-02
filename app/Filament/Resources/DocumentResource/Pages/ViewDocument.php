@@ -5,6 +5,7 @@ namespace App\Filament\Resources\DocumentResource\Pages;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Filament\Actions\PublishAction;
+use App\Filament\Actions\TransmitDocumentAction;
 use App\Filament\Resources\DocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -17,6 +18,7 @@ class ViewDocument extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            TransmitDocumentAction::make(),
             PublishAction::make()
                 ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
             Actions\Action::make('generateQR')
