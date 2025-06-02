@@ -65,16 +65,6 @@ trait ReceiveDocument
                 $this->sendCustomFailureNotification($e->getMessage());
             }
         });
-
-        $this->visible(function (?Document $record): bool {
-            if (! $record) {
-                return false;
-            }
-
-            return $record->activeTransmittal()
-                ->where('to_office_id', Auth::user()->office_id)
-                ->exists();
-        });
     }
 
     protected function handleElectronicDocumentDownload(Document $record): void
