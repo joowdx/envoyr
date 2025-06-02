@@ -16,7 +16,7 @@ class UnpublishAction extends Action
 
         $this->name('unpublish-document');
 
-        $this->label('Unpublish');
+        $this->label('Unpublish Document');
 
         $this->icon('heroicon-o-arrow-uturn-left');
 

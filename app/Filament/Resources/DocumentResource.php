@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Enums\UserRole;
-use App\Filament\Actions\Tables\ReceiveDocumentAction;
 use App\Filament\Actions\Tables\UnpublishAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
@@ -208,7 +207,7 @@ class DocumentResource extends Resource
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
-                            @$data['value'],
+                            $data['value'],
                             fn (Builder $query, $value): Builder => match ($value) {
                                 'draft' => $query->whereNull('published_at'),
                                 'published' => $query->whereNotNull('published_at'),
@@ -218,14 +217,6 @@ class DocumentResource extends Resource
                     }),
             ])
             ->actions([
-                ReceiveDocumentAction::make()
-                    ->label('Receive')
-                    ->visible(fn (Document $record): bool => $record->transmittals()
-                        ->where('to_office_id', Auth::user()->office_id)
-                        ->whereNull('received_at')
-                        ->exists()
-                    ),
-
                 UnpublishAction::make()
                     ->visible(fn (Document $record): bool => $record->isPublished()),
                 Tables\Actions\EditAction::make()
