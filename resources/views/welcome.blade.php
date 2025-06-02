@@ -7,17 +7,19 @@
           <div class="flex justify-end w-full">
                         @include('theme-switcher')
           </div>
-        <div class="flex space-x-4">
-            <button
-              class="text-sm px-4 py-1 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300"
+          <div class="flex space-x-4">
+            <x-filament::button
+              color="gray-500"
+              class="border border-gray-500 bg-gray-800 text-white hover:bg-gray-700 hover:border-gray-400 transition-colors duration-300 rounded-md px-6 py-3"
             >
               Login
-            </button>
-            <button
-              class="text-sm px-6 py-2 border border-primary text-white dark:text-pink-400 rounded hover:bg-primary transition-colors duration-300 whitespace-nowrap"
-            >
+            </x-filament::button>
+            <x-filament::button
+              color="gray-500"
+              class="border border-pink-500 bg-pink-400 text-white hover:bg-pink-500 hover:border-pink-600 transition-colors duration-300 rounded-md px-6 py-3"
+          >
               Sign Up
-            </button>
+          </x-filament::button>
         </div>
       </div>
     </header>
@@ -26,26 +28,31 @@
     <section class="min-h-screen bg-black text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-left">
       <div class="max-w-3xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
-          Track Documents <span class="text-pink-400">Smarter</span>
+            Track Documents <span class="text-pink-400">Smarter</span>
         </h2>
         <p class="text-lg mb-4 text-gray-300">
-          Envoyr makes document tracking seamless, efficient, and fully transparent.
+            Envoyr makes document tracking seamless, efficient, and fully transparent.
         </p>
         <p class="text-lg mb-8 text-gray-300">
-          Powered by smart QR codes.
+            Powered by smart QR codes.
         </p>
-        <a href="#features" class="bg-primary text-white px-6 py-3 rounded border border-indigo-500 font-semibold text-lg hover:bg-pink-400 transition">
-          Get Started
-        </a>
+        <x-filament::button
+            color="primary"
+            tag="a"
+            href="#features"
+            class="font-semibold border border-pink-500 bg-white-400 text-white hover:bg-pink-500 hover:border-pink-600 transition-colors duration-300 rounded-md px-6 py-3"
+        >
+            Get Started
+        </x-filament::button>
       </div>
       <div class="fade-in-scale flex justify-center">
-  <img
-    src="/images/heroIMG2.webp"
-    alt="Person handling documents"
-    onerror="this.src='/images/heroIMG2.webp';"
-    class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
-  />
-</div>
+        <img
+            src="/images/heroIMG2.webp"
+            alt="Person handling documents"
+            onerror="this.src='/images/heroIMG2.webp';"
+            class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
+        />
+      </div>
     </section>
 
     <!-- Features -->
@@ -127,13 +134,15 @@
     <!-- CTA -->
     <section class="bg-black dark:bg-gray-800 text-black dark:text-white py-20 text-center px-6">
       <h3 class="text-4xl font-extrabold mb-4">Start Tracking <span class="text-pink-400">Smarter</span> Today</h3>
-      <p class="text-lg mb-6">Sign up now and streamline your document workflow with Envoyr.</p>
-      <a
-        href="#"
-        class="bg-white text-black dark:bg-black dark:text-white px-6 py-3 rounded hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors duration-300 font-semibold"
-      >
-        Create Free Account
-      </a>
+        <p class="text-lg mb-6">Sign up now and streamline your document workflow with Envoyr.</p>
+          <x-filament::button
+            color="primary"
+            tag="a"
+            href="#"
+            class="font-semibold border border-pink-500 bg-white-400 text-white hover:bg-pink-500 hover:border-pink-600 transition-colors duration-300 rounded-md px-6 py-3"
+          >
+            Create Free Account
+          </x-filament::button>
     </section>
 
     <!-- Tech Stack -->

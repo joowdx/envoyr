@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Classification extends Model
 {
     use HasUlids;
+
     protected $fillable = ['name'];
 
     public function documents()
