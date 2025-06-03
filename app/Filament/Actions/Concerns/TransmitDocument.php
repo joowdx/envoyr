@@ -2,6 +2,7 @@
 
 namespace App\Filament\Actions\Concerns;
 
+use App\Enums\UserRole;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\Section;
@@ -76,7 +77,7 @@ trait TransmitDocument
                 ->options(function (callable $get) {
                     return User::where('office_id', Auth::user()->office_id)
                         ->when($get('office_id') !== Auth::user()->office_id, function ($query) {
-                            return $query->where('role', 'liaison');
+                            return $query->where('role', UserRole::LIAISON);
                         })
                         ->pluck('name', 'id');
                 })
