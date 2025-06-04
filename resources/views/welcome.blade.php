@@ -19,7 +19,7 @@
     </header>
 
     <!-- Hero -->
-    <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-cyan-900 to-cyan-700 text-left">
+    <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-pink-700 to-pink-600 text-left">
       <div class="max-w-3xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
             Track Documents <span class="text-amber-500">Smarter</span>
@@ -69,7 +69,7 @@
     </section>
 
     <!-- Steps -->
-    <section class="min-h-screen bg-black flex items-center justify-center px-6 py-20 bg-gradient-to-br from-cyan-900 to-cyan-700">
+    <section class="min-h-screen bg-black flex items-center justify-center px-6 py-20 bg-gradient-to-br from-pink-700 to-pink-600">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl items-center">
         <div class="flex justify-center">
           <img
@@ -130,12 +130,12 @@
     </section>
 
     <!-- Tech Stack --> 
-  <section class="min-h-screen bg-black bg-gradient-to-br from-cyan-900 to-cyan-700 text-white flex flex-col items-center justify-center px-6 py-20">
+  <section class="min-h-screen bg-black bg-gradient-to-br from-pink-700 to-pink-600 text-white flex flex-col items-center justify-center px-6 py-20">
     <div class="text-center">
         <h2 class="text-3xl font-semibold text-white dark:text-amber-500">
             The tech <span class="uppercase">stack</span>
         </h2>
-        <p class="mt-6 text-white dark:text-cyan-300">
+        <p class="mt-6 text-white dark:text-white">
             The technologies we use to build this application. We use the latest technologies to build this application.
         </p>
     </div>
