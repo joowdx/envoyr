@@ -1,17 +1,17 @@
 @extends('layouts.app')
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-black text-white dark:bg-black-900 shadow-md">
-      <div class="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center">
+    <header class="sticky top-0 y-20 bg-black text-white dark:bg-black-900 shadow-md">
+      <div class="max-w-7xl mx-auto px-12 py-2 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-amber-500 dark:text-amber-500">Envoyr</h1>
         <div class="text-amber-500 dark:text-amber-500 flex items-center gap-4">
           <div class="flex justify-end w-full">
                         @include('theme-switcher')
           </div>
           <div class="flex space-x-4 whitespace-nowrap">
-            <x-filament::button outlined tag="a" href="/login" class="hover:bg-amber-600 hover:text-white transition duration-300">
+            <x-filament::button outlined tag="a" href="{{ route('filament.auth.auth.login') }}" class="hover:bg-amber-600 hover:text-white transition duration-300">
               Login
             </x-filament::button>
-            <x-filament::button outlined tag="a" href="/register" class="hover:bg-amber-600 hover:text-white transition duration-300">
+            <x-filament::button outlined tag="a" href="{{ route('filament.auth.auth.register') }}" class="hover:bg-amber-600 hover:text-white transition duration-300">
               Sign Up
             </x-filament::button>
           </div>
@@ -20,7 +20,7 @@
 
     <!-- Hero -->
     <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-700 to-gray-600 text-left">
-      <div class="max-w-3xl">
+      <div class="max-w-2xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
             Track Documents <span class="text-amber-500">Smarter</span>
         </h2>
@@ -30,7 +30,7 @@
         <p class="text-lg mb-8 text-white">
             Powered by smart QR codes.
         </p>
-        <x-filament::button outlined tag="a" href="/register" icon="gmdi-rocket-launch-o" size="xl" class="hover:bg-amber-600 hover:text-white transition duration-300">
+        <x-filament::button outlined tag="a" href="{{ route('filament.auth.auth.register') }}" icon="gmdi-rocket-launch-o" size="xl" class="hover:bg-amber-600 hover:text-white transition duration-300">
             Get Started
         </x-filament::button>
       </div>
@@ -39,7 +39,7 @@
             src="/images/heroIMG2.webp"
             alt="Person handling documents"
             onerror="this.src='/images/heroIMG2.webp';"
-            class="w-[400px] md:w-[500px] lg:w-[600px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
+            class="w-[300px] md:w-[400px] lg:w-[500px] rounded-lg shadow-2xl hover:scale-105 transition-transform duration-300"
         />
       </div>
     </section>
