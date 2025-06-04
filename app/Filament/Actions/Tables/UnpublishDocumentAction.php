@@ -21,8 +21,6 @@ class UnpublishDocumentAction extends Action
 
         $this->icon('heroicon-o-arrow-uturn-left');
 
-        $this->color('warning');
-
         $this->requiresConfirmation();
 
         $this->modalSubmitActionLabel('Unpublish');

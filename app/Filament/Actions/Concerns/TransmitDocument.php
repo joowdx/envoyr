@@ -24,8 +24,6 @@ trait TransmitDocument
 
         $this->icon('heroicon-o-paper-airplane');
 
-        $this->color('success');
-
         $this->modalSubmitActionLabel('Transmit');
 
         $this->modalHeading('Transmit document');

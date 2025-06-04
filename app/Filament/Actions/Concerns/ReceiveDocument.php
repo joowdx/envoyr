@@ -19,8 +19,6 @@ trait ReceiveDocument
 
         $this->icon('heroicon-o-inbox-arrow-down');
 
-        $this->color('success');
-
         $this->modalHeading('Receive document');
 
         $this->modalDescription('Mark this document as received by your office.');
