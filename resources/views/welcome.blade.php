@@ -1,7 +1,7 @@
 @extends('layouts.app')
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-black text-white dark:bg-black-900 shadow-md">
-      <div class="max-w-8xl mx-auto px-6 py-2 flex justify-between items-center">
+      <div class="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-amber-500 dark:text-amber-500">Envoyr</h1>
         <div class="text-amber-500 dark:text-amber-500 flex items-center gap-4">
           <div class="flex justify-end w-full">
@@ -30,7 +30,7 @@
         <p class="text-lg mb-8 text-white">
             Powered by smart QR codes.
         </p>
-        <x-filament::button outlined icon="gmdi-rocket-launch-o" size="xl" class="hover:bg-amber-600 hover:text-white transition duration-300">
+        <x-filament::button outlined tag="a" href="/register" icon="gmdi-rocket-launch-o" size="xl" class="hover:bg-amber-600 hover:text-white transition duration-300">
             Get Started
         </x-filament::button>
       </div>
@@ -45,7 +45,7 @@
     </section>
 
     <!-- Features -->
-    <section id="features" class="py-20 bg-black dark:bg-gray-800 px-6">
+    <section id="features" class="py-20 bg-black dark:bg-gray-600 px-6">
       <div class="max-w-6xl mx-auto text-center mb-16">
         <h3 class="text-4xl font-bold text-amber-500 dark:text-amber-500">Key Features</h3>
       </div>
@@ -121,7 +121,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="bg-black dark:bg-gray-800 text-black dark:text-white py-20 text-center px-6">
+    <section class="bg-black dark:bg-gray-600 text-black dark:text-white py-20 text-center px-6">
       <h3 class="text-4xl font-extrabold mb-4">Start Tracking <span class="text-amber-500">Smarter</span> Today</h3>
         <p class="text-lg mb-6">Sign up now and streamline your document workflow with Envoyr.</p>
         <x-filament::button outlined>
