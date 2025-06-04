@@ -6,10 +6,27 @@ use App\Filament\Resources\ClassificationResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Notifications\Notification;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
 
 class ViewClassification extends ViewRecord
 {
     protected static string $resource = ClassificationResource::class;
+
+    public function getTitle(): string
+    {
+        return $this->record->name;
+    }
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('description')
+                    ->hiddenLabel(true)
+                    ->placeholder('No description provided'),
+            ]);
+    }
 
     protected function getHeaderActions(): array
     {

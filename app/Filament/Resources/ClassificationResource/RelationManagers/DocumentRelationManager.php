@@ -32,7 +32,8 @@ class DocumentRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable()
-                    ->limit(50),
+                    ->limit(50)
+                    ->url(fn ($record) => route('filament.app.resources.documents.view', $record->id)),
                 Tables\Columns\TextColumn::make('office.name')
                     ->label('Office')
                     ->searchable()
