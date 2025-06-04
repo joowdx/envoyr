@@ -23,6 +23,7 @@ use Filament\Http\Responses\Auth\RegistrationResponse;
 use Filament\Notifications\Auth\VerifyEmail;
 use Filament\Notifications\Notification;
 use Filament\Pages\Auth\Register;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 
@@ -119,8 +120,7 @@ class Registration extends Register
                                 ->required(),
                             $this->getSectionFormComponent()
                                 ->extraAttributes(['onkeydown' => "return event.key != 'Enter';"])
-                                ->extraAlpineAttributes(['@keyup.enter' => $next])
-                                ->required(),
+                                ->extraAlpineAttributes(['@keyup.enter' => $next]),
                         ]),
                     Step::make('Credentials')
                         ->icon('heroicon-o-shield-check')
@@ -194,11 +194,6 @@ class Registration extends Register
                 }
 
                 return Section::pluck('name', 'id');
-            })
-            ->disabled(function (callable $get) {
-                $officeId = $get('office_id');
-
-                return Section::where('office_id', $officeId)->count() === 0;
             })
             ->placeholder('Select Section')
             ->prefixIcon('heroicon-o-user-group');

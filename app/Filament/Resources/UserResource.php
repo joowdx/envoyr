@@ -23,7 +23,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function canAccess(): bool
     {
@@ -124,8 +124,8 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('role'),
                 Tables\Columns\TextColumn::make('office.acronym')
-                    ->label('Acronym')
-                    ->searchable()
+                    ->label('Office')
+                    ->searchable(['offices.name', 'offices.acronym'])
                     ->sortable()
                     ->tooltip(fn (User $record) => $record->office?->name),
                 Tables\Columns\TextColumn::make('section.name')
@@ -135,7 +135,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: false),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -160,10 +160,14 @@ class UserResource extends Resource
                     }),
             ])
             ->filters([
-                Tables\Filters\TrashedFilter::make('trashed'),
-                Tables\Filters\Filter::make('deactivated')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
-                    ->label('Active'),
+                Tables\Filters\TernaryFilter::make('deactivated_at')
+                    ->label('Deactivated')
+                    ->trueLabel('Active')
+                    ->falseLabel('Deactivated')
+                    ->queries(
+                        true: fn ($query) => $query->whereNull('deactivated_at'),
+                        false: fn ($query) => $query->whereNotNull('deactivated_at'),
+                    ),
                 Tables\Filters\TernaryFilter::make('approved_at')
                     ->label('Approved')
                     ->trueLabel('Approved')
@@ -172,6 +176,8 @@ class UserResource extends Resource
                         true: fn ($query) => $query->whereNotNull('approved_at'),
                         false: fn ($query) => $query->whereNull('approved_at'),
                     ),
+                Tables\Filters\TrashedFilter::make('trashed')
+                    ->label('Trashed'),
             ])
             ->actions([
                 Tables\Actions\Action::make('approve')
@@ -190,12 +196,9 @@ class UserResource extends Resource
                     }),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                    Tables\Actions\RestoreAction::make(),
-                    Tables\Actions\ForceDeleteAction::make(),
                     Tables\Actions\Action::make('deactivate')
                         ->label('Deactivate')
-                        ->icon('heroicon-o-x-circle')
+                        ->icon('heroicon-o-no-symbol')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => is_null($record->deactivated_at))
                         ->action(fn (User $record) => $record->deactivate(Auth::user())),
@@ -205,6 +208,9 @@ class UserResource extends Resource
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
                         ->action(fn (User $record) => $record->reactivate()),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\RestoreAction::make(),
+                    Tables\Actions\ForceDeleteAction::make(),
                 ]),
 
             ]);
@@ -238,10 +244,10 @@ class UserResource extends Resource
                 SoftDeletingScope::class,
             ])
             ->withTrashed()
-            ->with(['office', 'section', 'deactivatedByUser'])
-            ->where('id', '!=', Auth::id());
+            ->with(['office', 'section', 'deactivatedByUser']);
         if (Auth::user()?->role !== UserRole::ROOT) {
-            $query->where('office_id', Auth::user()->office_id);
+            $query->where('office_id', Auth::user()->office_id)
+                ->orWhere('office_id', null);
         }
 
         return $query;

@@ -13,7 +13,10 @@ class Transmittal extends Model
     use HasUlids;
 
     protected $fillable = [
+        'code',
         'purpose',
+        'remarks',
+        'pick_up',
         'document_id',
         'from_office_id',
         'to_office_id',
@@ -21,10 +24,8 @@ class Transmittal extends Model
         'to_section_id',
         'from_user_id',
         'to_user_id',
-        'remarks',
+        'liaison_id',
         'received_at',
-        'received_by_id',
-        'pick_up',
     ];
 
     protected $casts = [
@@ -70,5 +71,20 @@ class Transmittal extends Model
     public function attachments(): MorphMany
     {
         return $this->morphMany(Attachment::class, 'attachable');
+    }
+
+    public static function booted(): void
+    {
+        static::creating(function (self $transmittal) {
+            $faker = fake()->unique();
+
+            do {
+                $codes = collect(range(1, 10))->map(fn() => $faker->bothify('??????????'))->toArray();
+
+                $available = array_diff($codes, self::whereIn('code', $codes)->pluck('code')->toArray());
+            } while (empty($available));
+
+            $transmittal->code = reset($available);
+        });
     }
 }
