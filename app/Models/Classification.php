@@ -10,7 +10,10 @@ class Classification extends Model
 {
     use HasUlids;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
     public function documents(): HasMany
     {
