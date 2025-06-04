@@ -20,7 +20,7 @@ class ClassificationResource extends Resource
 {
     protected static ?string $model = Classification::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-wallet';
 
     public static function form(Form $form): Form
     {
@@ -59,9 +59,7 @@ class ClassificationResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->slideOver()
-                    ->modalWidth('md'),
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                     ->slideOver()
                     ->modalWidth('md'),
