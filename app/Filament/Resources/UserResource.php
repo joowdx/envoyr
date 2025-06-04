@@ -9,6 +9,9 @@ use App\Models\Section;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -22,16 +25,17 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
-    public static function canViewAny(): bool
+    public static function canAccess(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT;
+        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
+            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->columns(3)
-            ->disabled(fn (User $record): bool => $record->trashed())
+            ->disabled(fn (Page $livewire) => $livewire instanceof EditRecord && $livewire->record->trashed())
             ->schema([
                 Forms\Components\FileUpload::make('avatar')
                     ->alignCenter()
@@ -54,11 +58,12 @@ class UserResource extends Resource
                             ->label('Office')
                             ->searchable()
                             ->relationship('office', 'name')
-                            ->getOptionLabelUsing(fn ($value): ?string => Office::find($value)?->name)
+                            ->getOptionLabelUsing(fn ($value): ?string => optional(Office::find($value))->name)
                             ->placeholder('Select Office')
                             ->preload()
                             ->required()
                             ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('section_id', null))
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
                                     ->required()
@@ -81,9 +86,7 @@ class UserResource extends Resource
                             ->placeholder('Select Section')
                             ->preload()
                             ->options(function (callable $get) {
-
                                 $officeId = $get('office_id');
-
                                 if ($officeId) {
                                     return Section::where('office_id', $officeId)->pluck('name', 'id');
                                 }
@@ -110,23 +113,21 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function canCreate(): bool
-    {
-        return false;
-    }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('office.name')
-                    ->label('Office')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('email')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('role'),
+                Tables\Columns\TextColumn::make('office.acronym')
+                    ->label('Acronym')
+                    ->searchable()
+                    ->sortable()
+                    ->tooltip(fn (User $record) => $record->office?->name),
                 Tables\Columns\TextColumn::make('section.name')
                     ->label('Section')
                     ->searchable()
@@ -134,7 +135,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: false),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
@@ -148,9 +149,7 @@ class UserResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Deactivated By')
-                    ->getStateUsing(function (User $record) {
-                        return $record->deactivated_by ? User::find($record->deactivated_by)->name : null;
-                    }),
+                    ->getStateUsing(fn (User $record) => $record->deactivatedByUser?->name),
                 Tables\Columns\TextColumn::make('trashed')
                     ->label('Deleted At')
                     ->dateTime()
@@ -159,17 +158,38 @@ class UserResource extends Resource
                     ->getStateUsing(function (User $record) {
                         return $record->deleted_at ? $record->deleted_at : null;
                     }),
-                Tables\Columns\TextColumn::make('role'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),
                 Tables\Filters\Filter::make('deactivated')
                     ->query(fn (Builder $query): Builder => $query->whereNull('deactivated_at'))
                     ->label('Active'),
+                Tables\Filters\TernaryFilter::make('approved_at')
+                    ->label('Approved')
+                    ->trueLabel('Approved')
+                    ->falseLabel('Pending')
+                    ->queries(
+                        true: fn ($query) => $query->whereNotNull('approved_at'),
+                        false: fn ($query) => $query->whereNull('approved_at'),
+                    ),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => ! $record->approved_at && Auth::check() && UserResource::canApprove(Auth::user(), $record)
+                    )
+                    ->action(function (User $record) {
+                        $record->approve();
+                        Notification::make()
+                            ->title('User approved successfully.')
+                            ->success()
+                            ->send();
+                    }),
                 Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
@@ -178,16 +198,15 @@ class UserResource extends Resource
                         ->icon('heroicon-o-x-circle')
                         ->requiresConfirmation()
                         ->visible(fn (User $record): bool => is_null($record->deactivated_at))
-                        ->action(fn (User $record, User $user) => $record->deactivate($user)),
+                        ->action(fn (User $record) => $record->deactivate(Auth::user())),
+                    Tables\Actions\Action::make('reactivate')
+                        ->label('Reactivate')
+                        ->icon('heroicon-o-check-circle')
+                        ->requiresConfirmation()
+                        ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
+                        ->action(fn (User $record) => $record->reactivate()),
                 ]),
-                Tables\Actions\Action::make('reactivate')
-                    ->label('Reactivate')
-                    ->icon('heroicon-o-check-circle')
-                    ->requiresConfirmation()
-                    ->visible(fn (User $record): bool => ! is_null($record->deactivated_at))
-                    ->action(fn (User $record) => $record->reactivate()),
-            ])
-            ->bulkActions([
+
             ]);
     }
 
@@ -202,18 +221,29 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 
+    public static function canApprove(User $actingUser, User $userToApprove): bool
+    {
+        return $actingUser->role === UserRole::ROOT ||
+               ($actingUser->role === UserRole::ADMINISTRATOR && $actingUser->office_id === $userToApprove->office_id);
+    }
+
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])->withTrashed()
+            ])
+            ->withTrashed()
+            ->with(['office', 'section', 'deactivatedByUser'])
             ->where('id', '!=', Auth::id());
+        if (Auth::user()?->role !== UserRole::ROOT) {
+            $query->where('office_id', Auth::user()->office_id);
+        }
 
+        return $query;
     }
 }

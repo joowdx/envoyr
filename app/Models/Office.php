@@ -28,13 +28,8 @@ class Office extends Model
         return $this->hasMany(Document::class);
     }
 
-    public function users()
+    public function users(): HasMany
     {
         return $this->hasMany(User::class);
-    }
-
-    public function __toString(): string
-    {
-        return $this->name;
     }
 }

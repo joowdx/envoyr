@@ -29,8 +29,13 @@ class Section extends Model
         return $this->hasMany(Document::class);
     }
 
-    public function __toString(): string
+    public function transmittals(): HasMany
     {
-        return $this->name;
+        return $this->hasMany(Transmittal::class);
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 }
