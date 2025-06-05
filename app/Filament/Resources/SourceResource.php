@@ -15,7 +15,7 @@ class SourceResource extends Resource
 {
     protected static ?string $model = Source::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-inbox-stack';
 
     public static function form(Form $form): Form
     {
@@ -24,7 +24,6 @@ class SourceResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Source Name')
                     ->placeholder('Enter source name')
                     ->autofocus()
                     ->columnSpanFull()
