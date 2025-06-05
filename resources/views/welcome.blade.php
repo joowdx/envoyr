@@ -20,7 +20,7 @@
 
     <!-- Hero -->
     <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 dark:bg-neutral-900 text-left">
-      <div class="max-w-2xl">
+    <div class="max-w-2xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
             Track Documents <span class="text-amber-500">Smarter</span>
         </h2>
