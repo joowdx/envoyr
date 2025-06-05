@@ -30,13 +30,13 @@ class SourceResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Source Name')
-                    ->placeholder('Enter the source name')
+                    ->placeholder('Enter source name')
                     ->autofocus()
                     ->columnSpanFull()
                     ->live(),
                 Forms\Components\Textarea::make('description')
                     ->maxLength(255)
-                    ->placeholder('Enter classification description')
+                    ->placeholder('Enter source description')
                     ->rows(2)
                     ->columnSpanFull(),
             ]);
@@ -48,8 +48,11 @@ class SourceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name') 
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('description')
+                    ->searchable()
                     ->sortable()
-                    ->limit(50),
+                    ->placeholder('No description provided'),
             ])
             ->filters([
                 //
