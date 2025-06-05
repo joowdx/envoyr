@@ -14,17 +14,26 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\SourceResource\RelationManagers;
 use App\Filament\Resources\SourceResource\RelationManager\DocumentRelationManager;
 
+use function Laravel\Prompts\text;
+
 class SourceResource extends Resource
 {
     protected static ?string $model = Source::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255)
+                    ->label('Source Name')
+                    ->placeholder('Enter the source name')
+                    ->autofocus()
+                    ->columnSpanFull()
+                    ->live(),
             ]);
     }
 
