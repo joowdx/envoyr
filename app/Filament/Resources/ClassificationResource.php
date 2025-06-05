@@ -2,19 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\Classification;
-use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Filament\Resources\ClassificationResource\Pages;
-use App\Filament\Resources\ClassificationResource\RelationManagers;
 use App\Filament\Resources\ClassificationResource\RelationManagers\DocumentRelationManager;
-use Filament\Actions\ViewAction;
+use App\Models\Classification;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class ClassificationResource extends Resource
 {
@@ -26,7 +21,7 @@ class ClassificationResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name') 
+                Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull()
@@ -43,14 +38,14 @@ class ClassificationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name') 
+                Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
                     ->limit(50),
-                Tables\Columns\TextColumn::make('description') 
+                Tables\Columns\TextColumn::make('description')
                     ->limit(100)
                     ->wrap(),
-                Tables\Columns\TextColumn::make('created_at') 
+                Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -5,7 +5,6 @@ namespace App\Filament\Actions;
 use App\Models\Document;
 use Exception;
 use Filament\Actions\Action;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PublishDocumentAction extends Action

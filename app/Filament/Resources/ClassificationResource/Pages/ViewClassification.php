@@ -4,10 +4,10 @@ namespace App\Filament\Resources\ClassificationResource\Pages;
 
 use App\Filament\Resources\ClassificationResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Notifications\Notification;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewClassification extends ViewRecord
 {
@@ -42,7 +42,7 @@ class ViewClassification extends ViewRecord
                             ->body('This classification cannot be deleted because it has documents associated with it. Please remove all documents first.')
                             ->danger()
                             ->send();
-                        
+
                         $action->cancel();
                     }
                 })
