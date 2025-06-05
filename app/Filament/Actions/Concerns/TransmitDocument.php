@@ -45,7 +45,7 @@ trait TransmitDocument
                 ->required()
                 ->live()
                 ->afterStateUpdated(function ($state, callable $set) {
-                    if (!$state) {
+                    if (! $state) {
                         $set('section_id', null);
                     }
                 }),
@@ -54,13 +54,13 @@ trait TransmitDocument
                 ->options(function (Get $get) {
                     $officeId = $get('office_id');
 
-                    if (!$officeId) {
+                    if (! $officeId) {
                         return [];
                     }
 
                     $office = Office::find($officeId);
 
-                    if (!$office || $office->id !== Auth::user()->office_id) {
+                    if (! $office || $office->id !== Auth::user()->office_id) {
                         return [];
                     }
 
@@ -69,7 +69,7 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn(Get $get) => $get('office_id') === Auth::user()->office_id),
+                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id),
             Select::make('liaison_id')
                 ->label('Liaison')
                 ->options(function (callable $get) {
@@ -116,11 +116,10 @@ trait TransmitDocument
             }
         });
 
-        $this->visible(fn (Document $record): bool =>
-            $record->isPublished() &&
+        $this->visible(fn (Document $record): bool => $record->isPublished() &&
             $record->user_id === Auth::id() &&
-            !$record->transmitted_at &&
-            !$record->dissemination
+            ! $record->transmitted_at &&
+            ! $record->dissemination
         );
 
         $this->successNotificationTitle('Document transmitted successfully');

@@ -101,7 +101,7 @@ class DocumentResource extends Resource
                             ->orderColumn('sort')
                             ->hint('Specify the attachments enclosed with the document')
                             ->helperText('What are the files or documents attached?')
-                            ->itemLabel(fn($state) => $state['title'])
+                            ->itemLabel(fn ($state) => $state['title'])
                             ->collapsed()
                             ->required()
                             ->schema([
@@ -110,9 +110,9 @@ class DocumentResource extends Resource
                                 Forms\Components\TextInput::make('title')
                                     ->rule('required')
                                     ->markAsRequired()
-                                    ->hidden(fn(callable $get) => $get('electronic')),
+                                    ->hidden(fn (callable $get) => $get('electronic')),
                                 Forms\Components\Grid::make(3)
-                                    ->hidden(fn(callable $get) => $get('electronic'))
+                                    ->hidden(fn (callable $get) => $get('electronic'))
                                     ->schema([
                                         Forms\Components\TextInput::make('context.control')
                                             ->label('Control #'),
@@ -129,7 +129,7 @@ class DocumentResource extends Resource
                                             ->rule('numeric'),
                                     ]),
                                 Forms\Components\Textarea::make('remarks')
-                                    ->hidden(fn(callable $get) => $get('electronic'))
+                                    ->hidden(fn (callable $get) => $get('electronic'))
                                     ->maxLength(4096),
                             ]),
                     ]),
@@ -179,7 +179,7 @@ class DocumentResource extends Resource
                         Infolists\Components\TextEntry::make('published_at')
                             ->label('Published At')
                             ->dateTime()
-                            ->visible(fn(Document $record): bool => $record->isPublished()),
+                            ->visible(fn (Document $record): bool => $record->isPublished()),
                     ]),
             ]);
     }
@@ -192,7 +192,7 @@ class DocumentResource extends Resource
                     ->label('Title')
                     ->searchable()
                     ->limit(60)
-                    ->tooltip(fn(Tables\Columns\TextColumn $column): ?string => $column->getState()),
+                    ->tooltip(fn (Tables\Columns\TextColumn $column): ?string => $column->getState()),
                 Tables\Columns\TextColumn::make('code')
                     ->label('Code')
                     ->searchable()
@@ -208,9 +208,9 @@ class DocumentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn(Document $record): string => $record->isPublished() ? 'success' : 'gray')
-                    ->formatStateUsing(fn(Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
-                    ->getStateUsing(fn(Document $record): string => $record->isPublished() ? 'published' : 'draft'),
+                    ->color(fn (Document $record): string => $record->isPublished() ? 'success' : 'gray')
+                    ->formatStateUsing(fn (Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
+                    ->getStateUsing(fn (Document $record): string => $record->isPublished() ? 'published' : 'draft'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -230,7 +230,7 @@ class DocumentResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             @$data['value'],
-                            fn(Builder $query, $value): Builder => match ($value) {
+                            fn (Builder $query, $value): Builder => match ($value) {
                                 'draft' => $query->whereNull('published_at'),
                                 'published' => $query->whereNotNull('published_at'),
                                 default => $query,
@@ -247,7 +247,7 @@ class DocumentResource extends Resource
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
-                    ->visible(fn(Document $record): bool => $record->isPublished())
+                    ->visible(fn (Document $record): bool => $record->isPublished())
                     ->modalContent(function (Document $record) {
                         $qrCode = (new GenerateQR)($record->code);
 
@@ -276,7 +276,7 @@ class DocumentResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     UnpublishDocumentAction::make(),
                     Tables\Actions\EditAction::make()
-                        ->visible(fn(Document $record): bool => $record->isDraft()),
+                        ->visible(fn (Document $record): bool => $record->isDraft()),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
                 ]),

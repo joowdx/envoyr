@@ -79,7 +79,7 @@ class Transmittal extends Model
             $faker = fake()->unique();
 
             do {
-                $codes = collect(range(1, 10))->map(fn() => $faker->bothify('??????????'))->toArray();
+                $codes = collect(range(1, 10))->map(fn () => $faker->bothify('??????????'))->toArray();
 
                 $available = array_diff($codes, self::whereIn('code', $codes)->pluck('code')->toArray());
             } while (empty($available));
