@@ -38,8 +38,8 @@ class DocumentRelationManager extends RelationManager
                     ->label('Office')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('classification.name')
-                    ->label('Classification')
+                Tables\Columns\TextColumn::make('source.name')
+                    ->label('Source')
                     ->searchable()
                     ->sortable(),
             ])
