@@ -10,6 +10,7 @@ use App\Models\User;
 use Exception;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,11 @@ trait TransmitDocument
         $this->modalWidth('lg');
 
         $this->form([
+            Toggle::make('pick_up')
+                ->label('Pick Up')
+                ->default(false)
+                ->live()
+                ->columnSpanFull(),
             Select::make('office_id')
                 ->label('Office')
                 ->options(Office::pluck('name', 'id'))
@@ -60,7 +66,7 @@ trait TransmitDocument
 
                     $office = Office::find($officeId);
 
-                    if (! $office || $office->id !== Auth::user()->office_id) {
+                    if (! $office) {
                         return [];
                     }
 
@@ -69,7 +75,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id),
+                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id)
+                ->nullable(),
             Select::make('liaison_id')
                 ->label('Liaison')
                 ->options(function (callable $get) {
@@ -81,7 +88,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->required(),
+                ->required()
+                ->visible(fn (Get $get) => ! $get('pick_up')),
             Textarea::make('purpose')
                 ->label('Purpose')
                 ->markAsRequired()
@@ -101,12 +109,13 @@ trait TransmitDocument
                     $record->transmittals()->create([
                         'purpose' => $data['purpose'],
                         'remarks' => $data['remarks'],
+                        'pick_up' => $data['pick_up'],
                         'from_office_id' => Auth::user()->office_id,
                         'to_office_id' => $data['office_id'],
                         'from_section_id' => Auth::user()->section_id,
-                        'to_section_id' => $data['section_id'],
+                        'to_section_id' => $data['office_id'] === Auth::user()->office_id ? $data['section_id'] : null,
                         'from_user_id' => Auth::id(),
-                        'liaison_id' => $data['liaison_id'],
+                        'liaison_id' => $data['pick_up'] ? null : $data['liaison_id'],
                     ]);
                 });
 
@@ -116,10 +125,11 @@ trait TransmitDocument
             }
         });
 
-        $this->visible(fn (Document $record): bool => $record->isPublished() &&
-            $record->user_id === Auth::id() &&
-            ! $record->transmitted_at &&
-            ! $record->dissemination
+        $this->visible(
+            fn (Document $record): bool => $record->isPublished() &&
+                $record->user_id === Auth::id() &&
+                ! $record->transmitted_at &&
+                ! $record->dissemination
         );
 
         $this->successNotificationTitle('Document transmitted successfully');

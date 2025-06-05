@@ -16,8 +16,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Accordion;
-use Filament\Infolists\Components\AccordionItem;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,8 +25,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 
 class DocumentResource extends Resource
 {
@@ -201,45 +197,39 @@ class DocumentResource extends Resource
                                                     ->copyable()
                                                     ->copyMessage('Copied!')
                                                     ->copyMessageDuration(1500),
+                                                Infolists\Components\Grid::make(3)
+                                                    ->schema([
+                                                        Infolists\Components\TextEntry::make('fromOffice.name')
+                                                            ->label('From'),
+                                                        Infolists\Components\TextEntry::make('toOffice.name')
+                                                            ->label('To'),
+                                                        Infolists\Components\TextEntry::make('fromSection.name')
+                                                            ->label('From Section')
+                                                            ->visible(fn ($record) => $record->fromSection !== null),
+                                                        Infolists\Components\TextEntry::make('toSection.name')
+                                                            ->label('To Section')
+                                                            ->visible(fn ($record) => $record->toSection !== null),
+                                                        Infolists\Components\TextEntry::make('fromUser.name')
+                                                            ->label('Transmitted')
+                                                            ->helperText(fn ($record) => $record->created_at->format('F j, Y H:i')),
+                                                        Infolists\Components\TextEntry::make('liaison.name')
+                                                            ->label('Liaison')
+                                                            ->placeholder('For Pick Up'),
+                                                        Infolists\Components\TextEntry::make('toUser.name')
+                                                            ->label('Received')
+                                                            ->helperText(fn ($record) => $record->received_at?->format('F j, Y H:i'))
+                                                            ->placeholder('Not yet received'),
+                                                    ]),
                                                 Infolists\Components\TextEntry::make('purpose')
                                                     ->label('Purpose')
                                                     ->columnSpanFull(),
-                                                Infolists\Components\Section::make('Transmittal Details')
-                                                    ->collapsible()
-                                                    ->schema([
-                                                        Infolists\Components\Grid::make(2)
-                                                            ->schema([
-                                                                Infolists\Components\TextEntry::make('fromOffice.name')
-                                                                    ->label('From'),
-                                                                Infolists\Components\TextEntry::make('toOffice.name')
-                                                                    ->label('To'),
-                                                                Infolists\Components\TextEntry::make('fromSection.name')
-                                                                    ->label('From Section')
-                                                                    ->visible(fn($record) => $record->fromSection !== null),
-                                                                Infolists\Components\TextEntry::make('toSection.name')
-                                                                    ->label('To Section')
-                                                                    ->visible(fn($record) => $record->toSection !== null),
-                                                                Infolists\Components\TextEntry::make('fromUser.name')
-                                                                    ->label('Transmitted By'),
-                                                                Infolists\Components\TextEntry::make('liaison.name')
-                                                                    ->label('Liaison'),
-                                                                Infolists\Components\TextEntry::make('created_at')
-                                                                    ->label('Transmitted At')
-                                                                    ->dateTime(),
-                                                                Infolists\Components\TextEntry::make('received_at')
-                                                                    ->label('Received At')
-                                                                    ->dateTime(),
-                                                                Infolists\Components\TextEntry::make('toUser.name')
-                                                                    ->label('Received By'),
-                                                            ]),
-                                                    ]),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make('Remarks')
                                             ->schema([
                                                 Infolists\Components\TextEntry::make('remarks')
                                                     ->markdown()
                                                     ->columnSpanFull()
-                                                    ->visible(fn($record) => $record->remarks !== null),
+                                                    ->visible(fn ($record) => $record->remarks !== null),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make('Attachments')
                                             ->schema([
