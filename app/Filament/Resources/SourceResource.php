@@ -34,6 +34,11 @@ class SourceResource extends Resource
                     ->autofocus()
                     ->columnSpanFull()
                     ->live(),
+                Forms\Components\Textarea::make('description')
+                    ->maxLength(255)
+                    ->placeholder('Enter classification description')
+                    ->rows(2)
+                    ->columnSpanFull(),
             ]);
     }
 

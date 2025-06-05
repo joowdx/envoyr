@@ -12,10 +12,12 @@ class Source extends Model
 
     protected $fillable = [
         'name',
+        'description',
     ];
 
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
     }
+
 }
