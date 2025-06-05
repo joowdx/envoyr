@@ -19,7 +19,7 @@
     </header>
 
     <!-- Hero -->
-    <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-700 to-gray-600 text-left">
+    <section class="min-h-screen text-white flex items-center justify-center px-6 py-20 dark:bg-neutral-900 text-left">
       <div class="max-w-2xl">
         <h2 class="text-5xl md:text-7xl font-extrabold mb-6">
             Track Documents <span class="text-amber-500">Smarter</span>
@@ -45,7 +45,7 @@
     </section>
 
     <!-- Features -->
-    <section id="features" class="py-20 bg-black dark:bg-gray-600 px-6">
+    <section id="features" class="py-20 bg-black dark:bg-neutral-800 px-6">
       <div class="max-w-6xl mx-auto text-center mb-16">
         <h3 class="text-4xl font-bold text-amber-500 dark:text-amber-500">Key Features</h3>
       </div>
@@ -69,7 +69,7 @@
     </section>
 
     <!-- Steps -->
-    <section class="min-h-screen bg-black flex items-center justify-center px-6 py-20 bg-gradient-to-br from-gray-700 to-gray-600">
+    <section class="min-h-screen bg-black flex items-center justify-center px-6 py-20 dark:bg-neutral-900">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl items-center">
         <div class="flex justify-center">
           <img
@@ -82,7 +82,7 @@
           <h3 class="text-4xl font-bold text-amber-500 dark:text-amber-500 text-center md:text-left">How It Works</h3>
 
           <!-- Step 1 -->
-          <div class="flex bg-black bg-gray-700 rounded-lg overflow-hidden shadow-lg">
+          <div class="flex bg-black dark:bg-neutral-800 rounded-lg overflow-hidden shadow-lg">
             <div class="bg-red-500 text-white w-20 flex flex-col items-center justify-center p-4">
               <span class="text-3xl font-bold">01</span>
               <span class="uppercase text-xs tracking-widest">Step</span>
@@ -94,7 +94,7 @@
           </div>
 
           <!-- Step 2 -->
-          <div class="flex bg-black bg-gray-700 rounded-lg overflow-hidden shadow-lg">
+          <div class="flex bg-black dark:bg-neutral-800 rounded-lg overflow-hidden shadow-lg">
             <div class="bg-blue-500 text-white w-20 flex flex-col items-center justify-center p-4">
               <span class="text-3xl font-bold">02</span>
               <span class="uppercase text-xs tracking-widest">Step</span>
@@ -106,7 +106,7 @@
           </div>
 
           <!-- Step 3 -->
-          <div class="flex bg-black dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg">
+          <div class="flex bg-black dark:bg-neutral-800 rounded-lg overflow-hidden shadow-lg">
             <div class="bg-green-500 text-white w-20 flex flex-col items-center justify-center p-4">
               <span class="text-3xl font-bold">03</span>
               <span class="uppercase text-xs tracking-widest">Step</span>
@@ -121,7 +121,7 @@
     </section>
 
     <!-- CTA -->
-    <section class="bg-black dark:bg-gray-600 text-black dark:text-white py-20 text-center px-6">
+    <section class="bg-black dark:bg-neutral-800 text-black dark:text-white py-20 text-center px-6">
       <h3 class="text-4xl font-extrabold mb-4">Start Tracking <span class="text-amber-500">Smarter</span> Today</h3>
         <p class="text-lg mb-6">Sign up now and streamline your document workflow with Envoyr.</p>
         <x-filament::button outlined>
@@ -130,7 +130,7 @@
     </section>
 
     <!-- Tech Stack --> 
-  <section class="min-h-screen bg-black bg-gradient-to-br from-gray-700 to-gray-600 text-white flex flex-col items-center justify-center px-6 py-20">
+  <section class="min-h-screen bg-black dark:bg-neutral-900 text-white flex flex-col items-center justify-center px-6 py-20">
     <div class="text-center">
         <h2 class="text-3xl font-semibold text-white dark:text-amber-500">
             The tech <span class="uppercase">stack</span>
