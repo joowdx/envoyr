@@ -6,7 +6,6 @@ use Filament\Forms\Components\FileUpload;
 
 class AttachmentFileUpload extends FileUpload
 {
-
     public static function make(string $name = 'file'): static
     {
         $static = app(static::class, ['name' => $name]);

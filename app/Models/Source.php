@@ -19,5 +19,4 @@ class Source extends Model
     {
         return $this->hasMany(Document::class);
     }
-
 }

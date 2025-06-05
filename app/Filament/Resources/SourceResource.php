@@ -2,19 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\Source;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\SourceResource\Pages;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\SourceResource\RelationManagers;
 use App\Filament\Resources\SourceResource\RelationManager\DocumentRelationManager;
-
-use function Laravel\Prompts\text;
+use App\Models\Source;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class SourceResource extends Resource
 {
@@ -46,7 +41,7 @@ class SourceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name') 
+                Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
@@ -77,7 +72,7 @@ class SourceResource extends Resource
         return [
             'index' => Pages\ListSources::route('/'),
             'view' => Pages\ViewSources::route('/{record}'),
-            
+
         ];
     }
 }

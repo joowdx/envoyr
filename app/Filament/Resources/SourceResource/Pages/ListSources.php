@@ -14,9 +14,9 @@ class ListSources extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-            ->slideOver()
-            ->modalWidth('md')
-            ->createAnother(false),
+                ->slideOver()
+                ->modalWidth('md')
+                ->createAnother(false),
         ];
     }
 }
