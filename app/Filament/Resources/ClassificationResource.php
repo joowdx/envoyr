@@ -15,7 +15,7 @@ class ClassificationResource extends Resource
 {
     protected static ?string $model = Classification::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-wallet';
+    protected static ?string $navigationIcon = 'heroicon-o-folder';
 
     public static function form(Form $form): Form
     {
