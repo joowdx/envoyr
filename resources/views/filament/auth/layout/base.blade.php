@@ -1,6 +1,6 @@
 <div class="relative flex items-center justify-center min-h-screen">
-    <div class="relative z-10 grid w-full max-w-5xl p-10 mx-auto overflow-hidden bg-white dark:bg-gray-900 lg:rounded-2xl max-w-{{ $this->getMaxWidth() ?? 'lg' }}" >
-        <section class="grid auto-cols-fr gap-y-6">
+    <div class="relative z-10 grid w-full max-w-5xl p-6 mx-auto overflow-hidden bg-white dark:bg-gray-900 lg:rounded-2xl max-w-{{ $this->getMaxWidth() ?? 'lg' }}" >
+        <section class="grid auto-cols-fr gap-y-10">
             <header class="flex flex-col items-center fi-simple-header">
                 <div class="flex justify-end w-full">
                     {{-- @include('theme-switcher') --}}
