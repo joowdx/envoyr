@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\Controllers\EmailVerificationController;
+use App\Filament\Auth\Pages\Affilation;
 use App\Filament\Auth\Pages\Approval;
 use App\Filament\Auth\Pages\Redirect;
 use App\Filament\Auth\Pages\Registration;
@@ -46,6 +47,7 @@ class AuthPanelProvider extends PanelProvider
                 Redirect::class,
                 Verification::class,
                 Approval::class,
+                Affilation::class,
             ])
             ->middleware([
                 EncryptCookies::class,

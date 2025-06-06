@@ -49,6 +49,12 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    clamav:
+        image: clamav/clamav:latest
+        restart: unless-stopped
+        container_name: envoyr.antivirus
+        networks:
+            - envoyr
     mailpit:
         image: 'axllent/mailpit:latest'
         container_name: envoyr.testmail

@@ -23,8 +23,7 @@ class OfficeResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ROOT ||
-            \Illuminate\Support\Facades\Auth::user()?->role === UserRole::ADMINISTRATOR;
+        return Auth::user()?->role === UserRole::ROOT;
     }
 
     public static function form(Form $form): Form
@@ -82,8 +81,6 @@ class OfficeResource extends Resource
             ->withCount('users')
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ])->withTrashed()
-
-            ->where('id', '!=', Auth::id());
+            ]);
     }
 }

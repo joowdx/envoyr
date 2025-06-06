@@ -51,4 +51,9 @@ class Approval extends SimplePage implements HasMiddleware
     {
         return 'Account review in progress';
     }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        return 'Your registration is undergoing the review process.';
+    }
 }

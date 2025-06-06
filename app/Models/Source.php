@@ -12,6 +12,7 @@ class Source extends Model
 
     protected $fillable = [
         'name',
+        'description',
     ];
 
     public function documents(): HasMany

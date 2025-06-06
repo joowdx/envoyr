@@ -20,19 +20,21 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('code')->unique();
             $table->string('title');
+            $table->boolean('electronic')->default(false);
+            $table->boolean('dissemination')->default(false);
             $table->foreignIdFor(Classification::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Section::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(Source::class)->constrained()->cascadeOnDelete();
-            $table->boolean('digital')->default(false);
-            $table->boolean('directive')->default(false);
+            $table->foreignIdFor(Source::class)->nullable()->constrained()->nullOnDelete();
+            $table->timestamp('published_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
             $table->index(['office_id', 'created_at']); // Office + date queries
             $table->index(['office_id', 'deleted_at']); // Soft delete queries by office
-            $table->index('created_at'); // Date-based sorting/filtering
+            $table->index('created_at');
+            $table->index('published_at'); // Publication status queries
         });
     }
 
