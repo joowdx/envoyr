@@ -143,6 +143,7 @@ class DocumentResource extends Resource
                 Section::make('Document Information')
                     ->columns(2)
                     ->icon('heroicon-o-document-text')
+                    ->columns(8)
                     ->schema([
                         Infolists\Components\TextEntry::make('title')
                             ->columnSpanFull()
@@ -287,9 +288,9 @@ class DocumentResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
-                    ->color(fn (Document $record): string => $record->isPublished() ? 'success' : 'gray')
-                    ->formatStateUsing(fn (Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
-                    ->getStateUsing(fn (Document $record): string => $record->isPublished() ? 'published' : 'draft'),
+                    ->color(fn(Document $record): string => $record->isPublished() ? 'success' : 'gray')
+                    ->formatStateUsing(fn(Document $record): string => $record->isPublished() ? 'Published' : 'Draft')
+                    ->getStateUsing(fn(Document $record): string => $record->isPublished() ? 'published' : 'draft'),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -326,7 +327,7 @@ class DocumentResource extends Resource
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')
                     ->modalWidth('md')
-                    ->visible(fn (Document $record): bool => $record->isPublished())
+                    ->visible(fn(Document $record): bool => $record->isPublished())
                     ->modalContent(function (Document $record) {
                         $qrCode = (new GenerateQR)($record->code);
 
