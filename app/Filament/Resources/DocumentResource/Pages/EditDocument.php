@@ -15,7 +15,10 @@ class EditDocument extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            PublishDocumentAction::make(),
+            PublishDocumentAction::make()
+                ->after(function () {
+                    return redirect()->to(DocumentResource::getUrl('view', ['record' => $this->record]));
+                }),
             TransmitDocumentAction::make(),
             Actions\DeleteAction::make(),
             Actions\ForceDeleteAction::make(),

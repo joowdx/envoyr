@@ -5,9 +5,11 @@ namespace App\Filament\Resources;
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
 use App\Enums\UserRole;
+use App\Filament\Actions\Concerns\TransmittalHistoryInfolist;
 use App\Filament\Actions\Tables\ReceiveDocumentAction;
 use App\Filament\Actions\Tables\TransmitDocumentAction;
 use App\Filament\Actions\Tables\UnpublishDocumentAction;
+use App\Filament\Actions\Tables\ViewDocumentHistoryAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
 use Filament\Forms;
@@ -28,6 +30,8 @@ use Illuminate\Support\Facades\Response;
 
 class DocumentResource extends Resource
 {
+    use TransmittalHistoryInfolist;
+
     protected static ?string $model = Document::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
@@ -181,6 +185,9 @@ class DocumentResource extends Resource
                             ->dateTime()
                             ->visible(fn (Document $record): bool => $record->isPublished()),
                     ]),
+                Section::make('Transmittal History')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->schema(self::getTransmittalHistorySchema()),
             ]);
     }
 
@@ -243,6 +250,7 @@ class DocumentResource extends Resource
                 TransmitDocumentAction::make(),
                 ReceiveDocumentAction::make()
                     ->label('Receive'),
+                ViewDocumentHistoryAction::make(),
                 Tables\Actions\Action::make('generateQR')
                     ->label('QR')
                     ->icon('heroicon-o-qr-code')

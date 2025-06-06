@@ -58,9 +58,9 @@ class Transmittal extends Model
         return $this->belongsTo(User::class, 'to_user_id');
     }
 
-    public function receivedBy(): BelongsTo
+    public function liaison(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'received_by_id');
+        return $this->belongsTo(User::class, 'liaison_id');
     }
 
     public function contents(): HasMany

@@ -10,6 +10,7 @@ use App\Models\User;
 use Exception;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,12 @@ trait TransmitDocument
         $this->modalWidth('lg');
 
         $this->form([
+            Toggle::make('pick_up')
+                ->label('Pick Up')
+                ->helperText('Enable if the document needs to be picked up')
+                ->default(false)
+                ->live()
+                ->columnSpanFull(),
             Select::make('office_id')
                 ->label('Office')
                 ->options(Office::pluck('name', 'id'))
@@ -69,7 +76,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id),
+                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id)
+                ->required(fn (Get $get) => $get('office_id') === Auth::user()->office_id),
             Select::make('liaison_id')
                 ->label('Liaison')
                 ->options(function (callable $get) {
@@ -81,7 +89,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->required(),
+                ->required(fn (Get $get) => ! $get('pick_up'))
+                ->visible(fn (Get $get) => ! $get('pick_up')),
             Textarea::make('purpose')
                 ->label('Purpose')
                 ->markAsRequired()
@@ -107,6 +116,7 @@ trait TransmitDocument
                         'to_section_id' => $data['section_id'],
                         'from_user_id' => Auth::id(),
                         'liaison_id' => $data['liaison_id'],
+                        'pick_up' => $data['pick_up'],
                     ]);
                 });
 
@@ -116,10 +126,11 @@ trait TransmitDocument
             }
         });
 
-        $this->visible(fn (Document $record): bool => $record->isPublished() &&
-            $record->user_id === Auth::id() &&
-            ! $record->transmitted_at &&
-            ! $record->dissemination
+        $this->visible(
+            fn (Document $record): bool => $record->isPublished() &&
+                $record->user_id === Auth::id() &&
+                ! $record->transmitted_at &&
+                ! $record->dissemination
         );
 
         $this->successNotificationTitle('Document transmitted successfully');
