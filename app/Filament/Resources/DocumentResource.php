@@ -16,8 +16,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Accordion;
-use Filament\Infolists\Components\AccordionItem;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,8 +25,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 
 class DocumentResource extends Resource
 {
@@ -215,10 +211,10 @@ class DocumentResource extends Resource
                                                                     ->label('To'),
                                                                 Infolists\Components\TextEntry::make('fromSection.name')
                                                                     ->label('From Section')
-                                                                    ->visible(fn($record) => $record->fromSection !== null),
+                                                                    ->visible(fn ($record) => $record->fromSection !== null),
                                                                 Infolists\Components\TextEntry::make('toSection.name')
                                                                     ->label('To Section')
-                                                                    ->visible(fn($record) => $record->toSection !== null),
+                                                                    ->visible(fn ($record) => $record->toSection !== null),
                                                                 Infolists\Components\TextEntry::make('fromUser.name')
                                                                     ->label('Transmitted By'),
                                                                 Infolists\Components\TextEntry::make('liaison.name')
@@ -239,7 +235,7 @@ class DocumentResource extends Resource
                                                 Infolists\Components\TextEntry::make('remarks')
                                                     ->markdown()
                                                     ->columnSpanFull()
-                                                    ->visible(fn($record) => $record->remarks !== null),
+                                                    ->visible(fn ($record) => $record->remarks !== null),
                                             ]),
                                         Infolists\Components\Tabs\Tab::make('Attachments')
                                             ->schema([
