@@ -43,8 +43,19 @@ class ClassificationResource extends Resource
                     ->sortable()
                     ->limit(50),
                 Tables\Columns\TextColumn::make('description')
-                    ->limit(100)
-                    ->wrap(),
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('No description provided')
+                    ->limit(50)
+                    ->tooltip(function (Tables\Columns\TextColumn $component): ?string {
+                        $state = $component->getState();
+
+                        if (strlen($state) <= $component->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        return $state;
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

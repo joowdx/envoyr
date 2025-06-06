@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SourceResource\RelationManager;
 
+use App\Filament\Resources\DocumentResource;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -17,8 +18,7 @@ class DocumentRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255),
+                    ->required(),
             ]);
     }
 
@@ -31,7 +31,15 @@ class DocumentRelationManager extends RelationManager
                     ->searchable()
                     ->sortable()
                     ->limit(50)
-                    ->url(fn ($record) => route('filament.app.resources.documents.view', $record->id)),
+                    ->tooltip(function (Tables\Columns\TextColumn $component): ?string {
+                        $state = $component->getState();
+
+                        if (strlen($state) <= $component->getCharacterLimit()) {
+                            return null;
+                        }
+
+                        return $state;
+                    }),
                 Tables\Columns\TextColumn::make('office.name')
                     ->label('Office')
                     ->searchable()
@@ -48,8 +56,8 @@ class DocumentRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->url(fn ($record) => DocumentResource::getUrl('view', [$record->id])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
