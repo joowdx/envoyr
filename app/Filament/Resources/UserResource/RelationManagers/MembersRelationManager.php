@@ -74,9 +74,11 @@ class UsersRelationManager extends RelationManager
                     ->label('Role')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('section.name')
-                    ->label('Section') // Add the section column
+                    ->label('Section')
                     ->sortable()
-                    ->searchable(),
+                    ->url(fn ($record) => $record->section ? route('filament.app.resources.sections.view', ['record' => $record->section_id]) : null)
+                    ->searchable()
+                    ->visible(fn () => ! ($this->getOwnerRecord() instanceof \App\Models\Section)),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make('trashed'),

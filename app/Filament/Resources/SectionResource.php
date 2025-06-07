@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Enums\UserRole;
+use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 use App\Filament\Resources\SectionResource\Pages;
 use App\Models\Section;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -63,6 +65,7 @@ class SectionResource extends Resource
                 Tables\Filters\TrashedFilter::make('trashed'),
             ])
             ->actions([
+                ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ]);
     }
@@ -70,7 +73,7 @@ class SectionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            UsersRelationManager::class,
         ];
     }
 
@@ -80,6 +83,7 @@ class SectionResource extends Resource
             'index' => Pages\ListSections::route('/'),
             'create' => Pages\CreateSection::route('/create'),
             'edit' => Pages\EditSection::route('/{record}/edit'),
+            'view' => Pages\ViewSection::route('/{record}'),
         ];
     }
 
