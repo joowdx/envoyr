@@ -43,8 +43,8 @@ class ViewUser extends ViewRecord
                             ->color(fn ($state): string => match ($state->value) {
                                 'ROOT' => 'danger',
                                 'ADMINISTRATOR' => 'warning',
-                                'CLERK' => 'info',
-                                'EMPLOYEE' => 'success',
+                                'LIASON' => 'info',
+                                'USER' => 'success',
                                 default => 'gray',
                             }),
                     ])
