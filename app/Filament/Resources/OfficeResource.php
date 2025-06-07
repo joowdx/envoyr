@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -55,6 +56,7 @@ class OfficeResource extends Resource
                 Tables\Filters\TrashedFilter::make('trashed'),
             ])
             ->actions([
+                ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ]);
     }
@@ -72,6 +74,7 @@ class OfficeResource extends Resource
             'index' => Pages\ListOffices::route('/'),
             'create' => Pages\CreateOffice::route('/create'),
             'edit' => Pages\EditOffice::route('/{record}/edit'),
+            'view' => Pages\ViewOffice::route('/{record}'),
         ];
     }
 
