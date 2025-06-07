@@ -60,9 +60,6 @@ class ViewUser extends ViewRecord
                             ->label('Section')
                             ->url(fn ($record) => $record->section ? route('filament.app.resources.sections.view', ['record' => $record->section_id]) : null)
                             ->placeholder('No section assigned'),
-                        TextEntry::make('position')
-                            ->label('Position')
-                            ->placeholder('No position provided'),
                         TextEntry::make('designation')
                             ->label('Designation')
                             ->placeholder('No designation provided'),
