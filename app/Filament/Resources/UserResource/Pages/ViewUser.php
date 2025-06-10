@@ -72,6 +72,10 @@ class ViewUser extends ViewRecord
                             ->label('Email Verified')
                             ->dateTime()
                             ->placeholder('Not verified'),
+                        TextEntry::make('approved_at')
+                            ->label('User Approved')
+                            ->dateTime()
+                            ->placeholder('Not verified'),
                         TextEntry::make('created_at')
                             ->label('Account Created')
                             ->dateTime(),
