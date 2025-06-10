@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('enclosures', function (Blueprint $table) {
+        Schema::create('attachments', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignIdFor(Document::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Transmittal::class)->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
-
-            $table->unique(['document_id', 'transmittal_id'], 'unique_document_transmittal');
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('enclosures');
+        Schema::dropIfExists('attachments');
     }
 };
