@@ -95,15 +95,15 @@ class DocumentResource extends Resource
                             ->markAsRequired(),
                     ]),
                 Forms\Components\Grid::make()
-                    ->relationship('enclosure')
+                    ->relationship('attachment')
                     ->columnSpanFull()
                     ->schema([
-                        Forms\Components\Repeater::make('attachments')
+                        Forms\Components\Repeater::make('contents')
                             ->relationship()
-                            ->addActionLabel('Add attachment')
+                            ->addActionLabel('Add content')
                             ->columnSpanFull()
                             ->orderColumn('sort')
-                            ->hint('Specify the attachments enclosed with the document')
+                            ->hint('Specify the contents enclosed with the document')
                             ->helperText('What are the files or documents attached?')
                             ->itemLabel(fn ($state) => $state['title'])
                             ->collapsed()
@@ -130,7 +130,8 @@ class DocumentResource extends Resource
                                         Forms\Components\TextInput::make('context.payee'),
                                         Forms\Components\TextInput::make('context.amount')
                                             ->minValue(1)
-                                            ->rule('numeric'),
+                                            ->rule('numeric')
+                                            ->maxLength(null),
                                     ]),
                                 Forms\Components\Textarea::make('remarks')
                                     ->hidden(fn (callable $get) => $get('electronic'))
@@ -159,6 +160,42 @@ class DocumentResource extends Resource
                         Infolists\Components\TextEntry::make('classification.name')
                             ->label('Classification'),
                     ]),
+                Infolists\Components\Section::make('Content Details')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->relationship('attachment')
+                    ->columnSpanFull()
+                    ->schema([
+                        Infolists\Components\RepeatableEntry::make('contents')
+                            ->hiddenLabel()
+                            ->grid(2)
+                            ->columns(3)
+                            ->schema([
+                                Infolists\Components\TextEntry::make('title')
+                                    ->columnSpanFull()
+                                    ->hiddenLabel()
+                                    ->alignCenter()
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('context.control')
+                                    ->label('Control #')
+                                    ->placeholder('None'),
+                                Infolists\Components\TextEntry::make('context.pages')
+                                    ->label('Pages')
+                                    ->placeholder('Unspecified'),
+                                Infolists\Components\TextEntry::make('context.copies')
+                                    ->label('Copies')
+                                    ->placeholder('Unspecified'),
+                                Infolists\Components\TextEntry::make('context.particulars')
+                                    ->label('Particulars')
+                                    ->visible(fn ($record) => $record->context['particulars'] ?? false),
+                                Infolists\Components\TextEntry::make('context.payee')
+                                    ->label('Payee')
+                                    ->visible(fn ($record) => $record->context['payee'] ?? false),
+                                Infolists\Components\TextEntry::make('context.amount')
+                                    ->label('Amount')
+                                    ->visible(fn ($record) => $record->context['amount'] ?? false)
+                                    ->money('PHP'),
+                            ]),
+                        ]),
                 Section::make('Source Origin')
                     ->icon('heroicon-o-building-office')
                     ->schema([
