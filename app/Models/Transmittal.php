@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +34,13 @@ class Transmittal extends Model
         'pick_up' => 'boolean',
     ];
 
+    public function intraOffice(): Attribute
+    {
+        return Attribute::make(
+            get: fn (): bool => $this->from_office_id === $this->to_office_id,
+        );
+    }
+
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
@@ -46,6 +54,16 @@ class Transmittal extends Model
     public function toOffice(): BelongsTo
     {
         return $this->belongsTo(Office::class, 'to_office_id');
+    }
+
+    public function fromSection(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'from_section_id');
+    }
+
+    public function toSection(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'to_section_id');
     }
 
     public function fromUser(): BelongsTo
