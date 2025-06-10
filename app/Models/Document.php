@@ -116,21 +116,15 @@ class Document extends Model
         return $this->hasMany(Label::class);
     }
 
-    public function enclosures(): HasMany
-    {
-        return $this->hasMany(Enclosure::class);
-    }
-
-    public function enclosure(): HasOne
-    {
-        return $this->enclosures()
-            ->one()
-            ->ofMany();
-    }
-
     public function attachments(): HasManyThrough
     {
-        return $this->hasManyThrough(Attachment::class, Enclosure::class);
+        return $this->hasManyThrough(Attachment::class, Transmittal::class);
+    }
+
+    public function attachment(): HasOne
+    {
+        return $this->hasOne(Attachment::class)
+            ->whereNull('transmittal_id');
     }
 
     public function transmittals(): HasMany
@@ -154,15 +148,5 @@ class Document extends Model
             ], function ($query) {
                 $query->whereNull('received_at');
             });
-    }
-
-    public function attachment(): HasOne
-    {
-        return $this->hasOne(Attachment::class);
-    }
-
-    public function actions(): MorphMany
-    {
-        return $this->morphMany(Action::class, 'actionable');
     }
 }
