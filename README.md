@@ -99,7 +99,7 @@ Office {
   string designation
   string acronym
 }
-Sources{
+Source {
   ulid id
   string name
 }
@@ -123,7 +123,7 @@ Transmittal {
   datetime received_at
   boolean pick_up
 }
-Contents {
+Content {
   ulid id
   ulid transmittal_id
   int copies
@@ -143,13 +143,7 @@ User {
   string role
   string avatar
 }
-Enclosure {
-  ulid id
-  string name
-  ulid document_id
-  ulid transmittal_id
-}
-Attachments{
+Attachment {
   ulid id
   string remarks
   json files
@@ -160,7 +154,7 @@ Attachments{
 Transmittal }|--|| Document : "includes"
 Section || -- |{ User : "has"
 Office || -- |{ User : "has"
-Contents }|--|| Transmittal : "under"
+Content }|--|| Transmittal : "under"
 Transmittal }|--|| User : "sent by"
 Transmittal }|--|| User : "received by"
 Office ||--o{ Section : "has"
@@ -168,8 +162,8 @@ Document }| -- || User : "can make"
 Office || -- |{ Document : "can make"
 Section || -- |{ Document : "can make"
 Classification ||--|{ Document : "classified as"
-Document }| -- o| Sources : "can have"
-Document || -- |{ Enclosure : "has many"
-Transmittal || -- || Enclosure : "has many"
-Enclosure || -- |{ Attachments : "has many"
+Document }| -- o| Source : "can have"
+Document ||--|| Attachment : "has"
+Transmittal ||--|| Attachment : "has"
+Attachment ||--|{ Content : "has"
 ```
