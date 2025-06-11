@@ -129,7 +129,8 @@ class Document extends Model
 
     public function transmittals(): HasMany
     {
-        return $this->hasMany(Transmittal::class);
+        return $this->hasMany(Transmittal::class)
+            ->orderBy('id', 'desc');
     }
 
     public function transmittal(): HasOne
