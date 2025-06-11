@@ -113,7 +113,7 @@ trait TransmitDocument
                         'from_office_id' => Auth::user()->office_id,
                         'to_office_id' => $data['office_id'],
                         'from_section_id' => Auth::user()->section_id,
-                        'to_section_id' => $data['section_id'],
+                        'to_section_id' => $data['section_id'] ?? null,
                         'from_user_id' => Auth::id(),
                         'liaison_id' => $data['liaison_id'],
                         'pick_up' => $data['pick_up'],
@@ -122,6 +122,8 @@ trait TransmitDocument
 
                 $this->success();
             } catch (Exception $e) {
+                throw $e;
+
                 $this->failure();
             }
         });
