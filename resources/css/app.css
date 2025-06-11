@@ -1,11 +1,20 @@
+/* Font Awesome */
 @import '@fortawesome/fontawesome-free/css/all.css';
+
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom font configuration */
+
+
+/* Custom font fallback */
 :root {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+               'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Optional: Apply the custom font globally if needed */
+body {
+  font-family: var(--font-sans);
 }

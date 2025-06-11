@@ -1,22 +1,39 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Envoyr</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Google Fonts: Instrument Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Theme Toggle -->
+    <script>
+      (function () {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom Animations -->
     <style>
       @keyframes fadeInScale {
-        0% {
-          opacity: 0;
-          transform: scale(0.8);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
+        0% { opacity: 0; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1); }
       }
 
       .fade-in-scale {
@@ -24,15 +41,9 @@
       }
 
       @keyframes waveAnimation {
-        0% {
-          transform: translateX(0);
-        }
-        50% {
-          transform: translateX(-25px);
-        }
-        100% {
-          transform: translateX(0);
-        }
+        0% { transform: translateX(0); }
+        50% { transform: translateX(-25px); }
+        100% { transform: translateX(0); }
       }
 
       .animated-wave {
@@ -44,63 +55,10 @@
         top: 0;
         z-index: 50;
       }
-
-      .light {
-        background-color: white;
-        color: #1a202c;
-      }
-
-      .light section,
-      .light .bg-dark,
-      .light .bg-gray-800,
-      .light .bg-gray-700 {
-        background-color: #f8f9fa !important;
-        color: #1a202c;
-      }
-
-      .light .text-gray-300 {
-        color: rgb(0, 0, 0) !important;
-      }
-
-      .light .text-primary {
-        color: #c83ebf !important;
-      }
-
-      .light .text-white {
-        color: rgb(9, 9, 9) !important;
-      }
-
-      .light .shadow,
-      .light .shadow-md,
-      .light .shadow-lg {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .light .bg-gradient-to-br,
-      .light .bg-gradient-to-r {
-        background: linear-gradient(to right, #fff, #e2e8f0) !important;
-      }
-
-      .light .bg-black,
-      .light .bg-dark {
-        background-color: #ffffff !important;
-      }
-
-      .light footer {
-        background-color: #f1f5f9 !important;
-        color: #1a202c !important;
-      }
-
-      .light footer a {
-        color: #000000;
-      }
-
-      .light footer a:hover {
-        color: #c83ebf;
-      }
     </style>
   </head>
-  <body class="transition-colors duration-300 font-sans">
-    @section('content')
+
+  <body class="transition-colors duration-300 font-sans bg-white text-black dark:bg-black dark:text-white">
+    @yield('content')
   </body>
-<html>     
+</html>

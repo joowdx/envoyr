@@ -11,5 +11,5 @@ return [
     |
     */
 
-    'default_theme_mode' => 'light', // Change to 'dark' or 'system' as needed
+    'default_theme_mode' => 'system', // Change to 'dark' or 'system' as needed
 ];
