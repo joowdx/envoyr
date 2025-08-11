@@ -123,7 +123,6 @@ trait TransmitDocument
                 $this->success();
             } catch (Exception $e) {
                 throw $e;
-
                 $this->failure();
             }
         });

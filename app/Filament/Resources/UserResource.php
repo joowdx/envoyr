@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Enums\UserRole;
-use App\Filament\Resources\OfficeResource\RelationManagers\UsersRelationManager;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\Office;
 use App\Models\Section;

@@ -11,7 +11,6 @@ use App\Filament\Actions\Tables\TransmitDocumentAction;
 use App\Filament\Actions\Tables\UnpublishDocumentAction;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Models\Document;
-use App\Models\Transmittal;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -387,6 +386,6 @@ class DocumentResource extends Resource
                             ->visible(fn ($record) => $record->context['amount'] ?? false)
                             ->money('PHP'),
                     ]),
-                ]);
+            ]);
     }
 }
