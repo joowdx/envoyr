@@ -12,8 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('offices', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
+            $table->string('name');
+            $table->string('acronym');
+            $table->string('head_name')->nullable();
+            $table->string('designation')->nullable();
+            $table->softDeletes();
             $table->timestamps();
+        });
+
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->ulid('office_id')->constrained('offices')->cascadeOnDelete()->nullable()->change();
         });
     }
 
