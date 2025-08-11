@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Office;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -8,10 +9,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('offices', function (Blueprint $table) {
+        Schema::create('sections', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('name');
-            $table->string('acronym');
+            $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
             $table->string('head_name')->nullable();
             $table->string('designation')->nullable();
             $table->softDeletes();
@@ -19,12 +20,12 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->ulid('office_id')->constrained('offices')->cascadeOnDelete()->nullable()->change();
+            $table->ulid('section_id')->constrained('sections')->cascadeOnDelete()->nullable()->change();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('offices');
+        Schema::dropIfExists('sections');
     }
 };
