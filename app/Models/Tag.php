@@ -10,9 +10,7 @@ class Tag extends Model
 {
     use HasUlids;
 
-    protected $fillable = [
-        'tag',
-    ];
+    protected $fillable = ['tag'];
 
     public function documents(): BelongsToMany
     {

@@ -2,29 +2,31 @@
 
 namespace App\Models;
 
+use Filament\Forms\Components\Actions\Action;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Document extends Model
 {
-    use HasUlids;
+    use HasUlids, SoftDeletes;
 
     protected $fillable = [
         'code',
         'title',
-        'electronic',
         'dissemination',
+        'electronic',
         'classification_id',
         'user_id',
         'office_id',
         'section_id',
         'source_id',
         'published_at',
-
     ];
 
     protected $casts = [
@@ -133,7 +135,7 @@ class Document extends Model
 
     public function transmittal(): HasOne
     {
-        return $this->transmittal()
+        return $this->transmittals()
             ->one()
             ->ofMany();
     }
@@ -147,6 +149,5 @@ class Document extends Model
             ], function ($query) {
                 $query->whereNull('received_at');
             });
-
     }
 }
