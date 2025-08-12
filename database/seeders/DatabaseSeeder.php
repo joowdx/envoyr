@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
+// use Illuminate\Database\Console\Seeds\WithoutModelEvent;
+
+use App\Models\Office;
+use App\Models\Section;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +16,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (User::where('role', 'root')->doesntExist()) {
+            User::factory()->root()->create();
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        Office::factory()
+            ->count(5)
+            ->has(Section::factory()->count(3))
+            ->create();
     }
 }
