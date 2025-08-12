@@ -18,9 +18,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->ulid('office_id')->constrained('offices')->cascadeOnDelete()->nullable()->change();
-        });
+        // Schema::table('users', function (Blueprint $table) {
+        //     $table->ulid('office_id')->constrained('offices')->cascadeOnDelete()->nullable()->change();
+        // });
     }
 
     public function down(): void
