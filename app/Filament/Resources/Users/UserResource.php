@@ -2,24 +2,26 @@
 
 namespace App\Filament\Resources\Users;
 
-use BackedEnum;
-use App\Models\User;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Resource;
-use Filament\Actions\CreateAction;
-use App\Mail\UserFirstLoginOtpMail;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Filament\Support\Enums\Alignment;
-use Filament\Notifications\Notification;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Mail\UserFirstLoginOtpMail;
+use App\Models\User;
+use BackedEnum;
+use Filament\Actions\CreateAction;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Filament\Support\Enums\Alignment;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
 
 class UserResource extends Resource
 {
@@ -27,7 +29,6 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
 
-    // Changed signature to match parent (Schema)
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);
@@ -53,7 +54,6 @@ class UserResource extends Resource
                         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                         $data['password'] = Hash::make($otp);
                         $data['force_password_reset'] = true;
-
                         return $data;
                     })
                     ->createAnother(false)
@@ -71,7 +71,35 @@ class UserResource extends Resource
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")
                     ->modalWidth('sm')
-                    ->modalFooterActionsAlignment(Alignment::Center) 
+                    ->modalFooterActionsAlignment(Alignment::Center)
+                    ->infolist(function ($schema) { // accept the passed Schema instead of Infolist
+                        return $schema
+                            ->columns(1)
+                            ->components([
+                                TextEntry::make('name')
+                                    ->label('Name')
+                                    ->alignment(Alignment::Center),
+                                TextEntry::make('email')
+                                    ->label('Email')
+                                    ->alignment(Alignment::Center),
+                                TextEntry::make('role')
+                                    ->label('Role')
+                                    ->badge()
+                                    ->alignment(Alignment::Center),
+                                TextEntry::make('office.name')
+                                    ->label('Office')
+                                    ->placeholder('—')
+                                    ->alignment(Alignment::Center),
+                                TextEntry::make('created_at')
+                                    ->label('Created')
+                                    ->dateTime()
+                                    ->alignment(Alignment::Center),
+                                TextEntry::make('updated_at')
+                                    ->label('Updated')
+                                    ->since()
+                                    ->alignment(Alignment::Center),
+                            ]);
+                    }),
                 EditAction::make()
                     ->modalWidth('sm')
                     ->modalFooterActionsAlignment(Alignment::Center),
