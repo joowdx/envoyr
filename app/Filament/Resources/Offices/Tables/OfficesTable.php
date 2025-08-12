@@ -17,6 +17,7 @@ class OfficesTable
     {
         return $table
             ->columns([
+                //pang commit
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('acronym')
@@ -25,6 +26,18 @@ class OfficesTable
                     ->searchable(),
                 TextColumn::make('designation')
                     ->searchable(),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),
