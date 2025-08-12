@@ -10,24 +10,23 @@ use App\Mail\UserFirstLoginOtpMail;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\CreateAction;
-use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Support\Enums\Alignment;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\TextEntry;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Users;
 
     public static function form(Schema $schema): Schema
     {
@@ -54,6 +53,7 @@ class UserResource extends Resource
                         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                         $data['password'] = Hash::make($otp);
                         $data['force_password_reset'] = true;
+
                         return $data;
                     })
                     ->createAnother(false)
