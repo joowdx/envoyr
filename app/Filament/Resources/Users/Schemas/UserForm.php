@@ -28,22 +28,22 @@ class UserForm
                     ->helperText('A one-time login code will be sent to this email.')
                     ->columnSpan(1),
 
-                Select::make('role')
-                    ->label('Role')
-                    ->options([
-                        'admin' => 'Admin',
-                        'user' => 'User',
-                    ])
-                    ->default('user')
-                    ->required()
-                    ->columnSpan(1),
+                // Select::make('role')
+                //     ->label('Role')
+                //     ->options([
+                //         'admin' => 'Admin',
+                //         'user' => 'User',
+                //     ])
+                //     ->default('user')
+                //     ->required()
+                //     ->columnSpan(1),
 
-                Select::make('office_id')
-                    ->label('Office')
-                    ->relationship('office', 'name')
-                    ->searchable()
-                    ->required()
-                    ->columnSpan(1),
+                // Select::make('office_id')
+                //     ->label('Office')
+                //     ->relationship('office', 'name')
+                //     ->searchable()
+                //     ->required()
+                //     ->columnSpan(1),
 
             ]);
     }
