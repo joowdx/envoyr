@@ -34,7 +34,7 @@ class Transmittal extends Model
         'pick_up' => 'boolean',
     ];
 
-    public function intraOffice(): Attribute
+    public function infraOffice(): Attribute
     {
         return Attribute::make(
             get: fn (): bool => $this->from_office_id === $this->to_office_id,
