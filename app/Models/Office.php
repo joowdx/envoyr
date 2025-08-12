@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Office extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory;
+    use HasUlids;
+    use SoftDeletes;
 
     protected $fillable = [
-        'acronym',
         'name',
+        'acronym',
         'head_name',
         'designation',
     ];

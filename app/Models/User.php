@@ -3,23 +3,14 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Enums\UserRole;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Models\Contracts\HasAvatar;
-use Filament\Panel;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasUlids, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -30,14 +21,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'name',
         'email',
         'password',
-        'role',
-        'avatar',
-        'office_id',
-        'section_id',
-        'approved_by',
-        'approved_at',
-        'deactivated_at',
-        'deactivated_by',
     ];
 
     /**
@@ -55,80 +38,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
      *
      * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'role' => UserRole::class,
-        'deactivated_at' => 'datetime',
-    ];
-
-    public function deactivate(User $deactivatedBy): void
+    protected function casts(): array
     {
-        $this->update([
-            'deactivated_at' => now(),
-            'deactivated_by' => $deactivatedBy->id,
-        ]);
-    }
-
-    public function deactivatedByUser()
-    {
-        return $this->belongsTo(User::class, 'deactivated_by');
-    }
-
-    public function reactivate(): void
-    {
-        $this->update([
-            'deactivated_at' => null,
-        ]);
-    }
-
-    public function getFilamentAvatarUrl(): ?string
-    {
-        return $this->avatar
-            ? asset('storage/'.$this->avatar)
-            : null;
-    }
-
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return true;
-    }
-
-    public function office(): BelongsTo
-    {
-        return $this->belongsTo(Office::class);
-    }
-
-    public function section(): BelongsTo
-    {
-        return $this->belongsTo(Section::class);
-    }
-
-    public function approve(?User $user = null): void
-    {
-        $this->update([
-            'approved_by' => $user?->id ?? Auth::id(),
-            'approved_at' => now(),
-        ]);
-    }
-
-    public function approvedByUser()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function hasApprovedAccount(): bool
-    {
-        return $this->hasVerifiedEmail() && isset($this->approved_at);
-    }
-
-    public function hasOffice(): bool
-    {
-        return $this->office_id !== null;
-    }
-
-    public function hasSection(): bool
-    {
-        return $this->section_id !== null;
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }
