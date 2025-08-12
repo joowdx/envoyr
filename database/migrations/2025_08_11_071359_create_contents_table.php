@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contents', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
+            $table->smallInteger('sort')->default(0);
+            $table->string('title')->index();
+            $table->jsonb('context')->nullable();
+            $table->jsonb('file')->nullable();
+            $table->jsonb('path')->nullable();
+            $table->string('hash', 64)->nullable();
+            $table->foreignIdFor(Attachment::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }
