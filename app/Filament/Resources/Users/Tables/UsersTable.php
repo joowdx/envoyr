@@ -36,7 +36,7 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                
+
             ])
             ->recordActions([
                 ViewAction::make(),
