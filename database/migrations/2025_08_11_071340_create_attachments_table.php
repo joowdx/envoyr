@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('attachments', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
+            $table->foreignIdFor(Document::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Transmittal::class)->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

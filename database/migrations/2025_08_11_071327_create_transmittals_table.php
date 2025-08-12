@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Document;
+use App\Models\Office;
+use App\Models\Section;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
