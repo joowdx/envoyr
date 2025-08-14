@@ -27,6 +27,10 @@ return new class extends Migration
             $table->timestamp('created_at')->nullable();
         });
 
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('force_password_reset')->default(false)->after('password');
+        });
+
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -42,5 +46,8 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('force_password_reset');
+        });
     }
 };

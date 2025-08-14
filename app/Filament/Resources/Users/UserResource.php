@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources\Users;
 
-use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Schemas\UserInfolist;
-use App\Filament\Resources\Users\Tables\UsersTable;
-use App\Mail\UserFirstLoginOtpMail;
-use App\Models\User;
 use BackedEnum;
+use App\Models\User;
+use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Enums\Alignment;
+use App\Mail\UserFirstLoginOtpMail;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Filament\Notifications\Notification;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Schemas\UserForm;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Filament\Resources\Users\Schemas\UserInfolist;
 
 class UserResource extends Resource
 {
@@ -39,14 +39,31 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table)
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")
-                    ->modalWidth('sm')
-                    ->modalFooterActionsAlignment(Alignment::Center),
+                    ->modalWidth('sm'),
                 EditAction::make()
-                    ->modalWidth('sm')
-                    ->modalFooterActionsAlignment(Alignment::Center),
+                    ->modalWidth('sm'),
+                Action::make('resendOtp')
+                    ->label('Resend OTP')
+                    ->icon('heroicon-o-envelope')
+                    ->color('warning')
+                    ->visible(fn (User $record) => $record->force_password_reset ?? false)
+                    ->requiresConfirmation()
+                    ->modalHeading('Resend OTP Code')
+                    ->modalDescription('This will generate a new one-time password and send it to the user\'s email.')
+                    ->action(function (User $record) {
+                        $otp = self::generateOtp();
+                        $record->update(['password' => Hash::make($otp)]);
+                        self::sendWelcomeEmail($record, $otp);
+                        
+                        Notification::make()
+                            ->title('OTP Resent')
+                            ->body("New OTP sent to {$record->email}")
+                            ->success()
+                            ->send();
+                    }),
             ]);
     }
 
@@ -78,7 +95,7 @@ class UserResource extends Resource
         Mail::to($user->email)->send(new UserFirstLoginOtpMail($otp));
         
         Notification::make()
-            ->title('User created')
+            ->title('OTP Sent')
             ->body('One-time login code emailed.')
             ->success()
             ->send();
@@ -95,7 +112,7 @@ class UserResource extends Resource
             ...$data,
             'password' => Hash::make($otp),
             'force_password_reset' => true,
-            '_otp' => $otp, // Store temporarily for email
+            '_otp' => $otp, 
         ];
     }
 }

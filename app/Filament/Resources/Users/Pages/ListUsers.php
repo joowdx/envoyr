@@ -19,7 +19,7 @@ class ListUsers extends ListRecords
                 ->modalHeading('Create User')
                 ->modalWidth('sm')
                 ->icon('heroicon-o-user-plus')
-                ->mutateFormDataUsing(function (array $data): array {
+                ->mutateDataUsing(function (array $data): array {
                     return UserResource::prepareUserData($data);
                 })
                 ->createAnother(false)
