@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class ForcedPasswordResetController extends Controller
 {
@@ -20,9 +23,13 @@ class ForcedPasswordResetController extends Controller
         $user = Auth::user();
         $user->update([
             'password' => Hash::make($request->password),
-            'force_password_reset' => false,
+            'force_password_reset' => false, x,
         ]);
 
-        return redirect('/')->with('status', 'Password updated successfully!');
+        // Clear any cached user data
+        Auth::setUser($user->fresh());
+
+        // Redirect to the dashboard
+        return redirect('/')->with('status', 'Password updated successfully! Welcome to your dashboard.');
     }
 }

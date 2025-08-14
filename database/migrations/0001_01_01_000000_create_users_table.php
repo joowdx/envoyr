@@ -19,16 +19,13 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->timestamp('force_password_reset_at')->nullable()->after('password');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('force_password_reset')->default(false)->after('password');
         });
 
         Schema::create('sessions', function (Blueprint $table) {

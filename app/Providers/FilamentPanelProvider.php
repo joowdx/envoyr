@@ -50,10 +50,11 @@ class FilamentPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                'force.password.reset'
+
             ])
             ->authMiddleware([
                 Authenticate::class,
+                'force.password.reset',
             ]);
     }
 }

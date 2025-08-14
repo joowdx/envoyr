@@ -26,10 +26,10 @@ class ListUsers extends ListRecords
                 ->using(function (array $data): User {
                     $otp = $data['_otp'];
                     unset($data['_otp']);
-                    
+
                     $user = User::create($data);
                     UserResource::sendWelcomeEmail($user, $otp);
-                    
+
                     return $user;
                 })
                 ->successNotificationTitle(null),

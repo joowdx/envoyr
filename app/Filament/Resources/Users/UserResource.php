@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources\Users;
 
-use BackedEnum;
-use App\Models\User;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Resource;
-use App\Mail\UserFirstLoginOtpMail;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Filament\Notifications\Notification;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Mail\UserFirstLoginOtpMail;
+use App\Models\User;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserResource extends Resource
 {
@@ -57,7 +57,7 @@ class UserResource extends Resource
                         $otp = self::generateOtp();
                         $record->update(['password' => Hash::make($otp)]);
                         self::sendWelcomeEmail($record, $otp);
-                        
+
                         Notification::make()
                             ->title('OTP Resent')
                             ->body("New OTP sent to {$record->email}")
@@ -93,7 +93,7 @@ class UserResource extends Resource
     public static function sendWelcomeEmail(User $user, string $otp): void
     {
         Mail::to($user->email)->send(new UserFirstLoginOtpMail($otp));
-        
+
         Notification::make()
             ->title('OTP Sent')
             ->body('One-time login code emailed.')
@@ -107,12 +107,12 @@ class UserResource extends Resource
     public static function prepareUserData(array $data): array
     {
         $otp = self::generateOtp();
-        
+
         return [
             ...$data,
             'password' => Hash::make($otp),
             'force_password_reset' => true,
-            '_otp' => $otp, 
+            '_otp' => $otp,
         ];
     }
 }

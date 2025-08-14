@@ -18,7 +18,7 @@ class ForcePasswordReset
     {
         if (Auth::check() && Auth::user()->force_password_reset) {
             // Don't redirect if on password reset routes
-            if (!$request->routeIs('password.reset.force')) {
+            if (! $request->routeIs('password.reset.force')) {
                 return redirect()->route('password.reset.force');
             }
         }
