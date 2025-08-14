@@ -9,13 +9,14 @@ use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Mail\UserFirstLoginOtpMail;
 use App\Models\User;
 use BackedEnum;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\ActionSize;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -39,7 +40,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table)
-            ->recordActions([
+            ->recordActions([  // Changed from recordActions to actions
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")
                     ->modalWidth('sm'),
@@ -49,6 +50,7 @@ class UserResource extends Resource
                     ->label('Resend OTP')
                     ->icon('heroicon-o-envelope')
                     ->color('warning')
+                    ->size(ActionSize::Small)
                     ->visible(fn (User $record) => $record->force_password_reset ?? false)
                     ->requiresConfirmation()
                     ->modalHeading('Resend OTP Code')
@@ -56,8 +58,11 @@ class UserResource extends Resource
                     ->action(function (User $record) {
                         $otp = self::generateOtp();
                         $record->update(['password' => Hash::make($otp)]);
-                        self::sendWelcomeEmail($record, $otp);
+                        
+                        // Send email without notification (since we'll show one here)
+                        self::sendEmailOnly($record, $otp);
 
+                        // Show only one notification here
                         Notification::make()
                             ->title('OTP Resent')
                             ->body("New OTP sent to {$record->email}")
@@ -79,31 +84,29 @@ class UserResource extends Resource
         ];
     }
 
-    /**
-     * Generate a 6-digit OTP for user registration
-     */
     public static function generateOtp(): string
     {
         return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 
-    /**
-     * Send welcome email with OTP to new user
-     */
+
     public static function sendWelcomeEmail(User $user, string $otp): void
     {
         Mail::to($user->email)->send(new UserFirstLoginOtpMail($otp));
 
         Notification::make()
-            ->title('OTP Sent')
+            ->title('User Created')
             ->body('One-time login code emailed.')
             ->success()
             ->send();
     }
 
-    /**
-     * Prepare user data for creation with OTP password
-     */
+    public static function sendEmailOnly(User $user, string $otp): void
+    {
+        Mail::to($user->email)->send(new UserFirstLoginOtpMail($otp));
+    }
+
+
     public static function prepareUserData(array $data): array
     {
         $otp = self::generateOtp();
