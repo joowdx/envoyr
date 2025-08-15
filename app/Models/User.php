@@ -85,4 +85,66 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->avatar;
     }
+
+    public function deactivatedByUser()
+    {
+        return $this->belongsTo(User::class, 'deactivated_by');
+    }
+
+    public function reactivate(): void
+    {
+        $this->update([
+            'deactivated_at' => null,
+        ]);
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatar
+            ? asset('storage/'.$this->avatar)
+            : null;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class);
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(Section::class);
+    }
+
+    public function approve(?User $user = null): void
+    {
+        $this->update([
+            'approved_by' => $user?->id ?? Auth::id(),
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function hasApprovedAccount(): bool
+    {
+        return $this->hasVerifiedEmail() && isset($this->approved_at);
+    }
+
+    public function hasOffice(): bool
+    {
+        return $this->office_id !== null;
+    }
+
+    public function hasSection(): bool
+    {
+        return $this->section_id !== null;
+    }
 }
