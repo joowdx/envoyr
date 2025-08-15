@@ -6,14 +6,15 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
-use Filament\Panel;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -59,7 +60,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        //'role' => UserRole::class,
+        'role' => UserRole::class,
         'deactivated_at' => 'datetime',
     ];
 
@@ -82,13 +83,61 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         return is_null($this->password_reset_at) &&
         ($this->otp_expires_at === null || $this->otp_expires_at->isFuture());
     }
-    public function canAccessPanel(Panel $panel): bool
+
+    public function reactivate(): void
     {
-        return true; // Adjust this logic based on your requirements
+        $this->update([
+            'deactivated_at' => null,
+        ]);
     }
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->avatar;
+        return $this->avatar
+            ? asset('storage/'.$this->avatar)
+            : null;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class);
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(Section::class);
+    }
+
+    public function approve(?User $user = null): void
+    {
+        $this->update([
+            'approved_by' => $user?->id ?? Auth::id(),
+            'approved_at' => now(),
+        ]);
+    }
+
+    public function approvedByUser()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function hasApprovedAccount(): bool
+    {
+        return $this->hasVerifiedEmail() && isset($this->approved_at);
+    }
+
+    public function hasOffice(): bool
+    {
+        return $this->office_id !== null;
+    }
+
+    public function hasSection(): bool
+    {
+        return $this->section_id !== null;
     }
 }
