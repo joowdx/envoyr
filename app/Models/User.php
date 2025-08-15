@@ -21,7 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'force_password_reset',
+        'password_reset_at',
+        'otp_expires_at',
     ];
 
     /**
@@ -44,7 +45,14 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'force_password_reset' => 'boolean',
+            'password_reset' => 'timestamp',
+            'otp_expires_at' => 'datetime',
         ];
+    }
+
+    public function needsPasswordReset(): bool
+    {
+        return is_null($this->password_reset_at) &&
+        ($this->otp_expires_at === null || $this->otp_expires_at->isFuture());
     }
 }

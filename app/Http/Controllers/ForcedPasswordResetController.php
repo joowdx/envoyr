@@ -23,13 +23,13 @@ class ForcedPasswordResetController extends Controller
         $user = Auth::user();
         $user->update([
             'password' => Hash::make($request->password),
-            'force_password_reset' => false, x,
+            'password_reset_at' => now(),
         ]);
 
-        // Clear any cached user data
+
         Auth::setUser($user->fresh());
 
-        // Redirect to the dashboard
+
         return redirect('/')->with('status', 'Password updated successfully! Welcome to your dashboard.');
     }
 }
