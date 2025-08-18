@@ -49,7 +49,7 @@ class UserResource extends Resource
                     ->modalHeading('Create User')
                     ->modalWidth('sm')
                     ->icon('heroicon-o-user-plus')
-                    ->mutateFormDataUsing(function (array $data) use (&$otp) {
+                    ->mutateDataUsing(function (array $data) use (&$otp) {
                         $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                         $data['password'] = Hash::make($otp);
                         $data['force_password_reset'] = true;
@@ -67,12 +67,12 @@ class UserResource extends Resource
                     })
                     ->successNotificationTitle(null),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")
                     ->modalWidth('sm')
                     ->modalFooterActionsAlignment(Alignment::Center)
-                    ->infolist(function ($schema) { // accept the passed Schema instead of Infolist
+                    ->schema(function ($schema) { // accept the passed Schema instead of Infolist
                         return $schema
                             ->columns(1)
                             ->components([
