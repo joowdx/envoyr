@@ -43,9 +43,6 @@ class UsersTable
                 EditAction::make(),
             ])
             ->toolbarActions([
-                // BulkActionGroup::make([
-                //     DeleteBulkAction::make(),
-                // ])
             ]);
     }
 }
