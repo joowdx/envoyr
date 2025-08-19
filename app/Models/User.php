@@ -59,7 +59,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'role' => UserRole::class,
+        //'role' => UserRole::class,
         'deactivated_at' => 'datetime',
     ];
 
