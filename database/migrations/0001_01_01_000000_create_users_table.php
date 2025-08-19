@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\UserRole;
 
 return new class extends Migration
 {
@@ -16,7 +17,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('role')->default(UserRole::USER->value);
+            $table->ulid('office_id')->nullable();
+            $table->ulid('section_id')->nullable();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('password_reset_at')->nullable();

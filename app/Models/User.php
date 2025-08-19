@@ -14,11 +14,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Office;
+use App\Models\Section;     
+
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasUlids, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -59,7 +63,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        //'role' => UserRole::class,
+        'role' => UserRole::class,
         'deactivated_at' => 'datetime',
     ];
 
@@ -69,6 +73,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'deactivated_at' => now(),
             'deactivated_by' => $deactivatedBy->id,
         ]);
+    }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class, 'office_id');
+    }
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(Section::class, 'section_id');
     }
 
     public function needsPasswordReset(): bool

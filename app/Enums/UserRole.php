@@ -2,10 +2,11 @@
 
 namespace App\Enums;
 
-use App\Enums\Contracts\HasDescription;
-use App\Enums\Contracts\HasLabel;
+// use App\Enums\Contracts\HasDescription; comment out sa nako para aha ni
+// use App\Enums\Contracts\HasLabel;
 
-enum UserRole: string implements HasDescription, HasLabel
+// enum UserRole: string implements HasDescription, HasLabel
+enum UserRole: string
 {
     case ROOT = 'root';
     case ADMINISTRATOR = 'administrator';
