@@ -12,13 +12,13 @@ use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Actions\CreateAction;
 use App\Mail\UserFirstLoginOtpMail;
+use App\Filament\Resources\Users\Schemas\UserForm;
+use App\Filament\Resources\Users\Schemas\UserInfolist;
+use App\Filament\Resources\Users\Tables\UsersTable;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Filament\Notifications\Notification;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
-use App\Filament\Resources\Users\Schemas\UserInfolist;
 
 class UserResource extends Resource
 {
