@@ -2,29 +2,31 @@
 
 namespace App\Filament\Resources\Users;
 
-use BackedEnum;
+use App\Filament\Resources\Users\Schemas\UserForm;
+use App\Filament\Resources\Users\Schemas\UserInfolist;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Mail\UserFirstLoginOtpMail;
 use App\Models\User;
-use Filament\Tables\Table;
+use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use App\Mail\UserFirstLoginOtpMail;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Filament\Notifications\Notification;
-use App\Filament\Resources\Users\Schemas\UserForm;
-use App\Filament\Resources\Users\Tables\UsersTable;
-use App\Filament\Resources\Users\Schemas\UserInfolist;
 
 class UserResource extends Resource
 {
     private const OTP_LENGTH = 6;
+
     private const OTP_EXPIRY_HOURS = 24;
-    
+
     protected static ?string $model = User::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Users;
 
     public static function form(Schema $schema): Schema
@@ -44,10 +46,10 @@ class UserResource extends Resource
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")
                     ->modalWidth('sm'),
-                    
+
                 EditAction::make()
                     ->modalWidth('sm'),
-                    
+
                 self::resendOtpAction(),
             ]);
     }
@@ -83,7 +85,7 @@ class UserResource extends Resource
     {
         try {
             $otp = self::generateSecureOtp();
-            
+
             $record->update([
                 'password' => Hash::make($otp),
                 'password_reset_at' => null,
@@ -94,10 +96,10 @@ class UserResource extends Resource
 
             Notification::make()
                 ->title('OTP Sent Successfully')
-                ->body("New OTP sent to {$record->email} (expires in " . self::OTP_EXPIRY_HOURS . " hours)")
+                ->body("New OTP sent to {$record->email} (expires in ".self::OTP_EXPIRY_HOURS.' hours)')
                 ->success()
                 ->send();
-                
+
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Failed to Send OTP')
@@ -111,7 +113,7 @@ class UserResource extends Resource
     {
         $min = 10 ** (self::OTP_LENGTH - 1);
         $max = (10 ** self::OTP_LENGTH) - 1;
-        
+
         return (string) random_int($min, $max);
     }
 
@@ -137,7 +139,7 @@ class UserResource extends Resource
                 ->body("Welcome email sent to {$user->email}")
                 ->success()
                 ->send();
-                
+
         } catch (\Exception $e) {
             Notification::make()
                 ->title('User Created')

@@ -26,9 +26,7 @@ class ForcedPasswordResetController extends Controller
             'password_reset_at' => now(),
         ]);
 
-
         Auth::setUser($user->fresh());
-
 
         return redirect('/')->with('status', 'Password updated successfully! Welcome to your dashboard.');
     }
