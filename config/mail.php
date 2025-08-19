@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Mailer
@@ -36,7 +35,6 @@ return [
     */
 
     'mailers' => [
-
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
@@ -97,6 +95,15 @@ return [
             'retry_after' => 60,
         ],
 
+        'mailpit' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HOST', 'mailpit'),
+            'port' => env('MAIL_PORT', 1025),
+            'encryption' => null,
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'timeout' => null,
+        ],
     ],
 
     /*
@@ -114,5 +121,4 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
-
 ];
