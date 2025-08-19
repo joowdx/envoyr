@@ -19,15 +19,14 @@ class ListUsers extends ListRecords
                 ->modalHeading('Create User')
                 ->modalWidth('sm')
                 ->icon('heroicon-o-user-plus')
-                ->mutateDataUsing(function (array $data): array {
-                    return UserResource::prepareUserData($data);
-                })
                 ->createAnother(false)
                 ->using(function (array $data): User {
-                    $otp = $data['_otp'];
-                    unset($data['_otp']);
 
-                    $user = User::create($data);
+                    $userData = UserResource::createUserWithOtp($data);
+                    $otp = $userData['_otp'];
+                    unset($userData['_otp']);
+
+                    $user = User::create($userData);
                     UserResource::sendWelcomeEmail($user, $otp);
 
                     return $user;
