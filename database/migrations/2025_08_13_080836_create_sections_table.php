@@ -20,7 +20,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            $table->ulid('section_id')->constrained('sections')->cascadeOnDelete()->nullable()->change();
+            $table->foreign('section_id')->references('id')->on('sections')->cascadeOnDelete();
         });
     }
 
