@@ -91,7 +91,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     }
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; // Adjust this logic based on your requirements
+        return true; 
     }
 
     public function getFilamentAvatarUrl(): ?string
