@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
 use App\Enums\UserRole;
-
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
 return new class extends Migration
 {
     /**
@@ -28,9 +28,9 @@ return new class extends Migration
             $table->timestamps();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('password_reset_at')->nullable();
-            $table->timestamp('otp_expires_at')->nullable(); 
-            $table->timestamp('approved_at')->nullable(); 
-            $table->timestamp('deactivated_at')->nullable(); 
+            $table->timestamp('otp_expires_at')->nullable();
+            $table->timestamp('approved_at')->nullable();
+            $table->timestamp('deactivated_at')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

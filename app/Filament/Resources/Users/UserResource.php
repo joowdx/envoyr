@@ -9,7 +9,6 @@ use App\Mail\UserFirstLoginOtpMail;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
@@ -43,30 +42,6 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return UsersTable::configure($table)
-            ->headerActions([
-                CreateAction::make()
-                    ->label('New User')
-                    ->modalHeading('Create User')
-                    ->modalWidth('sm')
-                    ->icon('heroicon-o-user-plus')
-                    ->mutateDataUsing(function (array $data) use (&$otp) {
-                        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                        $data['password'] = Hash::make($otp);
-                        $data['force_password_reset'] = true;
-
-                        return $data;
-                    })
-                    ->createAnother(false)
-                    ->after(function (User $record) use (&$otp) {
-                        Mail::to($record->email)->send(new UserFirstLoginOtpMail($otp));
-                        Notification::make()
-                            ->title('User created')
-                            ->body('One-time login code emailed.')
-                            ->success()
-                            ->send();
-                    })
-                    ->successNotificationTitle(null),
-            ])
             ->recordActions([
                 ViewAction::make()
                     ->modalHeading(fn (User $record) => "User: {$record->name}")

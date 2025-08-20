@@ -15,10 +15,10 @@ class ListUsers extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('New User')
+                ->label('Invite User')
                 ->modalHeading('Create User')
                 ->modalWidth('sm')
-                ->icon('heroicon-o-user-plus')
+                ->icon('bi-send-fill')
                 ->createAnother(false)
                 ->using(function (array $data): User {
 

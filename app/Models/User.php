@@ -6,18 +6,13 @@ namespace App\Models;
 use App\Enums\UserRole;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Office;
-use App\Models\Section;     
-
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerifyEmail
 {
@@ -79,6 +74,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         return $this->belongsTo(Office::class, 'office_id');
     }
+
     public function section(): BelongsTo
     {
         return $this->belongsTo(Section::class, 'section_id');
@@ -86,12 +82,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function needsPasswordReset(): bool
     {
-        return is_null($this->password_reset_at) && 
+        return is_null($this->password_reset_at) &&
                (is_null($this->otp_expires_at) || now()->lt($this->otp_expires_at));
     }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; 
+        return true;
     }
 
     public function getFilamentAvatarUrl(): ?string

@@ -13,12 +13,17 @@ class UserForm
         return $schema
             ->columns(1)
             ->components([
-                TextInput::make('name')
-                    ->label('Full Name')
-                    ->placeholder('Enter full name')
-                    // ->autofocus()
+
+                Select::make('role')
+                    ->label('Role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'user' => 'User',
+                    ])
+                    ->default('user')
                     ->required()
                     ->columnSpan(1),
+
                 TextInput::make('email')
                     ->label('Email address')
                     ->placeholder('Enter email address')
@@ -27,16 +32,6 @@ class UserForm
                     ->unique(ignoreRecord: true)
                     ->helperText('A one-time login code will be sent to this email.')
                     ->columnSpan(1),
-
-                // Select::make('role')
-                //     ->label('Role')
-                //     ->options([
-                //         'admin' => 'Admin',
-                //         'user' => 'User',
-                //     ])
-                //     ->default('user')
-                //     ->required()
-                //     ->columnSpan(1),
 
                 // Select::make('office_id')
                 //     ->label('Office')
