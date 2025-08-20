@@ -7,6 +7,7 @@ use App\Filament\Resources\Offices\Pages\EditOffice;
 use App\Filament\Resources\Offices\Pages\ListOffices;
 use App\Filament\Resources\Offices\Schemas\OfficeForm;
 use App\Filament\Resources\Offices\Tables\OfficesTable;
+use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -37,7 +38,7 @@ class OfficeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SectionRelationManager::class,
         ];
     }
 
