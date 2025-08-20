@@ -3,12 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegistrationController;
 
-
-// User invitation/registration routes
-Route::get('/register/{token}', [RegistrationController::class, 'show'])
+// User invitation/registration routes with signed URLs
+Route::get('/register/{user}', [RegistrationController::class, 'show'])
     ->name('register.show')
-    ->middleware('guest'); 
+    ->middleware(['guest', 'signed']); // Add signed middleware
 
-Route::post('/register/{token}', [RegistrationController::class, 'store'])
+Route::post('/register/{user}', [RegistrationController::class, 'store'])
     ->name('register.store')
-    ->middleware('guest'); 
+    ->middleware(['guest', 'signed']); // Add signed middleware 

@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Mail\UserInvitationMail;
 use App\Models\User;
 use BackedEnum;
 use Filament\Notifications\Notification;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Mail;
 
 
 class UserResource extends Resource
@@ -52,7 +54,9 @@ class UserResource extends Resource
     public static function sendInvitationEmail(User $invitation): void
     {
         try {
-            // Mail::to($invitation->email)->send(new UserInvitationMail($invitation));
+            $registrationUrl = $invitation->getSignedRegistrationUrl();
+            
+            Mail::to($invitation->email)->send(new UserInvitationMail($invitation, $registrationUrl));
 
             Notification::make()
                 ->title('Invitation Sent Successfully')
@@ -63,7 +67,7 @@ class UserResource extends Resource
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Email Failed')
-                ->body('Invitation created but email failed to send.')
+                ->body('Invitation created but email failed to send: ' . $e->getMessage())
                 ->warning()
                 ->send();
         }

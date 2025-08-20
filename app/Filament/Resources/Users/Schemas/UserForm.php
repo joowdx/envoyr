@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\UserRole;
+use App\Models\Office;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Facades\Filament;
 
 class UserForm
 {
@@ -28,7 +30,24 @@ class UserForm
                     ->email()
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->helperText('A one-time login code will be sent to this email.')
+                    ->helperText(function () {
+                        $currentUser = Filament::auth()->user();
+                        if ($currentUser->role === UserRole::ROOT) {
+                            return 'ROOT user: You can assign users to any office, or leave office unassigned.';
+                        } else {
+                            $office = $currentUser->office->name ?? 'No office assigned';
+                            return "User will be invited to: {$office}. A registration link will be sent to this email.";
+                        }
+                    })
+                    ->columnSpan(1),
+
+                Select::make('office_id')
+                    ->label('Office')
+                    ->relationship('office', 'name')
+                    ->searchable()
+                    ->nullable()
+                    ->visible(fn () => Filament::auth()->user()->role === UserRole::ROOT)
+                    ->helperText('Leave blank to create user without office assignment (ROOT privilege)')
                     ->columnSpan(1),
 
             ]);

@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary(); // Changed to ULID
             $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->string('password')->nullable();
@@ -27,15 +27,15 @@ return new class extends Migration
             $table->string('invitation_token')->nullable()->unique();
             $table->timestamp('invitation_expires_at')->nullable();
             $table->timestamp('invitation_accepted_at')->nullable();
-            $table->foreignId('invited_by')->nullable()->constrained('users');
+            $table->ulid('invited_by')->nullable(); // Changed to ULID
 
             // Approval fields
-            $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->ulid('approved_by')->nullable(); // Changed to ULID
             $table->timestamp('approved_at')->nullable();
 
             // Deactivation fields
             $table->timestamp('deactivated_at')->nullable();
-            $table->foreignId('deactivated_by')->nullable()->constrained('users');
+            $table->ulid('deactivated_by')->nullable(); // Changed to ULID
 
             $table->rememberToken();
             $table->softDeletes();
@@ -43,14 +43,40 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
         });
 
+        // Add foreign key constraints for self-referencing columns
         Schema::table('users', function (Blueprint $table) {
-            $table->foreign('office_id')->references('id')->on('offices');
-            $table->foreign('section_id')->references('id')->on('sections');
+            $table->foreign('invited_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('deactivated_by')->references('id')->on('users')->nullOnDelete();
+        });
+
+        // Note: Foreign keys to offices and sections will be added by their respective migrations
+
+        // Create password reset tokens table
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        // Create sessions table
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->ulid('user_id')->nullable()->index(); // Changed to ULID to match users table
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+
+            // Add foreign key constraint for user_id
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
     }
 };

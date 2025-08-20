@@ -55,12 +55,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     ];
 
     // Invitation methods
-    public static function createInvitation(string $email, UserRole $role, string $officeId, int $invitedBy): self
+    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy): self
     {
         return self::create([
             'email' => $email,
             'role' => $role,
-            'office_id' => $officeId,
+            'office_id' => $officeId, // Can be null for ROOT-created users
             'invited_by' => $invitedBy,
             'invitation_token' => Str::random(64),
             'invitation_expires_at' => now()->addDays(7),
@@ -89,6 +89,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
             'invitation_token' => null, // Clear token after acceptance
             'invitation_expires_at' => null,
         ]);
+    }
+
+    public function getSignedRegistrationUrl(): string
+    {
+        return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+            'register.show',
+            $this->invitation_expires_at, // Expires when invitation expires
+            ['user' => $this->id]
+        );
     }
 
     public function canAccessPanel(Panel $panel): bool
