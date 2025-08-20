@@ -14,45 +14,44 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->nullable(); 
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable(); 
             $table->string('avatar')->nullable();
             $table->string('role')->default(UserRole::USER->value);
             $table->ulid('office_id')->nullable();
             $table->ulid('section_id')->nullable();
+            $table->string('designation')->nullable();
+
+            // Invitation fields
+            $table->string('invitation_token')->nullable()->unique();
+            $table->timestamp('invitation_expires_at')->nullable();
+            $table->timestamp('invitation_accepted_at')->nullable();
+            $table->foreignId('invited_by')->nullable()->constrained('users');
+            
+            // Approval fields
+            $table->foreignId('approved_by')->nullable()->constrained('users');
+            $table->timestamp('approved_at')->nullable();
+            
+            // Deactivation fields
+            $table->timestamp('deactivated_at')->nullable();
+            $table->foreignId('deactivated_by')->nullable()->constrained('users');
+            
             $table->rememberToken();
             $table->softDeletes();
-            $table->foreignId('approved_by')->nullable()->constrained('users'); // Add this
-            $table->foreignId('deactivated_by')->nullable()->constrained('users'); // Add this
             $table->timestamps();
             $table->timestamp('email_verified_at')->nullable();
-            $table->timestamp('password_reset_at')->nullable();
-            $table->timestamp('otp_expires_at')->nullable();
-            $table->timestamp('approved_at')->nullable();
-            $table->timestamp('deactivated_at')->nullable();
         });
 
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
+        
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('office_id')->references('id')->on('offices');
+            $table->foreign('section_id')->references('id')->on('sections');
         });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };
