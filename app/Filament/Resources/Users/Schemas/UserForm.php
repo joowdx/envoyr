@@ -44,6 +44,7 @@ class UserForm
                 Select::make('office_id')
                     ->label('Office')
                     ->relationship('office', 'name')
+                    ->options(Office::all()->pluck('name', 'id'))
                     ->searchable()
                     ->nullable()
                     ->visible(fn () => Filament::auth()->user()->role === UserRole::ROOT)
