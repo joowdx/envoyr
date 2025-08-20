@@ -69,9 +69,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function isPendingInvitation(): bool
     {
-        return !is_null($this->invitation_token) && 
-               is_null($this->invitation_accepted_at) && 
-               !$this->isInvitationExpired();
+        return ! is_null($this->invitation_token) &&
+               is_null($this->invitation_accepted_at) &&
+               ! $this->isInvitationExpired();
     }
 
     public function isInvitationExpired(): bool
@@ -93,7 +93,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return !$this->isPendingInvitation() && 
+        return ! $this->isPendingInvitation() &&
                in_array($this->role, [
                    UserRole::ROOT,
                    UserRole::ADMINISTRATOR,

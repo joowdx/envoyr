@@ -1,10 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RegistrationController;
 
-// Route::get('/', fn () => view('welcome'));
-Route::middleware(['auth'])->group(function () {
-    Route::get('/force-password-reset', [App\Http\Controllers\ForcedPasswordResetController::class, 'show'])
-        ->name('password.reset.force');
-    Route::post('/force-password-reset', [App\Http\Controllers\ForcedPasswordResetController::class, 'update']);
-});
+
+// User invitation/registration routes
+Route::get('/register/{token}', [RegistrationController::class, 'show'])
+    ->name('register.show')
+    ->middleware('guest'); 
+
+Route::post('/register/{token}', [RegistrationController::class, 'store'])
+    ->name('register.store')
+    ->middleware('guest'); 
