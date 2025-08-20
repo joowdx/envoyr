@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -120,12 +121,14 @@ class UserResource extends Resource
     public static function createUserWithOtp(array $data): array
     {
         $otp = self::generateSecureOtp();
+        $currentUser = Auth::user();
 
         return array_merge($data, [
             'password' => Hash::make($otp),
             'password_reset_at' => null,
             'otp_expires_at' => now()->addHours(self::OTP_EXPIRY_HOURS),
-            '_otp' => $otp, // For immediate use after creation
+            'office_id' => $currentUser->office_id,
+            '_otp' => $otp,
         ]);
     }
 

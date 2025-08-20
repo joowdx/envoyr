@@ -18,7 +18,7 @@ class ListUsers extends ListRecords
                 ->label('Invite User')
                 ->modalHeading('Create User')
                 ->modalWidth('sm')
-                ->icon('bi-send-fill')
+                ->icon('heroicon-o-user-plus')
                 ->createAnother(false)
                 ->using(function (array $data): User {
 

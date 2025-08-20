@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Enums\UserRole;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -16,11 +17,8 @@ class UserForm
 
                 Select::make('role')
                     ->label('Role')
-                    ->options([
-                        'admin' => 'Admin',
-                        'user' => 'User',
-                    ])
-                    ->default('user')
+                    ->options(UserRole::options())
+                    ->default(UserRole::USER->value)
                     ->required()
                     ->columnSpan(1),
 
@@ -32,13 +30,6 @@ class UserForm
                     ->unique(ignoreRecord: true)
                     ->helperText('A one-time login code will be sent to this email.')
                     ->columnSpan(1),
-
-                // Select::make('office_id')
-                //     ->label('Office')
-                //     ->relationship('office', 'name')
-                //     ->searchable()
-                //     ->required()
-                //     ->columnSpan(1),
 
             ]);
     }
