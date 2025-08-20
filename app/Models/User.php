@@ -86,12 +86,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function needsPasswordReset(): bool
     {
-        return is_null($this->password_reset_at) &&
-        ($this->otp_expires_at === null || $this->otp_expires_at->isFuture());
+        return is_null($this->password_reset_at) && 
+               (is_null($this->otp_expires_at) || now()->lt($this->otp_expires_at));
     }
     public function canAccessPanel(Panel $panel): bool
     {
-        return true; // Adjust this logic based on your requirements
+        return true; 
     }
 
     public function getFilamentAvatarUrl(): ?string
