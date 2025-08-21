@@ -25,9 +25,11 @@ class ListUsers extends ListRecords
                 ->using(function (array $data): User {
                     $currentUser = Filament::auth()->user();
 
+
                     if ($currentUser->role !== UserRole::ROOT && ! $currentUser->office_id) {
                         throw new \Exception('You must be assigned to an office to invite users.');
                     }
+
 
                     $targetOfficeId = null;
                     if ($currentUser->role === UserRole::ROOT) {
@@ -40,7 +42,7 @@ class ListUsers extends ListRecords
 
                     $invitation = User::createInvitation(
                         email: $data['email'],
-                        role: UserRole::from($data['role']),
+                        role: UserRole::from($data['role']), 
                         officeId: $targetOfficeId,
                         invitedBy: $currentUser->id,
                         designation: $data['designation'] ?? null
@@ -49,8 +51,7 @@ class ListUsers extends ListRecords
                     UserResource::sendInvitationEmail($invitation);
 
                     return $invitation;
-                })
-                ->successNotificationTitle('Invitation Sent Successfully'),
+                }),
         ];
     }
 }

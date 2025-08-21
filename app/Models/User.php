@@ -55,12 +55,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     ];
 
     // Invitation methods
-    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy, ?string $designation = null): self
+    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy, string $designation = null): self
     {
         return self::create([
             'email' => $email,
             'role' => $role,
-            'office_id' => $officeId,
+            'office_id' => $officeId, 
             'invited_by' => $invitedBy,
             'designation' => $designation,
             'invitation_token' => Str::random(64),
@@ -84,7 +84,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         $updateData = [
             'name' => $data['name'],
-            'password' => $data['password'],
+            'password' => $data['password'], 
             'invitation_accepted_at' => now(),
             'invitation_token' => null,
             'invitation_expires_at' => null,
