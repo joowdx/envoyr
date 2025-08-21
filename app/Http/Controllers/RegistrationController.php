@@ -17,6 +17,7 @@ class RegistrationController extends Controller
 
         return view('auth.register', [
             'user' => $user,
+            'needsDesignation' => is_null($user->designation), // Add this line
         ]);
     }
 
@@ -27,27 +28,31 @@ class RegistrationController extends Controller
             return redirect('/')->withErrors(['token' => 'Invalid or expired invitation link.']);
         }
 
+        // Dynamic validation rules
         $rules = [
             'name' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed'
+            'password' => 'required|string|min:8|confirmed',
         ];
-        
+
+        // Add designation validation only if it wasn't set during invitation
         if (is_null($user->designation)) {
             $rules['designation'] = 'required|string|max:255';
         }
 
         $request->validate($rules);
 
+        // Prepare data for acceptance
         $acceptanceData = [
             'name' => $request->name,
             'password' => $request->password,
         ];
 
+        // Add designation if it was provided during registration
         if (is_null($user->designation) && $request->designation) {
             $acceptanceData['designation'] = $request->designation;
         }
 
-    $user->acceptInvitation($acceptanceData);
+        $user->acceptInvitation($acceptanceData);
 
         Auth::login($user);
 
