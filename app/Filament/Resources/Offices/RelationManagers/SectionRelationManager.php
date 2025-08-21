@@ -50,8 +50,13 @@ class SectionRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('head_name'),
-                TextColumn::make('designation'),
+                TextColumn::make('head_name')
+                    ->label('Head Name'),
+                TextColumn::make('designation')
+                    ->label('Designation'),
+                TextColumn::make('users_count')
+                    ->counts('users')
+                    ->label('Members'),
             ])
             ->filters([
                 // TrashedFilter::make(),

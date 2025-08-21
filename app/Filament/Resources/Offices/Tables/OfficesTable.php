@@ -19,6 +19,11 @@ class OfficesTable
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('acronym'),
+                TextColumn::make('sections_count')
+                    ->counts('sections')
+                    ->label('Sections'),
+                TextColumn::make('head_name')
+                    ->label('Head Name'),
             ])
             ->filters([
                 TrashedFilter::make(),
