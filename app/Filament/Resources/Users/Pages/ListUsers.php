@@ -22,6 +22,7 @@ class ListUsers extends ListRecords
                 ->modalWidth('sm')
                 ->icon('heroicon-o-paper-airplane')
                 ->createAnother(false)
+                ->successNotificationTitle(false)
                 ->using(function (array $data): User {
                     $currentUser = Filament::auth()->user();
 
