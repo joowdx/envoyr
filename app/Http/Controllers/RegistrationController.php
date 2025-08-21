@@ -17,6 +17,7 @@ class RegistrationController extends Controller
 
         return view('auth.register', [
             'user' => $user,
+            'needsDesignation' => is_null($user->designation), // Add this line
         ]);
     }
 

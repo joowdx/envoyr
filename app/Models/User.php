@@ -114,6 +114,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
                    UserRole::ADMINISTRATOR,
                    UserRole::LIAISON,
                    UserRole::FRONT_DESK,
+                   UserRole::USER, 
                ]);
     }
 
