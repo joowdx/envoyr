@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Enums\UserRole;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use Filament\Actions;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ListRecords;
 
 class ListUsers extends ListRecords
@@ -15,23 +17,42 @@ class ListUsers extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('New User')
-                ->modalHeading('Create User')
+                ->label('Invite User')
+                ->modalHeading('Invite User')
                 ->modalWidth('sm')
-                ->icon('heroicon-o-user-plus')
+                ->icon('heroicon-o-paper-airplane')
                 ->createAnother(false)
+                ->successNotificationTitle(false)
                 ->using(function (array $data): User {
+                    $currentUser = Filament::auth()->user();
 
-                    $userData = UserResource::createUserWithOtp($data);
-                    $otp = $userData['_otp'];
-                    unset($userData['_otp']);
 
-                    $user = User::create($userData);
-                    UserResource::sendWelcomeEmail($user, $otp);
+                    if ($currentUser->role !== UserRole::ROOT && ! $currentUser->office_id) {
+                        throw new \Exception('You must be assigned to an office to invite users.');
+                    }
 
-                    return $user;
-                })
-                ->successNotificationTitle(null),
+
+                    $targetOfficeId = null;
+                    if ($currentUser->role === UserRole::ROOT) {
+
+                        $targetOfficeId = $data['office_id'] ?? null;
+                    } else {
+
+                        $targetOfficeId = $currentUser->office_id;
+                    }
+
+                    $invitation = User::createInvitation(
+                        email: $data['email'],
+                        role: UserRole::from($data['role']), 
+                        officeId: $targetOfficeId,
+                        invitedBy: $currentUser->id,
+                        designation: $data['designation'] ?? null
+                    );
+
+                    UserResource::sendInvitationEmail($invitation);
+
+                    return $invitation;
+                }),
         ];
     }
 }
