@@ -10,21 +10,16 @@
             <h2 class="text-2xl font-bold mb-6">Complete Your Registration</h2>
             
             <p class="mb-4 text-gray-600">
-                You've been invited to join as {{ $user->role->getLabel() }} 
-                at {{ $user->office->name ?? 'Office not assigned' }}.
+                You've been invited to join as <strong>{{ $user->role->getLabel() }}</strong>{{ $user->office ? ' at ' . $user->office->name : '' }}.
             </p>
 
-            @if ($errors->any())
-                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+            @if($user->designation)
+                <p class="mb-4 text-sm bg-blue-50 border border-blue-200 rounded p-3">
+                    <strong>Your designated position:</strong> {{ $user->designation }}
+                </p>
             @endif
 
-            <form method="POST" action="{{ request()->url() }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}">
+            <form method="POST" action="{{ request()->fullUrl() }}">
                 @csrf
                 
                 <div class="mb-4">
@@ -36,15 +31,18 @@
                     @error('name')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">
-                        Designation
-                    </label>
-                    <input type="text" name="designation" value="{{ old('designation') }}" required
-                           placeholder="Enter your designation (e.g., Manager, Assistant, etc.)"
-                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                    @error('designation')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-                </div>
+                {{-- Show designation field only if not set during invitation --}}
+                @if($needsDesignation)
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">
+                            Designation
+                        </label>
+                        <input type="text" name="designation" value="{{ old('designation') }}" required
+                               placeholder="Enter your designation (e.g., Manager, Officer, Assistant)"
+                               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                        @error('designation')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+                @endif
 
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">
@@ -68,10 +66,6 @@
                     Complete Registration
                 </button>
             </form>
-
-            <div class="mt-4 text-center text-sm text-gray-600">
-                Email: {{ $user->email }}
-            </div>
         </div>
     </div>
 </body>

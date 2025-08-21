@@ -16,7 +16,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Mail;
 
-
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -55,7 +54,7 @@ class UserResource extends Resource
     {
         try {
             $registrationUrl = $invitation->getSignedRegistrationUrl();
-            
+
             Mail::to($invitation->email)->send(new UserInvitationMail($invitation, $registrationUrl));
 
             Notification::make()
@@ -67,7 +66,7 @@ class UserResource extends Resource
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Email Failed')
-                ->body('Invitation created but email failed to send: ' . $e->getMessage())
+                ->body('Invitation created but email failed to send: '.$e->getMessage())
                 ->warning()
                 ->send();
         }

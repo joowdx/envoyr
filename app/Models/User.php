@@ -55,13 +55,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     ];
 
     // Invitation methods
-    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy): self
+    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy, string $designation = null): self
     {
         return self::create([
             'email' => $email,
             'role' => $role,
-            'office_id' => $officeId, // Can be null for ROOT-created users
+            'office_id' => $officeId, 
             'invited_by' => $invitedBy,
+            'designation' => $designation,
             'invitation_token' => Str::random(64),
             'invitation_expires_at' => now()->addDays(7),
         ]);
@@ -81,14 +82,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
 
     public function acceptInvitation(array $data): void
     {
-        $this->update([
+        $updateData = [
             'name' => $data['name'],
-            'password' => $data['password'], // Will be hashed by cast
-            'designation' => $data['designation'],
+            'password' => $data['password'], 
             'invitation_accepted_at' => now(),
-            'invitation_token' => null, // Clear token after acceptance
+            'invitation_token' => null,
             'invitation_expires_at' => null,
-        ]);
+        ];
+
+        if (isset($data['designation'])) {
+            $updateData['designation'] = $data['designation'];
+        }
+
+        $this->update($updateData);
     }
 
     public function getSignedRegistrationUrl(): string

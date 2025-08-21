@@ -21,7 +21,7 @@ class UserInvitationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'You\'re invited to join ' . config('app.name'),
+            subject: 'You\'re invited to join '.config('app.name'),
         );
     }
 

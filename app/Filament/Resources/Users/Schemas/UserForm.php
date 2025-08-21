@@ -4,10 +4,10 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\UserRole;
 use App\Models\Office;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
-use Filament\Facades\Filament;
 
 class UserForm
 {
@@ -36,6 +36,7 @@ class UserForm
                             return 'ROOT user: You can assign users to any office, or leave office unassigned.';
                         } else {
                             $office = $currentUser->office->name ?? 'No office assigned';
+
                             return "User will be invited to: {$office}. A registration link will be sent to this email.";
                         }
                     })
@@ -49,6 +50,13 @@ class UserForm
                     ->nullable()
                     ->visible(fn () => Filament::auth()->user()->role === UserRole::ROOT)
                     ->helperText('Leave blank to create user without office assignment (ROOT privilege)')
+                    ->columnSpan(1),
+
+                TextInput::make('designation')
+                    ->label('Designation')
+                    ->placeholder('Enter user designation')
+                    ->nullable()
+                    ->helperText('Leave blank to let the user set their own designation')
                     ->columnSpan(1),
 
             ]);

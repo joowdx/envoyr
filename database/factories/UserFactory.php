@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'role' => \App\Enums\UserRole::USER->value,
             'designation' => fake()->randomElement([
-                'Officer', 'Assistant Officer', 'Senior Officer', 'Manager', 'Director'
+                'Officer', 'Assistant Officer', 'Senior Officer', 'Manager', 'Director',
             ]),
             'remember_token' => Str::random(10),
         ];

@@ -11,7 +11,7 @@ class RegistrationController extends Controller
     public function show(User $user)
     {
         // Check if user is pending invitation
-        if (!$user->isPendingInvitation()) {
+        if (! $user->isPendingInvitation()) {
             return redirect('/')->withErrors(['token' => 'Invalid or expired invitation link.']);
         }
 
@@ -23,21 +23,31 @@ class RegistrationController extends Controller
     public function store(Request $request, User $user)
     {
         // Check if user is pending invitation
-        if (!$user->isPendingInvitation()) {
+        if (! $user->isPendingInvitation()) {
             return redirect('/')->withErrors(['token' => 'Invalid or expired invitation link.']);
         }
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
-            'designation' => 'required|string|max:255',
-        ]);
+            'password' => 'required|string|min:8|confirmed'
+        ];
+        
+        if (is_null($user->designation)) {
+            $rules['designation'] = 'required|string|max:255';
+        }
 
-        $user->acceptInvitation([
+        $request->validate($rules);
+
+        $acceptanceData = [
             'name' => $request->name,
             'password' => $request->password,
-            'designation' => $request->designation,
-        ]);
+        ];
+
+        if (is_null($user->designation) && $request->designation) {
+            $acceptanceData['designation'] = $request->designation;
+        }
+
+    $user->acceptInvitation($acceptanceData);
 
         Auth::login($user);
 
