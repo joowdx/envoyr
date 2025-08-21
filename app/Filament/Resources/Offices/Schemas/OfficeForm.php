@@ -13,12 +13,16 @@ class OfficeForm
         return $schema
             ->columns(2)
             ->components([
-                TextInput::make('name'),
-                TextInput::make('acronym'),
+                TextInput::make('name')
+                    ->required()
+                    ->label('Office Name'),
+                TextInput::make('acronym')
+                    ->required()
+                    ->label('Office Acronym'),
                 TextInput::make('head_name')
-                    ->nullable(),   
+                    ->label('Head Name'),   
                 TextInput::make('designation')
-                    ->nullable(),
+                    ->label('Designation'),
             ]);
     }
 }
