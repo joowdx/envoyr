@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SectionRelationManager extends RelationManager
 {
-    protected static string $relationship = 'Sections';
+    protected static string $relationship = 'sections';
 
     public function form(Schema $schema): Schema
     {
@@ -52,7 +52,6 @@ class SectionRelationManager extends RelationManager
                 TextColumn::make('name'),
                 TextColumn::make('head_name'),
                 TextColumn::make('designation'),
-
             ])
             ->filters([
                 // TrashedFilter::make(),
