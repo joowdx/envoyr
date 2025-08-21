@@ -24,6 +24,9 @@ class OfficesTable
                     ->label('Sections'),
                 TextColumn::make('head_name')
                     ->label('Head Name'),
+                TextColumn::make('users_count')
+                    ->counts('users')
+                    ->label('Members'),
             ])
             ->filters([
                 TrashedFilter::make(),
