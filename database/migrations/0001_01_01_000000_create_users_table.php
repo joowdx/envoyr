@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
 use App\Enums\UserRole;
-
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
 return new class extends Migration
 {
     /**
@@ -13,46 +13,70 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->ulid('id')->primary(); // Changed to ULID
+            $table->string('name')->nullable();
             $table->string('email')->unique();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('avatar')->nullable();
             $table->string('role')->default(UserRole::USER->value);
             $table->ulid('office_id')->nullable();
             $table->ulid('section_id')->nullable();
+            $table->string('designation')->nullable();
+
+            // Invitation fields
+            $table->string('invitation_token')->nullable()->unique();
+            $table->timestamp('invitation_expires_at')->nullable();
+            $table->timestamp('invitation_accepted_at')->nullable();
+            $table->ulid('invited_by')->nullable(); // Changed to ULID
+
+            // Approval fields
+            $table->ulid('approved_by')->nullable(); // Changed to ULID
+            $table->timestamp('approved_at')->nullable();
+
+            // Deactivation fields
+            $table->timestamp('deactivated_at')->nullable();
+            $table->ulid('deactivated_by')->nullable(); // Changed to ULID
+
             $table->rememberToken();
             $table->softDeletes();
-            $table->foreignId('approved_by')->nullable()->constrained('users'); // Add this
-            $table->foreignId('deactivated_by')->nullable()->constrained('users'); // Add this
             $table->timestamps();
             $table->timestamp('email_verified_at')->nullable();
-            $table->timestamp('password_reset_at')->nullable();
-            $table->timestamp('otp_expires_at')->nullable(); 
-            $table->timestamp('approved_at')->nullable(); 
-            $table->timestamp('deactivated_at')->nullable(); 
         });
 
+        // Add foreign key constraints for self-referencing columns
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('invited_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('deactivated_by')->references('id')->on('users')->nullOnDelete();
+        });
+
+        // Note: Foreign keys to offices and sections will be added by their respective migrations
+
+        // Create password reset tokens table
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+        // Create sessions table
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->ulid('user_id')->nullable()->index(); // Changed to ULID to match users table
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
+
+            // Add foreign key constraint for user_id
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

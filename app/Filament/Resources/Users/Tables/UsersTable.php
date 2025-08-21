@@ -26,6 +26,10 @@ class UsersTable
                 TextColumn::make('office.name')
                     ->label('Office')
                     ->searchable(),
+                TextColumn::make('role')
+                    ->label('Role')
+                    ->formatStateUsing(fn ($state) => strtoupper($state->value))
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

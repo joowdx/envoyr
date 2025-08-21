@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,12 +14,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create a test admin user with all required fields
+        User::create([
+            'name' => 'Test Admin',
+            'email' => 'admin@test.com',
             'password' => Hash::make('password'),
+            'role' => UserRole::ROOT,
+            'designation' => 'System Administrator',
+            'email_verified_at' => now(),
+        ]);
+
+        // Create a regular test user
+        User::create([
+            'name' => 'Test User',
+            'email' => 'user@test.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::USER,
+            'designation' => 'Officer',
+            'email_verified_at' => now(),
         ]);
     }
 }

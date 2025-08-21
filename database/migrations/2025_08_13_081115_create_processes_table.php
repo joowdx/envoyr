@@ -18,10 +18,13 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignIdFor(Document::class)->constrained('documents')->cascadeOnDelete();
             $table->foreignIdFor(Transmittal::class)->constrained('transmittals')->cascadeOnDelete();
-            $table->foreignIdFor(User::class)->constrained('users')->cascadeOnDelete();
+            $table->ulid('user_id'); // Changed to ULID for User reference
             $table->timestamp('processed_at')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
+
+            // Add foreign key constraint for user_id
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

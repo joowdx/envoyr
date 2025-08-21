@@ -24,13 +24,18 @@ return new class extends Migration
             $table->foreignIdFor(Document::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Office::class, 'from_office_id')->constrained('offices')->cascadeOnDelete();
             $table->foreignIdFor(Section::class, 'from_section_id')->nullable()->constrained('sections')->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'from_user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->ulid('from_user_id')->nullable(); // Changed to ULID
             $table->foreignIdFor(Office::class, 'to_office_id')->constrained('offices')->cascadeOnDelete();
             $table->foreignIdFor(Section::class, 'to_section_id')->nullable()->constrained('sections')->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'to_user_id')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'liaison_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->ulid('to_user_id')->nullable(); // Changed to ULID
+            $table->ulid('liaison_id')->nullable(); // Changed to ULID
             $table->timestamp('received_at')->nullable();
             $table->timestamps();
+
+            // Add foreign key constraints for user references
+            $table->foreign('from_user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('to_user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('liaison_id')->references('id')->on('users')->cascadeOnDelete();
 
             $table->index(['to_office_id', 'received_at']);
             $table->index(['document_id', 'received_at']);

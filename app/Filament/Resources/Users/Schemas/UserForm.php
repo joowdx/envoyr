@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Enums\UserRole;
+use App\Models\Office;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -13,37 +16,48 @@ class UserForm
         return $schema
             ->columns(1)
             ->components([
-                TextInput::make('name')
-                    ->label('Full Name')
-                    ->placeholder('Enter full name')
-                    // ->autofocus()
+
+                Select::make('role')
+                    ->label('Role')
+                    ->options(UserRole::options())
+                    ->default(UserRole::USER->value)
                     ->required()
                     ->columnSpan(1),
+
                 TextInput::make('email')
                     ->label('Email address')
                     ->placeholder('Enter email address')
                     ->email()
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->helperText('A one-time login code will be sent to this email.')
+                    ->helperText(function () {
+                        $currentUser = Filament::auth()->user();
+                        if ($currentUser->role === UserRole::ROOT) {
+                            return 'ROOT user: You can assign users to any office, or leave office unassigned.';
+                        } else {
+                            $office = $currentUser->office->name ?? 'No office assigned';
+
+                            return "User will be invited to: {$office}. A registration link will be sent to this email.";
+                        }
+                    })
                     ->columnSpan(1),
 
-                // Select::make('role')
-                //     ->label('Role')
-                //     ->options([
-                //         'admin' => 'Admin',
-                //         'user' => 'User',
-                //     ])
-                //     ->default('user')
-                //     ->required()
-                //     ->columnSpan(1),
+                Select::make('office_id')
+                    ->label('Office')
+                    ->relationship('office', 'name')
+                    ->options(Office::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->nullable()
+                    ->visible(fn () => Filament::auth()->user()->role === UserRole::ROOT)
+                    ->helperText('Leave blank to create user without office assignment (ROOT privilege)')
+                    ->columnSpan(1),
 
-                // Select::make('office_id')
-                //     ->label('Office')
-                //     ->relationship('office', 'name')
-                //     ->searchable()
-                //     ->required()
-                //     ->columnSpan(1),
+                TextInput::make('designation')
+                    ->label('Designation')
+                    ->placeholder('Enter user designation')
+                    ->nullable()
+                    ->helperText('Leave blank to let the user set their own designation')
+                    ->columnSpan(1),
 
             ]);
     }
