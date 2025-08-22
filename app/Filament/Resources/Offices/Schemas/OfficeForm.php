@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\Offices\Schemas;
 
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use Filament\Schemas\Schema;
 
 class OfficeForm
 {
@@ -16,7 +15,7 @@ class OfficeForm
                 TextInput::make('name'),
                 TextInput::make('acronym'),
                 TextInput::make('head_name')
-                    ->nullable(),   
+                    ->nullable(),
                 TextInput::make('designation')
                     ->nullable(),
             ]);
