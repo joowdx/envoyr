@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Tables;
 
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -40,8 +41,7 @@ class UsersTable
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->color(fn ($record) => $record->deactivated_at ? 'gray' : ($record->isPendingInvitation() ? 'warning' : 'success'))
-                    ->formatStateUsing(function ($state, $record) {
+                    ->getStateUsing(function ($record) {
                         if ($record->deactivated_at) {
                             return 'Deactivated';
                         }
@@ -49,7 +49,8 @@ class UsersTable
                             return 'Pending';
                         }
                         return 'Active';
-                    }),
+                    })
+                    ->color(fn ($state) => $state === 'Deactivated' ? 'gray' : ($state === 'Pending' ? 'warning' : 'success')),
 
                 TextColumn::make('designation')
                     ->label('Designation')
@@ -75,15 +76,20 @@ class UsersTable
                     ]),
             ])
             ->recordActions([
+                ActionGroup::make([
                 ViewAction::make()
+                    ->icon('heroicon-o-eye')
+                    ->tooltip('View')
                     ->modalWidth('md'),
 
                 EditAction::make()
+                    ->icon('heroicon-o-pencil-square')
+                    ->tooltip('Edit')
                     ->modalWidth('sm'),
 
                 Action::make('resend_invitation')
-                    ->label('Resend Invitation')
                     ->icon('heroicon-o-paper-airplane')
+                    ->tooltip('Resend Invitation')
                     ->color('warning')
                     ->visible(fn ($record) => $record->isPendingInvitation())
                     ->requiresConfirmation()
@@ -106,8 +112,8 @@ class UsersTable
                     ),
 
                 Action::make('deactivate')
-                    ->label('Deactivate')
                     ->icon('heroicon-o-user-minus')
+                    ->tooltip('Deactivate')
                     ->color('danger')
                     ->visible(fn ($record) => !$record->deactivated_at && in_array(\Filament\Facades\Filament::auth()->user()?->role->value, ['root', 'administrator']))
                     ->requiresConfirmation()
@@ -125,8 +131,8 @@ class UsersTable
                     ),
 
                 Action::make('reactivate')
-                    ->label('Reactivate')
                     ->icon('heroicon-o-user-plus')
+                    ->tooltip('Reactivate')
                     ->color('success')
                     ->visible(fn ($record) => $record->deactivated_at && in_array(\Filament\Facades\Filament::auth()->user()?->role->value, ['root', 'administrator']))
                     ->requiresConfirmation()
@@ -145,6 +151,7 @@ class UsersTable
                             ->success()
                     ),
             ])
+        ])
             ->toolbarActions([
                 BulkAction::make('resend_invitations')
                     ->label('Resend Invitations')
