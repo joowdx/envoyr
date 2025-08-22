@@ -31,10 +31,25 @@ class UsersTable
                 TextColumn::make('office.name')
                     ->label('Office')
                     ->searchable(),
+
                 TextColumn::make('role')
                     ->label('Role')
                     ->formatStateUsing(fn ($state) => strtoupper($state->value))
                     ->sortable(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn ($record) => $record->deactivated_at ? 'gray' : ($record->isPendingInvitation() ? 'warning' : 'success'))
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->deactivated_at) {
+                            return 'Deactivated';
+                        }
+                        if ($record->isPendingInvitation()) {
+                            return 'Pending';
+                        }
+                        return 'Active';
+                    }),
 
                 TextColumn::make('designation')
                     ->label('Designation')
@@ -50,7 +65,6 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                // Tabs are now handled in ListUsers page
                 SelectFilter::make('role')
                     ->options([
                         'root' => 'ROOT',
@@ -88,6 +102,46 @@ class UsersTable
                         fn ($record) => \Filament\Notifications\Notification::make()
                             ->title('Invitation Resent')
                             ->body("Registration link has been resent to {$record->email}")
+                            ->success()
+                    ),
+
+                Action::make('deactivate')
+                    ->label('Deactivate')
+                    ->icon('heroicon-o-user-minus')
+                    ->color('danger')
+                    ->visible(fn ($record) => !$record->deactivated_at && in_array(\Filament\Facades\Filament::auth()->user()?->role->value, ['root', 'administrator']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Deactivate User')
+                    ->modalDescription(fn ($record) => "Are you sure you want to deactivate {$record->name} ({$record->email})?")
+                    ->action(function ($record) {
+                        $currentUser = \Filament\Facades\Filament::auth()->user();
+                        $record->deactivate($currentUser);
+                    })
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->title('User Deactivated')
+                            ->body("{$record->name} has been deactivated.")
+                            ->success()
+                    ),
+
+                Action::make('reactivate')
+                    ->label('Reactivate')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->deactivated_at && in_array(\Filament\Facades\Filament::auth()->user()?->role->value, ['root', 'administrator']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Reactivate User')
+                    ->modalDescription(fn ($record) => "Are you sure you want to reactivate {$record->name} ({$record->email})?")
+                    ->action(function ($record) {
+                        $record->update([
+                            'deactivated_at' => null,
+                            'deactivated_by' => null,
+                        ]);
+                    })
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->title('User Reactivated')
+                            ->body("{$record->name} has been reactivated.")
                             ->success()
                     ),
             ])
