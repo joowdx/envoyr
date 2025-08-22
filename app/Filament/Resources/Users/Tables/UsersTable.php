@@ -151,38 +151,7 @@ class UsersTable
                             ->success()
                     ),
             ])
-        ])
-            ->toolbarActions([
-                BulkAction::make('resend_invitations')
-                    ->label('Resend Invitations')
-                    ->icon('heroicon-o-paper-airplane')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('Resend Invitations')
-                    ->modalDescription('Are you sure you want to resend invitations to all selected users with pending invitations?')
-                    ->action(function (Collection $records) {
-                        $count = 0;
-                        foreach ($records as $record) {
-                            if ($record->isPendingInvitation()) {
-                                // Generate new registration URL and send email
-                                UserResource::sendInvitationEmail($record);
+        ]);
 
-                                // Update invitation expiration (extend by 7 days)
-                                $record->update([
-                                    'invitation_expires_at' => now()->addDays(7),
-                                ]);
-
-                                $count++;
-                            }
-                        }
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Invitations Resent')
-                            ->body("Successfully resent {$count} invitation(s)")
-                            ->success()
-                            ->send();
-                    })
-                    ->deselectRecordsAfterCompletion(),
-            ]);
     }
 }
