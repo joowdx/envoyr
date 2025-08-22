@@ -29,6 +29,14 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('office.name')
                     ->label('Office')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) return null;
+                        // Get acronym from first letters of each word
+                        return collect(explode(' ', $state))
+                            ->map(fn($word) => mb_substr($word, 0, 1))
+                            ->join('');
+                    })
+                    ->tooltip(fn ($state) => $state ?: null)
                     ->searchable(),
 
                 TextColumn::make('role')
