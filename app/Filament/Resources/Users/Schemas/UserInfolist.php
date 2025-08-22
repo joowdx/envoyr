@@ -74,20 +74,20 @@ class UserInfolist
                     ])
                     ->columns(3), // 3 columns for status indicators
 
-                // Show invitation details only if pending
-                Section::make('Invitation Details')
+                Section::make('Invitation')
                     ->schema([
                         TextEntry::make('invitedBy.name')
                             ->label('Invited by')
-                            ->icon('heroicon-o-user'),
+                            ->icon('heroicon-o-user')
+                            ->placeholder('N/A'),
 
                         TextEntry::make('invitation_expires_at')
-                            ->label('Expires')
+                            ->label('Invitation Expires')
                             ->since()
-                            ->color('warning'),
+                            ->color('warning')
+                            ->placeholder('N/A'),
                     ])
                     ->columns(2)
-                    ->visible(fn ($record) => $record->isPendingInvitation())
                     ->collapsed(false),
             ]);
     }
