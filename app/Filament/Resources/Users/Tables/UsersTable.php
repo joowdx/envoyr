@@ -109,8 +109,7 @@ class UsersTable
                             ->body("Registration link has been resent to {$record->email}")
                             ->success()
                     ),
-            ])
-            ->bulkActions([
+                ]);
                 BulkAction::make('resend_invitations')
                     ->label('Resend Invitations')
                     ->icon('heroicon-o-paper-airplane')

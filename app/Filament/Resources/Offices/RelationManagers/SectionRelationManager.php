@@ -2,12 +2,10 @@
 
 namespace App\Filament\Resources\Offices\RelationManagers;
 
-use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
@@ -38,10 +36,9 @@ class SectionRelationManager extends RelationManager
                     ->maxLength(255),
                 TextInput::make('designation')
                     ->maxLength(255),
-                    
+
             ]);
 
-            
     }
 
     public function table(Table $table): Table
@@ -63,8 +60,8 @@ class SectionRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                ->createAnother(false)
-                ->label('Add Section'),
+                    ->createAnother(false)
+                    ->label('Add Section'),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -85,6 +82,4 @@ class SectionRelationManager extends RelationManager
                     SoftDeletingScope::class,
                 ]));
     }
-
-    
 }

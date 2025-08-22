@@ -38,7 +38,7 @@ class ListUsers extends ListRecords
                     ->whereNotNull('invitation_token')
                     ->where(function (Builder $query) {
                         $query->whereNull('invitation_expires_at')
-                              ->orWhere('invitation_expires_at', '>', now());
+                            ->orWhere('invitation_expires_at', '>', now());
                     })
                     ->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query
@@ -46,7 +46,7 @@ class ListUsers extends ListRecords
                     ->whereNotNull('invitation_token')
                     ->where(function (Builder $query) {
                         $query->whereNull('invitation_expires_at')
-                              ->orWhere('invitation_expires_at', '>', now());
+                            ->orWhere('invitation_expires_at', '>', now());
                     })
                 ),
 
@@ -72,11 +72,9 @@ class ListUsers extends ListRecords
                 ->using(function (array $data): User {
                     $currentUser = Filament::auth()->user();
 
-
                     if ($currentUser->role !== UserRole::ROOT && ! $currentUser->office_id) {
                         throw new \Exception('You must be assigned to an office to invite users.');
                     }
-
 
                     $targetOfficeId = null;
                     if ($currentUser->role === UserRole::ROOT) {
@@ -89,7 +87,7 @@ class ListUsers extends ListRecords
 
                     $invitation = User::createInvitation(
                         email: $data['email'],
-                        role: UserRole::from($data['role']), 
+                        role: UserRole::from($data['role']),
                         officeId: $targetOfficeId,
                         invitedBy: $currentUser->id,
                         designation: $data['designation'] ?? null
