@@ -25,11 +25,8 @@ class OfficePolicy
         if ($user->role === UserRole::ROOT) {
             return true;
         }
-
-        if ($user->role === UserRole::ADMINISTRATOR) {
-            return $user->office_id === $office->id;
-        }
-
+    
+        // Both ADMINISTRATOR and other roles follow the same rule
         return $user->office_id === $office->id;
     }
 
