@@ -63,14 +63,12 @@ class OfficeResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
-        $query = parent::getEloquentQuery();
-    
-        // ROOT users can see everything
+        $query = parent::getEloquentQuery(); 
+        
         if ($user->role === UserRole::ROOT) {
             return $query;
         }
     
-        // All other users can only see their own office
         return $query->where('id', $user->office_id);
     }
 

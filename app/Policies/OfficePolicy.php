@@ -9,6 +9,15 @@ use App\Models\User;
 class OfficePolicy
 {
 
+    public function before(User $user): ?bool
+    {
+        if ($user->role === UserRole::ROOT) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(User $user): bool
     {
         return in_array($user->role, [
@@ -19,25 +28,20 @@ class OfficePolicy
         ]);
     }
 
-    // viewing
     public function view(User $user, Office $office): bool
     {
         if ($user->role === UserRole::ROOT) {
             return true;
         }
     
-        // Both ADMINISTRATOR and other roles follow the same rule
         return $user->office_id === $office->id;
     }
 
-
-    // creating
     public function create(User $user): bool
     {
-        return $user->role === UserRole::ROOT;
+        return false;
     }
 
-    // updating
     public function update(User $user, Office $office): bool
     {
         if ($user->role === UserRole::ROOT) {
@@ -51,20 +55,19 @@ class OfficePolicy
         return false;
     }
 
-    // deleting
     public function delete(User $user, Office $office): bool
     {
-        return $user->role === UserRole::ROOT;
+        return false;
     }
 
     public function restore(User $user, Office $office): bool
     {
-        return $user->role === UserRole::ROOT;
+        return false;
     }
 
     public function forceDelete(User $user, Office $office): bool
     {
-        return $user->role === UserRole::ROOT;
+        return false;
     }
 
     public function __construct()
