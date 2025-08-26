@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Offices;
 
+use App\Enums\UserRole;
 use App\Filament\Resources\Offices\Pages\CreateOffice;
 use App\Filament\Resources\Offices\Pages\EditOffice;
 use App\Filament\Resources\Offices\Pages\ListOffices;
@@ -57,5 +58,17 @@ class OfficeResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = auth()->user();
+        $query = parent::getEloquentQuery();
+
+        if ($user->role === UserRole::ROOT) {
+            return $query;
+        }
+
+        return $query->where('id', $user->office_id);
     }
 }
