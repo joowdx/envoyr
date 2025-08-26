@@ -8,7 +8,6 @@ use App\Models\User;
 
 class OfficePolicy
 {
-
     public function before(User $user): ?bool
     {
         if ($user->role === UserRole::ROOT) {
@@ -33,7 +32,7 @@ class OfficePolicy
         if ($user->role === UserRole::ROOT) {
             return true;
         }
-    
+
         return $user->office_id === $office->id;
     }
 
