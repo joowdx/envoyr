@@ -30,9 +30,9 @@ class RegistrationController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed'
+            'password' => 'required|string|min:8|confirmed',
         ];
-        
+
         if (is_null($user->designation)) {
             $rules['designation'] = 'required|string|max:255';
         }
@@ -48,7 +48,7 @@ class RegistrationController extends Controller
             $acceptanceData['designation'] = $request->designation;
         }
 
-    $user->acceptInvitation($acceptanceData);
+        $user->acceptInvitation($acceptanceData);
 
         Auth::login($user);
 
