@@ -13,18 +13,37 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListUsers extends ListRecords
 {
+    protected function getTableQuery(): Builder
+    {
+        $user = Filament::auth()->user();
+        $query = User::query();
+        if ($user->role !== UserRole::ROOT) {
+            $query->where('office_id', $user->office_id);
+        }
+        // Exclude the current user from the list
+        $query->where('id', '!=', $user->id);
+        return $query;
+    }
     protected static string $resource = UserResource::class;
 
     public function getTabs(): array
     {
+        $user = Filament::auth()->user();
+        $baseQuery = User::query();
+        if ($user->role !== UserRole::ROOT) {
+            $baseQuery->where('office_id', $user->office_id);
+        }
+        $baseQuery->where('id', '!=', $user->id);
+
         return [
             'all' => Tab::make('All Users')
                 ->icon('heroicon-o-users')
-                ->badge(User::count()),
+                ->badge((clone $baseQuery)->count()),
 
             'active' => Tab::make('Active Users')
                 ->icon('heroicon-o-check-circle')
-                ->badge(User::whereNotNull('invitation_accepted_at')
+                ->badge((clone $baseQuery)
+                    ->whereNotNull('invitation_accepted_at')
                     ->whereNull('deactivated_at')
                     ->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query
@@ -34,7 +53,8 @@ class ListUsers extends ListRecords
 
             'pending' => Tab::make('Pending Invitation')
                 ->icon('heroicon-o-clock')
-                ->badge(User::whereNull('invitation_accepted_at')
+                ->badge((clone $baseQuery)
+                    ->whereNull('invitation_accepted_at')
                     ->whereNotNull('invitation_token')
                     ->where(function (Builder $query) {
                         $query->whereNull('invitation_expires_at')
@@ -52,7 +72,9 @@ class ListUsers extends ListRecords
 
             'deactivated' => Tab::make('Deactivated Users')
                 ->icon('heroicon-o-x-circle')
-                ->badge(User::whereNotNull('deactivated_at')->count())
+                ->badge((clone $baseQuery)
+                    ->whereNotNull('deactivated_at')
+                    ->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereNotNull('deactivated_at')
                 ),
