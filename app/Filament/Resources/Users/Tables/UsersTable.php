@@ -98,7 +98,7 @@ class UsersTable
                         ->modalWidth('sm'),
 
                     Action::make('resend_invitation')
-                        ->icon('heroicon-o-paper-airplane')
+                        ->icon('heroicon-o-arrow-path')
                         ->tooltip('Resend Invitation')
                         ->color('warning')
                         ->visible(fn ($record) => $record->isPendingInvitation())
@@ -106,10 +106,7 @@ class UsersTable
                         ->modalHeading('Resend Invitation')
                         ->modalDescription(fn ($record) => "Are you sure you want to resend the invitation to {$record->email}?")
                         ->action(function ($record) {
-                            // Generate new registration URL and send email
                             UserResource::sendInvitationEmail($record);
-
-                            // Update invitation expiration (extend by 7 days)
                             $record->update([
                                 'invitation_expires_at' => now()->addDays(7),
                             ]);
@@ -162,6 +159,5 @@ class UsersTable
                         ),
                 ]),
             ]);
-
     }
 }
