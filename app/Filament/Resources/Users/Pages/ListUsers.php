@@ -11,17 +11,8 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
-use App\Actions\User\CreateInvitation;
-
 class ListUsers extends ListRecords
 {
-    protected CreateInvitation $createInvitation;
-
-    public function __construct(...$args)
-    {
-        parent::__construct(...$args);
-        $this->createInvitation = app(CreateInvitation::class);
-    }
     protected static string $resource = UserResource::class;
 
     public function getTabs(): array
@@ -96,7 +87,7 @@ class ListUsers extends ListRecords
 
 
 
-                    $invitation = $this->createInvitation->execute(
+                    $invitation = app(\App\Actions\User\CreateInvitation::class)->execute(
                         $data['email'],
                         UserRole::from($data['role']),
                         $targetOfficeId,
