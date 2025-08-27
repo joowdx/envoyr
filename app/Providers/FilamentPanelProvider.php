@@ -28,6 +28,7 @@ class FilamentPanelProvider extends PanelProvider
             ->id('')
             ->path('')
             ->login()
+            ->passwordReset()
             ->colors(['primary' => Color::Pink])
             ->spa()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
