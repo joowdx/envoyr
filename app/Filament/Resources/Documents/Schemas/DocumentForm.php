@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Documents\Schemas;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\CreateOptionAction;
+use Filament\Forms\Components\FileUpload;
 
 class DocumentForm
 {
@@ -19,16 +19,36 @@ class DocumentForm
                 Select::make('classification_id')
                     ->label('Classification')
                     ->relationship('classification', 'name')
+                    ->createOptionForm(function (Schema $schema) {
+                        return $schema->components([
+                            TextInput::make('name')
+                                ->required()
+                                ->label('Name'),
+                            TextInput::make('description')
+                                ->required()
+                                ->label('Description')
+                                ->columnSpanFull(),
+                        ]);
+                    })
                     ->preload()
                     ->searchable()
-                    ->required()
-                    ->createOptionAction(CreateOptionAction::make()
-                        ->modalHeading('Create Classification')
-                        ->modalDescription('Create a new classification for the document')
-                        ->modalSubmitActionLabel('Create')
-                        ->modalCancelActionLabel('Cancel')
-                        ->modalWidth('md')
-                    ),
+                    ->required(),
+                Select::make('source_id')
+                    ->label('Source')
+                    ->relationship('source', 'name')
+                    ->createOptionForm(function (Schema $schema) {
+                        return $schema->components([
+                            TextInput::make('name')
+                                ->required()
+                                ->label('Name'),
+                            TextInput::make('description')
+                                ->required()
+                                ->label('Description')
+                                ->columnSpanFull(),
+                        ]);
+                    })
+                    ->preload()
+                    ->searchable(),
                 TextInput::make('description')
                     ->required()
                     ->label('Description'),
