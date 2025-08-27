@@ -14,7 +14,7 @@ class ListOffices extends ListRecords
     {
         return [
             CreateAction::make()
-            ->label('Add Office'),
+                ->label('Add Office'),
         ];
     }
 }

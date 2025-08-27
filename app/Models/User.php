@@ -54,19 +54,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
         'deactivated_at' => 'datetime',
     ];
 
-    // Invitation methods
-    public static function createInvitation(string $email, UserRole $role, ?string $officeId, string $invitedBy, string $designation = null): self
-    {
-        return self::create([
-            'email' => $email,
-            'role' => $role,
-            'office_id' => $officeId, 
-            'invited_by' => $invitedBy,
-            'designation' => $designation,
-            'invitation_token' => Str::random(64),
-            'invitation_expires_at' => now()->addDays(7),
-        ]);
-    }
 
     public function isPendingInvitation(): bool
     {
@@ -84,7 +71,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
     {
         $updateData = [
             'name' => $data['name'],
-            'password' => $data['password'], 
+            'password' => $data['password'],
             'invitation_accepted_at' => now(),
             'invitation_token' => null,
             'invitation_expires_at' => null,
@@ -114,7 +101,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, MustVerif
                    UserRole::ADMINISTRATOR,
                    UserRole::LIAISON,
                    UserRole::FRONT_DESK,
-                   UserRole::USER, 
+                   UserRole::USER,
                ]);
     }
 
