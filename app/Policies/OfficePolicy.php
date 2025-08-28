@@ -8,7 +8,6 @@ use App\Models\User;
 
 class OfficePolicy
 {
-
     public function before(User $user): ?bool
     {
         return $user->role === UserRole::ROOT ?: null;
