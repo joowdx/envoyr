@@ -71,4 +71,15 @@ class OfficeResource extends Resource
 
         return $query->where('id', $user->office_id);
     }
+
+    public static function getNavigationUrl(): string
+    {
+        $user = auth()->user();
+
+        if ($user && $user->role === UserRole::ADMINISTRATOR && $user->office_id) {
+            return static::getUrl('edit', ['record' => $user->office_id]);
+        }
+
+        return static::getUrl('index');
+    }
 }

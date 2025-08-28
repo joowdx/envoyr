@@ -28,9 +28,27 @@ class EditOffice extends EditRecord
             RestoreAction::make(),
         ];
     }
+    
+    public function getTitle(): string
+    {
+        return $this->record->acronym;
+    }
+
+    public function getSubheading(): string
+    {
+        return $this->record->name;
+    }
 
     protected function getFormActions(): array
     {
         return [];
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return array_merge(array_slice(parent::getBreadcrumbs(), 0, -3),[
+           'Office',
+           $this->record->acronym,
+        ]);
     }
 }
