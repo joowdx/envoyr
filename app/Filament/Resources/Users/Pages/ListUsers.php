@@ -77,6 +77,10 @@ class ListUsers extends ListRecords
                     ->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query
                     ->whereNotNull('deactivated_at')
+                    ->where(function ($query) {
+                        $query->whereNotNull('invitation_accepted_at')
+                              ->orWhereNull('invitation_token');
+                    })
                 ),
         ];
     }
