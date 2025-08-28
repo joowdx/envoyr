@@ -22,7 +22,7 @@ class OfficeResource extends Resource
 {
     protected static ?string $model = Office::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
     protected static ?string $recordTitleAttribute = 'Office';
 
@@ -70,5 +70,16 @@ class OfficeResource extends Resource
         }
 
         return $query->where('id', $user->office_id);
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        $user = auth()->user();
+
+        if ($user && $user->role === UserRole::ADMINISTRATOR && $user->office_id) {
+            return static::getUrl('edit', ['record' => $user->office_id]);
+        }
+
+        return static::getUrl('index');
     }
 }

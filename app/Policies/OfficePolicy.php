@@ -15,12 +15,12 @@ class OfficePolicy
 
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     public function view(User $user, Office $office): bool
     {
-        return $user->office_id === $office->id;
+        return false;
     }
 
     public function create(User $user): bool
