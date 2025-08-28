@@ -85,8 +85,6 @@ class ListUsers extends ListRecords
                         $targetOfficeId = $currentUser->office_id;
                     }
 
-
-
                     $invitation = app(\App\Actions\User\CreateInvitation::class)->execute(
                         $data['email'],
                         UserRole::from($data['role']),
