@@ -29,10 +29,6 @@ return new class extends Migration
             $table->timestamp('invitation_accepted_at')->nullable();
             $table->ulid('invited_by')->nullable(); 
 
-            // Approval fields
-            $table->ulid('approved_by')->nullable(); // Changed to ULID
-            $table->timestamp('approved_at')->nullable();
-
             // Deactivation fields
             $table->timestamp('deactivated_at')->nullable();
             $table->ulid('deactivated_by')->nullable(); // Changed to ULID
