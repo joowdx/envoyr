@@ -42,7 +42,6 @@ return new class extends Migration
         // Add foreign key constraints for self-referencing columns
         Schema::table('users', function (Blueprint $table) {
             $table->foreign('invited_by')->references('id')->on('users')->nullOnDelete();
-            $table->foreign('approved_by')->references('id')->on('users')->nullOnDelete();
             $table->foreign('deactivated_by')->references('id')->on('users')->nullOnDelete();
         });
 
