@@ -36,6 +36,14 @@ class DatabaseSeeder extends Seeder
             'office_id' => $office->id,
         ]);
 
+        Office::create([
+            'id' => Str::ulid(),
+            'name' => 'Provincial Information and Communication Technology Office',
+            'acronym' => 'PGO - PICTO',
+            'head_name' => 'John Doe',
+            'designation' => 'Office Head',
+        ]);
+
         User::create([
             'name' => 'Test User',
             'office_id' => $office->id,
