@@ -32,8 +32,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => UserRole::ROOT,
             'designation' => 'System Administrator',
-            'email_verified_at' => now(),
             'office_id' => $office->id,
+            'email_verified_at' => now(),
         ]);
 
         Office::create([
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => UserRole::USER,
             'designation' => 'Officer',
-            'email_verified_at' => now(),
+
         ]);
 
         User::create([
