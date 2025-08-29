@@ -13,13 +13,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->ulid('id')->primary(); // Changed to ULID
+            $table->ulid('id')->primary(); 
             $table->string('name')->nullable();
             $table->string('email')->unique();
             $table->string('password')->nullable();
             $table->string('avatar')->nullable();
             $table->string('role')->default(UserRole::USER->value);
-            $table->ulid('office_id')->nullable();
+            $table->ulid('office_id');
             $table->ulid('section_id')->nullable();
             $table->string('designation')->nullable();
 
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('invitation_token')->nullable()->unique();
             $table->timestamp('invitation_expires_at')->nullable();
             $table->timestamp('invitation_accepted_at')->nullable();
-            $table->ulid('invited_by')->nullable(); // Changed to ULID
+            $table->ulid('invited_by')->nullable(); 
 
             // Approval fields
             $table->ulid('approved_by')->nullable(); // Changed to ULID
