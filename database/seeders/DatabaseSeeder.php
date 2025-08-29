@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         Office::create([
             'id' => Str::ulid(),
             'name' => 'Provincial Information and Communication Technology Office',
-            'acronym' => 'PICTO',
+            'acronym' => 'PGO - PICTO',
             'head_name' => 'John Doe',
             'designation' => 'Office Head',
         ]);
