@@ -33,6 +33,15 @@ class DatabaseSeeder extends Seeder
             'role' => UserRole::ROOT,
             'designation' => 'System Administrator',
             'office_id' => $office->id,
+            'email_verified_at' => now(),
+        ]);
+
+        Office::create([
+            'id' => Str::ulid(),
+            'name' => 'Provincial Information and Communication Technology Office',
+            'acronym' => 'PGO - PICTO',
+            'head_name' => 'John Doe',
+            'designation' => 'Office Head',
         ]);
 
         User::create([
@@ -52,7 +61,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => UserRole::LIAISON,
             'designation' => 'Officer',
-
+            'email_verified_at' => now(),
         ]);
     }
 }

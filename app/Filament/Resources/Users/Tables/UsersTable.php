@@ -27,18 +27,8 @@ class UsersTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('office.name')
+                    TextColumn::make('office.acronym')
                     ->label('Office')
-                    ->formatStateUsing(function ($state) {
-                        if (! $state) {
-                            return null;
-                        }
-
-                        // Get acronym from first letters of each word
-                        return collect(explode(' ', $state))
-                            ->map(fn ($word) => mb_substr($word, 0, 1))
-                            ->join('');
-                    })
                     ->tooltip(fn ($state) => $state ?: null)
                     ->searchable(),
 
