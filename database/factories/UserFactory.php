@@ -29,6 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => \App\Enums\UserRole::USER->value,
+            'office_id' => \App\Models\Office::factory(),
             'designation' => fake()->randomElement([
                 'Officer', 'Assistant Officer', 'Senior Officer', 'Manager', 'Director',
             ]),

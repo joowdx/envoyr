@@ -16,7 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a test admin user with all required fields
+        // 1. Create the initial office first
+        $office = Office::create([
+            'id' => Str::ulid(),
+            'name' => fake()->company() . ' Office',
+            'acronym' => strtoupper(fake()->lexify('???')),
+            'head_name' => fake()->name(),
+            'designation' => fake()->jobTitle(),
+        ]);
+
+        // 2. Now create users and assign office_id
         User::create([
             'name' => 'Test Admin',
             'email' => 'admin@test.com',
@@ -24,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'role' => UserRole::ROOT,
             'designation' => 'System Administrator',
             'email_verified_at' => now(),
+            'office_id' => $office->id,
         ]);
 
         Office::create([
@@ -36,7 +46,7 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Test User',
-            'office_id' => Office::first()->id,
+            'office_id' => $office->id,
             'email' => 'user@test.com',
             'password' => Hash::make('password'),
             'role' => UserRole::USER,
@@ -46,23 +56,12 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Test Liaison',
-            'office_id' => Office::first()->id,
+            'office_id' => $office->id,
             'email' => 'liaison@test.com',
             'password' => Hash::make('password'),
             'role' => UserRole::LIAISON,
             'designation' => 'Officer',
             'email_verified_at' => now(),
         ]);
-
-        for ($i = 1; $i <= 10; $i++) {
-            Office::create([
-                'id' => Str::ulid(),
-                'name' => fake()->company() . ' Office',
-                'acronym' => strtoupper(fake()->lexify('???')),
-                'head_name' => fake()->name(),
-                'designation' => fake()->jobTitle(),
-            ]);
-        }
-      
     }
 }

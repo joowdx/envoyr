@@ -47,10 +47,10 @@ class UsersTable
                         if ($record->isPendingInvitation()) {
                             return 'Pending';
                         }
-
                         return 'Active';
                     })
-                    ->color(fn ($state) => $state === 'Deactivated' ? 'gray' : ($state === 'Pending' ? 'warning' : 'success')),
+                    ->color(fn ($state) => $state === 'Deactivated' ? 'gray' : ($state === 'Pending' ? 'warning' : 'success'))
+                    ->visible(fn () => request()->input('tableTab', 'all') === 'all'), // Only show in "All Users" tab
 
                 TextColumn::make('designation')
                     ->label('Designation')
