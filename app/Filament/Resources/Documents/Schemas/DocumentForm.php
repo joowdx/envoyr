@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Documents\Schemas;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
