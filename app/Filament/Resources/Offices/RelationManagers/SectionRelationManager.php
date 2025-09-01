@@ -12,6 +12,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -32,13 +33,45 @@ class SectionRelationManager extends RelationManager
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                
+                Select::make('user_id')
+                    ->label('Section Head (User)')
+                    ->options(function () {
+                        $officeId = $this->getOwnerRecord()->id;
+                        return \App\Models\User::where('office_id', $officeId)
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->placeholder('Select a user as section head (optional)')
+                    ->nullable()
+                    ->reactive()
+                    ->afterStateUpdated(function ($set, $state) {
+                        if ($state) {
+                            $user = \App\Models\User::find($state);
+                            if ($user) {
+                                $set('head_name', $user->name);
+                                $set('designation', $user->designation);
+                            }
+                        } else {
+                            $set('head_name', null);
+                            $set('designation', null);
+                        }
+                    }),
+                
                 TextInput::make('head_name')
-                    ->maxLength(255),
+                    ->label('Head Name')
+                    ->maxLength(255)
+                    ->required(fn ($get): bool => is_null($get('user_id')))
+                    ->disabled(fn ($get): bool => !is_null($get('user_id')))
+                    ->reactive(),
+                
                 TextInput::make('designation')
-                    ->maxLength(255),
-
+                    ->label('Designation')
+                    ->maxLength(255)
+                    ->required(fn ($get): bool => is_null($get('user_id')))
+                    ->disabled(fn ($get): bool => !is_null($get('user_id')))
+                    ->reactive(),
             ]);
-
     }
 
     public function table(Table $table): Table
@@ -61,10 +94,12 @@ class SectionRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->createAnother(false)
+                    
                     ->label('Add Section'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                ->slideOver(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
