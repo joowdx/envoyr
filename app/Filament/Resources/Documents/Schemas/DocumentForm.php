@@ -58,19 +58,16 @@ class DocumentForm
                             ->rule('required')
                             ->markAsRequired(),
                     ]),
-                // Fixed: Removed invalid relationship from Grid and moved to Repeater
                 Repeater::make('contents')
-                    ->relationship('attachment')  // Specify the relationship here
+                    ->relationship('attachment')
                     ->addActionLabel('Add Content')
                     ->columnSpanFull()
-                    ->orderColumn('sort')
                     ->hint('Specify the content enclosed with the document')
                     ->helperText('What are the files or documents attached?')
-                    ->itemLabel(fn ($state) => $state['title'] ?? 'Untitled')  // Added null check
+                    ->itemLabel(fn ($state) => $state['title'] ?? 'Untitled')
                     ->collapsed()
                     ->required()
                     ->schema([
-                        // Removed hidden Toggle if not needed; add back if required
                         TextInput::make('title')
                             ->rule('required')
                             ->markAsRequired(),
@@ -89,7 +86,7 @@ class DocumentForm
                                 TextInput::make('context.amount')
                                     ->minValue(1)
                                     ->rule('numeric')
-                                    ->maxLength(255),  // Fixed: Valid maxLength
+                                    ->maxLength(255),
                             ]),
                         Textarea::make('remarks')
                             ->maxLength(4096),
