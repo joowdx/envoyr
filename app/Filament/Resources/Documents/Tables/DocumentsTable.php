@@ -4,14 +4,21 @@ namespace App\Filament\Resources\Documents\Tables;
 
 use App\Models\Document;
 use Filament\Tables\Table;
+use App\Actions\DownloadQR;
+use App\Actions\GenerateQR;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Response;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Actions\ForceDeleteBulkAction;
+use App\Filament\Actions\ReceiveDocumentAction;
+use App\Filament\Actions\TransmitDocumentAction;
+use App\Filament\Actions\Tables\UnpublishDocumentAction;
 
 class DocumentsTable
 {
@@ -71,14 +78,48 @@ class DocumentsTable
                     })
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                ]),
+                TransmitDocumentAction::make(),
+                ReceiveDocumentAction::make()
+                    ->label('Receive Document'),
+                Action::make('generateQR')
+                    ->label('QR')
+                    ->icon('heroicon-o-qr-code')
+                    ->modalWidth('md')
+                    ->visible(fn (Document $record): bool => $record->isPublished())
+                    ->modalContent(function (Document $record) {
+                        $qrCode = (new GenerateQR)($record->code);
+
+                        return view('components.qr-code', [
+                            'qrCode' => $qrCode,
+                            'code' => $record->code,
+                        ]);
+                    })
+                    ->modalFooterActions([
+                        Action::make('download')
+                            ->label('Download QR Code')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->action(function (Document $record) {
+                                $base64 = (new DownloadQR)($record->code);
+
+                                return Response::streamDownload(
+                                    function () use ($base64) {
+                                        echo base64_decode($base64);
+                                    },
+                                    'qr-code.pdf',
+                                    ['Content-Type' => 'application/pdf']
+                                );
+                            }),
+                        ]),
+                    ViewAction::make('view'),
+                    ActionGroup::make([
+                        UnpublishDocumentAction::make(),
+                        EditAction::make()
+                            ->visible(fn (Document $record): bool => $record->isDraft()),
+                        RestoreAction::make(),
+                        ForceDeleteAction::make(),
+
+                    ])
+
             ]);
     }
 }
