@@ -16,8 +16,10 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Response;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Actions\ReceiveDocumentAction;
-use App\Filament\Actions\TransmitDocumentAction;
+
+
+use App\Filament\Actions\Tables\ReceiveDocumentAction;
+use App\Filament\Actions\Tables\TransmitDocumentAction;
 use App\Filament\Actions\Tables\UnpublishDocumentAction;
 
 class DocumentsTable
