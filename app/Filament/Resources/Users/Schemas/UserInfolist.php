@@ -46,18 +46,32 @@ class UserInfolist
                             ->label('Section')
                             ->placeholder('No section assigned'),
                     ])
-                    ->columns(2), // Use columns() method instead of Grid
+                    ->columns(2),
 
                 Section::make('Status')
                     ->schema([
                         TextEntry::make('email_verified_at')
-                            ->label('Verified')
-                            ->formatStateUsing(fn ($state) => $state ? '✓ Verified' : '✗ Unverified')
-                            ->color(fn ($state) => $state ? 'success' : 'danger'),
+                            ->label('Email Status')
+                            ->formatStateUsing(function ($state, $record) {
+                                // Email is verified upon completing registration
+                                if ($record->invitation_accepted_at) {
+                                    return '✓ Verified';
+                                }
+                                return '✗ Unverified';
+                            })
+                            ->color(function ($state, $record) {
+                                return $record->invitation_accepted_at ? 'success' : 'danger';
+                            }),
 
                         TextEntry::make('invitation_accepted_at')
-                            ->label('Status')
+                            ->label('Account Status')
                             ->formatStateUsing(function ($state, $record) {
+                                // Check if deactivated first
+                                if ($record->deactivated_at) {
+                                    return '🚫 Deactivated';
+                                }
+                                
+                                // Then check if pending invitation
                                 if ($record->isPendingInvitation()) {
                                     return '⏳ Pending';
                                 }
@@ -65,6 +79,9 @@ class UserInfolist
                                 return '✓ Active';
                             })
                             ->color(function ($state, $record) {
+                                if ($record->deactivated_at) {
+                                    return 'gray';
+                                }
                                 return $record->isPendingInvitation() ? 'warning' : 'success';
                             }),
 
@@ -72,7 +89,24 @@ class UserInfolist
                             ->label('Joined')
                             ->since(),
                     ])
-                    ->columns(3), // 3 columns for status indicators
+                    ->columns(3),
+
+                // Show deactivation details if user is deactivated
+                Section::make('Deactivation Details')
+                    ->schema([
+                        TextEntry::make('deactivated_at')
+                            ->label('Deactivated On')
+                            ->dateTime()
+                            ->color('danger'),
+
+                        TextEntry::make('deactivatedByUser.name')
+                            ->label('Deactivated By')
+                            ->icon('heroicon-o-user-minus')
+                            ->color('danger')
+                            ->placeholder('System'),
+                    ])
+                    ->columns(2)
+                    ->visible(fn ($record) => $record->deactivated_at !== null),
 
                 Section::make('Invitation')
                     ->schema([
