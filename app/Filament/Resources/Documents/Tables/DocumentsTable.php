@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -17,7 +18,9 @@ class DocumentsTable
     {
         return $table
             ->columns([
-                TextColumn::make('title'),
+                TextColumn::make('title')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('code'),
                 TextColumn::make('classification.name'),
                 TextColumn::make('source.name'),
@@ -29,7 +32,7 @@ class DocumentsTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                ViewAction::make(),
             ])
             ->toolbarActions([
                 // BulkActionGroup::make([
