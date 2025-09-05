@@ -51,7 +51,6 @@ class UsersTable
                     })
                     ->color(fn ($state) => $state === 'Deactivated' ? 'gray' : ($state === 'Pending' ? 'warning' : 'success'))
                     ->visible(fn () => request()->input('tableTab', 'all') === 'all'), // Only show in "All Users" tab
-
                 TextColumn::make('designation')
                     ->label('Designation')
                     ->searchable()
@@ -100,13 +99,7 @@ class UsersTable
                             $record->update([
                                 'invitation_expires_at' => now()->addDays(7),
                             ]);
-                        })
-                        ->successNotification(
-                            fn ($record) => \Filament\Notifications\Notification::make()
-                                ->title('Invitation Resent')
-                                ->body("Registration link has been resent to {$record->email}")
-                                ->success()
-                        ),
+                        }),
 
                     Action::make('deactivate')
                         ->icon('heroicon-o-user-minus')
