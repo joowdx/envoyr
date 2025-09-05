@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Middleware\EnsureUserHasName;
+use App\Http\Middleware\EnsureUserNotDeactivated;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -57,6 +58,7 @@ class FilamentPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 EnsureUserHasName::class,
+                EnsureUserNotDeactivated::class,
             ]);
     }
 }
