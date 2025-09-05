@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Filament\Notifications\Notification;
 
 class EnsureUserNotDeactivated
 {
@@ -20,8 +21,15 @@ class EnsureUserNotDeactivated
 
         if ($user && $user->deactivated_at) {
             Auth::logout();
-            return redirect()->route('filament..auth.login')
-                ->withErrors(['account' => 'Your account has been deactivated. Contact your administrator.']);
+            
+            Notification::make()
+                ->title('Account Deactivated')
+                ->body('Your account has been deactivated. Contact your administrator.')
+                ->danger()
+                ->persistent()
+                ->send();
+            
+            return redirect()->route('filament..auth.login');
         }
 
         return $next($request);
