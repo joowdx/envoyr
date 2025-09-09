@@ -58,7 +58,7 @@ trait TransmitDocument
                 }),
             Select::make('section_id')
                 ->label('Section')
-                ->options(function (Get $get) {
+                ->options(function (callable $get) {
                     $officeId = $get('office_id');
 
                     if (! $officeId) {
@@ -76,8 +76,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->visible(fn (Get $get) => $get('office_id') === Auth::user()->office_id)
-                ->required(fn (Get $get) => $get('office_id') === Auth::user()->office_id),
+                ->visible(fn (callable $get) => $get('office_id') === Auth::user()->office_id)
+                ->required(fn (callable $get) => $get('office_id') === Auth::user()->office_id),
             Select::make('liaison_id')
                 ->label('Liaison')
                 ->options(function (callable $get) {
@@ -89,8 +89,8 @@ trait TransmitDocument
                 })
                 ->searchable()
                 ->preload()
-                ->required(fn (Get $get) => ! $get('pick_up'))
-                ->visible(fn (Get $get) => ! $get('pick_up')),
+                ->required(fn (callable $get) => ! $get('pick_up'))
+                ->visible(fn (callable $get) => ! $get('pick_up')),
             Textarea::make('purpose')
                 ->label('Purpose')
                 ->markAsRequired()

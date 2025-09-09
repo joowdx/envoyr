@@ -59,5 +59,50 @@ class DatabaseSeeder extends Seeder
             'name' => 'Memo',
             'description' => 'Memorandum classification for official documents',
         ]);
+
+        // 6. Create HR office
+        $hrOffice = Office::create([
+            'id' => Str::ulid(),
+            'name' => 'Provincial Human Resource Management Office',
+            'acronym' => 'PGO - HRMO',
+            'head_name' => 'Jane Smith',
+            'designation' => 'Office Head',
+        ]);
+
+        // 7. Create HR section and HR account, link as section head
+        $hrSection = Section::create([
+            'id' => Str::ulid(),
+            'name' => 'HR Section',
+            'office_id' => $hrOffice->id,
+        ]);
+
+        $hrUser = User::create([
+            'name' => 'HR Admin',
+            'email' => 'hr@test.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::ADMINISTRATOR,
+            'designation' => 'HR Administrator',
+            'office_id' => $hrOffice->id,
+            'section_id' => $hrSection->id,
+            'email_verified_at' => now(),
+        ]);
+
+        $hrSection->update([
+            'user_id' => $hrUser->id,
+            'head_name' => $hrUser->name,
+            'designation' => $hrUser->designation,
+        ]);
+
+        // 8. Create a liaison for PICTO and assign to its section
+        User::create([
+            'name' => 'PICTO Liaison',
+            'email' => 'liaison@test.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::LIAISON,
+            'designation' => 'Liaison',
+            'office_id' => $office->id,
+            'section_id' => $section->id,
+            'email_verified_at' => now(),
+        ]);
     }
 }

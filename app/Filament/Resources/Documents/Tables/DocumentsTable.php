@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Documents\Tables;
 
+use App\Filament\Actions\PublishDocumentAction;
+use App\Filament\Actions\TransmitDocumentAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,14 +26,14 @@ class DocumentsTable
                 TextColumn::make('code'),
                 TextColumn::make('classification.name'),
                 TextColumn::make('source.name'),
-                TextColumn::make('published_at'),
-                TextColumn::make('created_at')->dateTime('d-m-Y H:i:s'),
-                TextColumn::make('updated_at')->dateTime('d-m-Y H:i:s'),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                TransmitDocumentAction::make(),
+                PublishDocumentAction::make(),
+                EditAction::make(),
                 ViewAction::make(),
             ])
             ->toolbarActions([
