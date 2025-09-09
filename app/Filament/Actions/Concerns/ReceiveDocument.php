@@ -64,7 +64,7 @@ trait ReceiveDocument
         });
 
         $this->action(function (?Document $record, array $data): void {
-            $record = $record ?? Document::where($data);
+            $record = $record ?? Document::where('code', $data['code'])->first();
 
             try {
                 if ($record->electronic && $record->attachments->isNotEmpty()) {

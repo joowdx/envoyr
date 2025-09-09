@@ -105,12 +105,20 @@ trait TransmitDocument
         ]);
 
         $this->action(function (Document $record, array $data) {
+            $record->refresh();
+            
             if ($record->activeTransmittal()->exists()) {
+                $this->failureNotificationTitle('Cannot transmit document');
+                $this->failureNotificationBody('This document has an active transmittal that has not been received yet.');
                 $this->failure();
                 return;
             }
             try {
                 DB::transaction(function () use ($record, $data) {
+                    if ($record->transmittals()->whereNull('received_at')->exists()) {
+                        throw new Exception('Document has an active transmittal');
+                    }
+                    
                     $transmittal = $record->transmittals()->create([
                         'purpose' => $data['purpose'],
                         'remarks' => $data['remarks'],
