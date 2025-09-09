@@ -105,9 +105,13 @@ trait TransmitDocument
         ]);
 
         $this->action(function (Document $record, array $data) {
+            if ($record->activeTransmittal()->exists()) {
+                $this->failure();
+                return;
+            }
             try {
                 DB::transaction(function () use ($record, $data) {
-                    $record->transmittals()->create([
+                    $transmittal = $record->transmittals()->create([
                         'purpose' => $data['purpose'],
                         'remarks' => $data['remarks'],
                         'from_office_id' => Auth::user()->office_id,
@@ -115,8 +119,15 @@ trait TransmitDocument
                         'from_section_id' => Auth::user()->section_id,
                         'to_section_id' => $data['section_id'] ?? null,
                         'from_user_id' => Auth::id(),
-                        'liaison_id' => $data['liaison_id'],
+                        'liaison_id' => $data['liaison_id'] ?? null,
                         'pick_up' => $data['pick_up'],
+                    ]);
+
+                    $record->processes()->create([
+                        'transmittal_id' => $transmittal->id,
+                        'user_id' => Auth::id(),
+                        'processed_at' => now(),
+                        'status' => 'transmitted',
                     ]);
                 });
 
@@ -131,7 +142,7 @@ trait TransmitDocument
         $this->visible(
             fn (Document $record): bool => $record->isPublished() &&
                 $record->user_id === Auth::id() &&
-                ! $record->transmitted_at &&
+                ! $record->activeTransmittal()->exists() &&
                 ! $record->dissemination
         );
 
