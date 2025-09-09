@@ -104,5 +104,24 @@ class DatabaseSeeder extends Seeder
             'section_id' => $section->id,
             'email_verified_at' => now(),
         ]);
+
+        // 9. Create BUDGET office and a user for it
+        $budgetOffice = Office::create([
+            'id' => Str::ulid(),
+            'name' => 'Provincial Budget Office',
+            'acronym' => 'PGO - BUDGET',
+            'head_name' => 'Robert Brown',
+            'designation' => 'Office Head',
+        ]);
+
+        User::create([
+            'name' => 'Budget User',
+            'email' => 'budget@test.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::USER,
+            'designation' => 'Officer',
+            'office_id' => $budgetOffice->id,
+            'email_verified_at' => now(),
+        ]);
     }
 }
