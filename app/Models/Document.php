@@ -148,4 +148,10 @@ class Document extends Model
                 $query->whereNull('received_at');
             });
     }
+
+    public function processes(): HasMany
+    {
+        return $this->hasMany(Process::class);
+    }
+
 }
