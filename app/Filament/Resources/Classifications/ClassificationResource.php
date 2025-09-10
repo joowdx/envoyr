@@ -52,14 +52,6 @@ class ClassificationResource extends Resource
                 TextEntry::make('description')
                     ->label('Description')
                     ->columnSpan(1),
-                // TextEntry::make('created_at')
-                //     ->dateTime()
-                //     ->label('Created At')
-                //     ->columnSpanFull(),
-                // TextEntry::make('updated_at')
-                //     ->dateTime()
-                //     ->label('Updated At')
-                //     ->columnSpanFull(),
             ]);
     }
 
@@ -87,11 +79,6 @@ class ClassificationResource extends Resource
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
-            ])
-            ->toolbarActions([
-                // BulkActionGroup::make([
-                //     DeleteBulkAction::make(),
-                // ]),
             ]);
     }
 
