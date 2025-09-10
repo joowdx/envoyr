@@ -36,18 +36,30 @@ class ClassificationResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+                Textarea::make('description')
+                    ->rows(3),
             ]);
     }
 
     public static function infolist(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
-                TextEntry::make('name'),
-                TextEntry::make('created_at')
-                    ->dateTime(),
-                TextEntry::make('updated_at')
-                    ->dateTime(),
+                TextEntry::make('name')
+                    ->label('Classification Name')
+                    ->columnSpan(1),
+                TextEntry::make('description')
+                    ->label('Description')
+                    ->columnSpan(1),
+                // TextEntry::make('created_at')
+                //     ->dateTime()
+                //     ->label('Created At')
+                //     ->columnSpanFull(),
+                // TextEntry::make('updated_at')
+                //     ->dateTime()
+                //     ->label('Updated At')
+                //     ->columnSpanFull(),
             ]);
     }
 
