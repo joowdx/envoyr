@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\Section;
+use App\Models\Transmittal;
 use App\Models\User;
 use Exception;
 use Filament\Forms\Components\Select;
@@ -131,6 +132,9 @@ trait TransmitDocument
                         'pick_up' => $data['pick_up'],
                     ]);
 
+                    // MISSING: Copy current document attachments to transmittal
+                    $this->createTransmittalAttachmentSnapshot($record, $transmittal);
+
                     $record->processes()->create([
                         'transmittal_id' => $transmittal->id,
                         'user_id' => Auth::id(),
@@ -149,7 +153,7 @@ trait TransmitDocument
 
         $this->visible(
             fn (Document $record): bool => $record->isPublished() &&
-                $record->user_id === Auth::id() &&
+                $this->canTransmitDocument($record) &&
                 ! $record->activeTransmittal()->exists() &&
                 ! $record->dissemination
         );
@@ -157,5 +161,47 @@ trait TransmitDocument
         $this->successNotificationTitle('Document transmitted successfully');
 
         $this->failureNotificationTitle('Document transmission failed');
+    }
+
+    private function canTransmitDocument(Document $record): bool
+    {
+        $currentOfficeId = Auth::user()->office_id;
+        
+        if ($record->activeTransmittal) {
+            return $record->activeTransmittal->to_office_id === $currentOfficeId;
+        }
+        
+        $lastReceivedTransmittal = $record->transmittals()
+            ->whereNotNull('received_at')
+            ->orderBy('received_at', 'desc')
+            ->first();
+            
+        if ($lastReceivedTransmittal) {
+            return $lastReceivedTransmittal->to_office_id === $currentOfficeId;
+        }
+        
+        return $record->office_id === $currentOfficeId;
+    }
+
+    private function createTransmittalAttachmentSnapshot(Document $document, Transmittal $transmittal): void
+    {
+        $draftAttachment = $document->attachment;
+
+        if ($draftAttachment) {
+            $transmittalAttachment = $transmittal->attachments()->create([
+                'document_id' => $document->id,
+            ]);
+
+            foreach ($draftAttachment->contents as $content) {
+                $transmittalAttachment->contents()->create([
+                    'sort' => $content->sort,
+                    'title' => $content->title,
+                    'file' => $content->file,
+                    'path' => $content->path,
+                    'hash' => $content->hash,
+                    'context' => $content->context,
+                ]);
+            }
+        }
     }
 }

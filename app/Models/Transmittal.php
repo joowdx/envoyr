@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Transmittal extends Model
 {
@@ -81,14 +81,14 @@ class Transmittal extends Model
         return $this->belongsTo(User::class, 'liaison_id');
     }
 
-    public function contents(): HasMany
+    public function contents(): HasManyThrough
     {
-        return $this->hasMany(Content::class);
+        return $this->hasManyThrough(Content::class, Attachment::class);
     }
 
-    public function attachments(): MorphMany
+    public function attachments(): HasMany
     {
-        return $this->morphMany(Attachment::class, 'attachable');
+        return $this->hasMany(Attachment::class);
     }
 
     public static function booted(): void
