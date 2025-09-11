@@ -54,7 +54,7 @@ class ViewDocument extends ViewRecord
             Actions\EditAction::make()
                 ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
             Actions\DeleteAction::make()
-                ->visible(fn (): bool => $this->record->user_id === Auth::id()),
+                ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
         ];
     }
 
