@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -114,9 +113,9 @@ class Document extends Model
         return $this->hasMany(Label::class);
     }
 
-    public function attachments(): HasManyThrough
+    public function attachments(): HasMany
     {
-        return $this->hasManyThrough(Attachment::class, Transmittal::class);
+        return $this->hasMany(Attachment::class);
     }
 
     public function attachment(): HasOne
@@ -152,6 +151,35 @@ class Document extends Model
     public function processes(): HasMany
     {
         return $this->hasMany(Process::class);
+    }
+
+    public function scopeForOffice($query, $officeId)
+    {
+        return $query->where(function ($q) use ($officeId) {
+            $q->where('office_id', $officeId)
+                ->orWhereHas('transmittals', function ($transmittalQuery) use ($officeId) {
+                    $transmittalQuery->where('to_office_id', $officeId)
+                        ->whereNotNull('received_at');
+                });
+        });
+    }
+
+    public function isOwnedByOffice($officeId): bool
+    {
+        if ($this->activeTransmittal) {
+            return $this->activeTransmittal->to_office_id === $officeId;
+        }
+        
+        $lastReceivedTransmittal = $this->transmittals()
+            ->whereNotNull('received_at')
+            ->orderBy('received_at', 'desc')
+            ->first();
+            
+        if ($lastReceivedTransmittal) {
+            return $lastReceivedTransmittal->to_office_id === $officeId;
+        }
+        
+        return $this->office_id === $officeId;
     }
 
 }

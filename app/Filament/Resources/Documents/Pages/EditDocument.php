@@ -16,8 +16,10 @@ class EditDocument extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => $this->record->isDraft()),
+            ForceDeleteAction::make()
+                ->visible(fn (): bool => $this->record->isDraft()),
             RestoreAction::make(),
         ];
     }
