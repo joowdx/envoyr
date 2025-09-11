@@ -44,8 +44,8 @@ class Content extends Model
         return Attribute::make(fn () => isset($this->hash));
     }
 
-    public function transmittal(): BelongsTo
+    public function attachment(): BelongsTo
     {
-        return $this->belongsTo(Transmittal::class);
+        return $this->belongsTo(Attachment::class);
     }
 }

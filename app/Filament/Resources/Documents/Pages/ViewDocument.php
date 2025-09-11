@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Documents\Pages;
 
 use App\Actions\DownloadQR;
 use App\Actions\GenerateQR;
+use App\Filament\Actions\ModifyAttachmentsAction;
 use App\Filament\Actions\PublishDocumentAction;
 use App\Filament\Actions\TransmitDocumentAction;
 use App\Filament\Resources\Documents\DocumentResource;
@@ -19,6 +20,7 @@ class ViewDocument extends ViewRecord
     {
         return [
             TransmitDocumentAction::make(),
+            ModifyAttachmentsAction::make(),
             PublishDocumentAction::make(),
             Actions\Action::make('generateQR')
                 ->label('QR')
@@ -53,6 +55,14 @@ class ViewDocument extends ViewRecord
                 ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
             Actions\DeleteAction::make()
                 ->visible(fn (): bool => $this->record->user_id === Auth::id()),
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\Documents\Widgets\TransmittalHistoryOverview::class,
+            \App\Filament\Resources\Documents\Widgets\TransmittalHistoryTable::class,
         ];
     }
 }

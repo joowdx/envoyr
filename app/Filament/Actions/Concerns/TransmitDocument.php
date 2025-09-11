@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\Section;
+use App\Models\Transmittal;
 use App\Models\User;
 use Exception;
 use Filament\Forms\Components\Select;
@@ -131,6 +132,9 @@ trait TransmitDocument
                         'pick_up' => $data['pick_up'],
                     ]);
 
+                    // MISSING: Copy current document attachments to transmittal
+                    $this->createTransmittalAttachmentSnapshot($record, $transmittal);
+
                     $record->processes()->create([
                         'transmittal_id' => $transmittal->id,
                         'user_id' => Auth::id(),
@@ -157,5 +161,30 @@ trait TransmitDocument
         $this->successNotificationTitle('Document transmitted successfully');
 
         $this->failureNotificationTitle('Document transmission failed');
+    }
+
+    private function createTransmittalAttachmentSnapshot(Document $document, Transmittal $transmittal): void
+    {
+        // Get current draft attachment
+        $draftAttachment = $document->attachment;
+
+        if ($draftAttachment) {
+            // Create transmittal attachment
+            $transmittalAttachment = $transmittal->attachments()->create([
+                'document_id' => $document->id,
+            ]);
+
+            // Copy all contents
+            foreach ($draftAttachment->contents as $content) {
+                $transmittalAttachment->contents()->create([
+                    'sort' => $content->sort,
+                    'title' => $content->title,
+                    'file' => $content->file, // JSON array of file paths
+                    'path' => $content->path,
+                    'hash' => $content->hash,
+                    'context' => $content->context,
+                ]);
+            }
+        }
     }
 }

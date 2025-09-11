@@ -4,119 +4,88 @@ namespace App\Filament\Actions\Concerns;
 
 use App\Models\Document;
 use App\Models\Transmittal;
-use Filament\Infolists;
+// Note: This trait is currently unused but kept for reference
+// Components used here may not be available in current Filament version
 
 trait TransmittalHistoryInfolist
 {
     protected static function getTransmittalHistorySchema(): array
     {
         return [
-            Infolists\Components\Tabs::make('contents')
-                ->contained(false)
-                ->tabs([
-                    Infolists\Components\Tabs\Tab::make('Current State')
-                        ->visible(fn ($record) => $record->transmittal !== null)
+            Components\Section::make('Document Transmittal History')
+                ->description('View the complete transmission history and attachment versions for this document.')
                         ->schema([
-                            Infolists\Components\Group::make()
-                                ->relationship('transmittal')
-                                ->schema([
-                                    Infolists\Components\Grid::make()
-                                        ->schema([
-                                            Infolists\Components\TextEntry::make('code')
-                                                ->extraAttributes(['class' => 'font-mono'])
-                                                ->copyable()
-                                                ->copyMessage('Copied!')
-                                                ->copyMessageDuration(1500),
-                                            Infolists\Components\TextEntry::make('liaison.name'),
-                                            Infolists\Components\TextEntry::make('toOffice.name')
-                                                ->label('To')
-                                                ->helperText(fn ($record) => $record->section->name),
-                                            Infolists\Components\TextEntry::make('fromOffice.name')
-                                                ->label('From')
-                                                ->helperText(fn ($record) => $record->section->name),
-                                            Infolists\Components\TextEntry::make('created_at')
-                                                ->label('Transmitted')
-                                                ->dateTime('jS F Y \a\t H:i')
-                                                ->helperText(fn ($record) => $record->transmittal?->fromUser?->name ?? 'Unknown'),
-                                            Infolists\Components\TextEntry::make('received_at')
-                                                ->label(fn (Document $record) => $record->pick_up ? 'Picked up at' : 'Received At')
-                                                ->dateTime('jS F Y \a\t H:i')
-                                                ->placeholder('Not yet received')
-                                                ->helperText(function (Document $record) {
-                                                    if (! $record->transmittal?->received_at) {
-                                                        return 'Not yet received';
-                                                    }
-
-                                                    return 'By ' . ($record->transmittal?->toUser?->name ?? 'Unknown');
-                                                }),
-                                            Infolists\Components\TextEntry::make('purpose')
-                                                ->label('Purpose')
-                                                ->columnSpanFull(),
-                                        ]),
-                                    static::attachmentInfolistGroup(),
-                                ]),
-                        ]),
-                    Infolists\Components\Tabs\Tab::make('Transmittal Transactions')
+                    Components\Placeholder::make('current_transmittal')
+                        ->label('Current Status')
+                        ->content(function ($record) {
+                            $activeTransmittal = $record->activeTransmittal;
+                            if (!$activeTransmittal) {
+                                return 'No active transmittal';
+                            }
+                            
+                            $status = $activeTransmittal->received_at ? 'Received' : 'In Transit';
+                            $office = $activeTransmittal->toOffice->name ?? 'Unknown Office';
+                            
+                            return "Status: {$status} | To: {$office}";
+                        })
+                        ->visible(fn ($record) => $record->activeTransmittal()->exists()),
+                        
+                    Components\Placeholder::make('transmittal_count')
+                        ->label('Total Transmittals')
+                        ->content(fn ($record) => $record->transmittals->count() . ' transmittal(s)')
+                        ->visible(fn ($record) => $record->transmittals->isNotEmpty()),
+                        
+                    Components\Placeholder::make('attachment_summary')
+                        ->label('Current Attachments')
+                        ->content(function ($record) {
+                            $draftAttachment = $record->attachment;
+                            if (!$draftAttachment || $draftAttachment->contents->isEmpty()) {
+                                return 'No attachments';
+                            }
+                            
+                            $fileCount = $draftAttachment->contents->count();
+                            $fileNames = $draftAttachment->contents->pluck('title')->join(', ');
+                            
+                            return "{$fileCount} file(s): {$fileNames}";
+                        }),
+                ])
+                ->collapsible()
+                ->persistCollapsed(),
+                
+            Components\Section::make('Transmittal History')
+                ->description('Detailed history of all transmittals for this document.')
                         ->schema([
-                            Infolists\Components\RepeatableEntry::make('transmittals')
-                                ->hiddenLabel()
-                                // ->contained(false)
-                                ->schema([
-                                    // Infolists\Components\Tabs::make()
-                                    //     ->tabs([
-                                    //         Infolists\Components\Tabs\Tab::make('Overview')
-                                    //             ->schema([
-                                                    Infolists\Components\Grid::make(2)
-                                                        ->schema([
-                                                            Infolists\Components\TextEntry::make('code')
-                                                                ->extraAttributes(['class' => 'font-mono'])
-                                                                ->copyable()
-                                                                ->copyMessage('Copied!')
-                                                                ->copyMessageDuration(1500),
-                                                            Infolists\Components\TextEntry::make('liaison.name'),
-                                                            Infolists\Components\TextEntry::make('toOffice.name')
-                                                                ->label('To')
-                                                                ->helperText(fn ($record) => $record->toSection?->name),
-                                                            Infolists\Components\TextEntry::make('fromOffice.name')
-                                                                ->label('From')
-                                                                ->helperText(fn ($record) => $record->fromSection?->name),
-                                                            Infolists\Components\TextEntry::make('created_at')
-                                                                ->label('Transmitted')
-                                                                ->dateTime('jS F Y \a\t H:i')
-                                                                ->helperText(fn ($record) => 'By '.($record->fromUser?->name ?? 'Unknown')),
-                                                            Infolists\Components\TextEntry::make('received_at')
-                                                                ->label(fn (Transmittal $record) => $record->pick_up ? 'Picked up' : 'Received')
-                                                                ->dateTime('jS F Y \a\t H:i')
-                                                                ->placeholder('Not yet received')
-                                                                ->helperText(function (Transmittal $record) {
-                                                                    if (! $record->received_at) {
-                                                                        return 'Not yet received';
-                                                                    }
-
-                                                                    return 'By ' . ($record?->toUser?->name ?? 'Unknown');
-                                                                }),
-                                                        ]),
-                                                    Infolists\Components\TextEntry::make('purpose')
-                                                        ->label('Purpose')
-                                                        ->columnSpanFull(),
-                                                // ]),
-                                            // Infolists\Components\Tabs\Tab::make('Remarks')
-                                            //     ->hidden(fn ($record) => $record->remarks === null)
-                                            //     ->schema([
-                                                    Infolists\Components\TextEntry::make('remarks')
-                                                        ->markdown()
-                                                        ->columnSpanFull()
-                                                        ->visible(fn ($record) => $record->remarks !== null),
-                                                // ]),
-                                            Infolists\Components\Tabs\Tab::make('Contents')
-                                                ->schema([static::attachmentInfolistGroup()]),
-                                        ]),
-                                // ]),
-
-                        ]),
-                    Infolists\Components\Tabs\Tab::make('Original Contents')
-                        ->schema([static::attachmentInfolistGroup()]),
-                ]),
+                    Components\Placeholder::make('transmittal_history')
+                        ->label('')
+                        ->content(function ($record) {
+                            if ($record->transmittals->isEmpty()) {
+                                return 'No transmittals yet.';
+                            }
+                            
+                            $history = '';
+                            foreach ($record->transmittals as $index => $transmittal) {
+                                $num = $index + 1;
+                                $from = $transmittal->fromOffice->name ?? 'Unknown';
+                                $to = $transmittal->toOffice->name ?? 'Unknown';
+                                $date = $transmittal->created_at->format('M d, Y H:i');
+                                $status = $transmittal->received_at ? 'Received' : 'Pending';
+                                $attachmentCount = $transmittal->attachments->sum(fn($att) => $att->contents->count());
+                                
+                                $history .= "#{$num}: {$from} → {$to} ({$date}) - {$status} - {$attachmentCount} files\n";
+                                $history .= "Purpose: {$transmittal->purpose}\n";
+                                if ($transmittal->remarks) {
+                                    $history .= "Remarks: {$transmittal->remarks}\n";
+                                }
+                                $history .= "\n";
+                            }
+                            
+                            return trim($history);
+                        })
+                        ->extraAttributes(['style' => 'white-space: pre-line; font-family: monospace;']),
+                ])
+                ->collapsible()
+                ->collapsed()
+                ->visible(fn ($record) => $record->transmittals->isNotEmpty()),
         ];
     }
 }
