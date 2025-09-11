@@ -20,7 +20,7 @@ class TransmittalHistoryTable extends BaseWidget
             ->query(
                 $this->record ? 
                 $this->record->transmittals()->getQuery()->latest() : 
-                Transmittal::query()->whereNull('id') // Empty query if no record
+                Transmittal::query()->whereNull('id')
             )
             ->columns([
                 Tables\Columns\TextColumn::make('code')
