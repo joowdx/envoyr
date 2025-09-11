@@ -30,12 +30,10 @@ class TransmittalHistoryTable extends BaseWidget
                     
                 Tables\Columns\TextColumn::make('fromOffice.name')
                     ->label('From Office')
-                    ->badge()
                     ->color('gray'),
                     
                 Tables\Columns\TextColumn::make('toOffice.name')
                     ->label('To Office')
-                    ->badge()
                     ->color('primary'),
                     
                 Tables\Columns\TextColumn::make('purpose')
@@ -61,7 +59,6 @@ class TransmittalHistoryTable extends BaseWidget
                 Tables\Columns\TextColumn::make('attachments_count')
                     ->label('Files')
                     ->counts('attachments')
-                    ->badge()
                     ->color('info'),
                     
                 Tables\Columns\TextColumn::make('created_at')

@@ -112,7 +112,12 @@ class AttachmentsRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        // Make read-only if document has active transmittal
-        return $this->getOwnerRecord()->activeTransmittal()->exists();
+        $document = $this->getOwnerRecord();
+        
+        if ($document->activeTransmittal()->exists()) {
+            return true;
+        }
+        
+        return !$document->isOwnedByOffice(auth()->user()->office_id);
     }
 }

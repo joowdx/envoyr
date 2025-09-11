@@ -115,7 +115,9 @@ class ModifyAttachmentsAction extends Action
         $this->visible(function (Document $record): bool {
             $activeTransmittal = $record->activeTransmittal;
             
-            return $activeTransmittal && 
+            // Only show if document is owned by current office and has been received
+            return $record->isOwnedByOffice(Auth::user()->office_id) &&
+                   $activeTransmittal && 
                    $activeTransmittal->received_at && 
                    $activeTransmittal->to_office_id === Auth::user()->office_id;
         });

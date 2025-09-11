@@ -153,4 +153,33 @@ class Document extends Model
         return $this->hasMany(Process::class);
     }
 
+    public function scopeForOffice($query, $officeId)
+    {
+        return $query->where(function ($q) use ($officeId) {
+            $q->where('office_id', $officeId)
+                ->orWhereHas('transmittals', function ($transmittalQuery) use ($officeId) {
+                    $transmittalQuery->where('to_office_id', $officeId)
+                        ->whereNotNull('received_at');
+                });
+        });
+    }
+
+    public function isOwnedByOffice($officeId): bool
+    {
+        if ($this->activeTransmittal) {
+            return $this->activeTransmittal->to_office_id === $officeId;
+        }
+        
+        $lastReceivedTransmittal = $this->transmittals()
+            ->whereNotNull('received_at')
+            ->orderBy('received_at', 'desc')
+            ->first();
+            
+        if ($lastReceivedTransmittal) {
+            return $lastReceivedTransmittal->to_office_id === $officeId;
+        }
+        
+        return $this->office_id === $officeId;
+    }
+
 }
