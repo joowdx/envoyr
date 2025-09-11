@@ -6,6 +6,7 @@ use App\Filament\Resources\Documents\Pages\CreateDocument;
 use App\Filament\Resources\Documents\Pages\EditDocument;
 use App\Filament\Resources\Documents\Pages\ListDocuments;
 use App\Filament\Resources\Documents\Pages\ViewDocument;
+use App\Filament\Resources\Documents\RelationManagers\AttachmentsRelationManager;
 use App\Filament\Resources\Documents\Schemas\DocumentForm;
 use App\Filament\Resources\Documents\Tables\DocumentsTable;
 use BackedEnum;
@@ -38,7 +39,7 @@ class DocumentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AttachmentsRelationManager::class,
         ];
     }
 
@@ -55,6 +56,15 @@ class DocumentResource extends Resource
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->forOffice(auth()->user()->office_id)
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

@@ -37,15 +37,27 @@ trait ReceiveDocument
                         $document = Document::firstWhere('code', $value);
 
                         if (! $document) {
-                            $fail('Document not found.');
-
+                            $fail('Document with code "' . $value . '" not found.');
                             return;
                         }
 
                         $transmittal = $document->activeTransmittal;
 
-                        if (! $transmittal || $transmittal->to_office_id !== Auth::user()->office_id) {
-                            $fail('You are not authorized to receive this document.');
+                        if (! $transmittal) {
+                            $fail('This document has no active transmittal. It may not have been transmitted yet.');
+                            return;
+                        }
+
+                        if ($transmittal->received_at) {
+                            $fail('This document has already been received.');
+                            return;
+                        }
+
+                        if ($transmittal->to_office_id !== Auth::user()->office_id) {
+                            $toOfficeName = $transmittal->toOffice->name ?? 'Unknown Office';
+                            $userOfficeName = Auth::user()->office->name ?? 'Unknown Office';
+                            $fail('This document was sent to "' . $toOfficeName . '" but you are from "' . $userOfficeName . '".');
+                            return;
                         }
                     };
                 })
@@ -64,7 +76,12 @@ trait ReceiveDocument
         });
 
         $this->action(function (?Document $record, array $data): void {
-            $record = $record ?? Document::where('code', $data['code'])->first();
+            $record = $record ?? Document::firstWhere('code', $data['code']);
+
+            if (!$record) {
+                $this->failure();
+                return;
+            }
 
             try {
                 if ($record->electronic && $record->attachments->isNotEmpty()) {
@@ -72,7 +89,17 @@ trait ReceiveDocument
                 }
 
                 DB::transaction(function () use ($record) {
-                    $record->activeTransmittal->update([
+                    $activeTransmittal = $record->activeTransmittal;
+                    
+                    if (!$activeTransmittal) {
+                        throw new Exception('No active transmittal found for this document.');
+                    }
+                    
+                    if ($activeTransmittal->to_office_id !== Auth::user()->office_id) {
+                        throw new Exception('You are not authorized to receive this document.');
+                    }
+                    
+                    $activeTransmittal->update([
                         'received_at' => now(),
                         'to_user_id' => Auth::id(),
                     ]);
@@ -80,7 +107,13 @@ trait ReceiveDocument
 
                 $this->success();
 
-            } catch (Exception) {
+            } catch (Exception $e) {
+                Notification::make()
+                    ->title('Failed to receive document')
+                    ->body($e->getMessage())
+                    ->danger()
+                    ->send();
+                    
                 $this->failure();
             }
         });
