@@ -33,4 +33,9 @@ class Office extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function processes(): HasMany
+    {
+        return $this->hasMany(Process::class);
+    }
 }
