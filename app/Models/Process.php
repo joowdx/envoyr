@@ -14,6 +14,7 @@ class Process extends Model
         'document_id',
         'transmittal_id',
         'user_id',
+        'classification_id',
         'processed_at',
         'status',
     ];
@@ -31,5 +32,10 @@ class Process extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function classification(): BelongsTo
+    {
+        return $this->belongsTo(Classification::class);
     }
 }
