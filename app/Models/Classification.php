@@ -19,4 +19,9 @@ class Classification extends Model
     {
         return $this->hasMany(Document::class);
     }
+
+    public function processes(): HasMany
+    {
+        return $this->hasMany(Process::class);
+    }
 }
