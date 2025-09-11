@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Document;
+use App\Models\Office;
 use App\Models\Transmittal;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -16,15 +17,11 @@ return new class extends Migration
     {
         Schema::create('processes', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignIdFor(Document::class)->constrained('documents')->cascadeOnDelete();
-            $table->foreignIdFor(Transmittal::class)->constrained('transmittals')->cascadeOnDelete();
-            $table->ulid('user_id'); // Changed to ULID for User reference
-            $table->timestamp('processed_at')->nullable();
-            $table->string('status')->nullable();
+            $table->string('name');
+            $table->foreignIdFor(Office::class)->constrained()->cascadeOnDelete();
+            $table->softDeletes();
             $table->timestamps();
 
-            // Add foreign key constraint for user_id
-            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

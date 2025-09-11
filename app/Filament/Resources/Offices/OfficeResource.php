@@ -7,6 +7,7 @@ use App\Filament\Resources\Offices\Pages\CreateOffice;
 use App\Filament\Resources\Offices\Pages\EditOffice;
 use App\Filament\Resources\Offices\Pages\ListOffices;
 use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
+use App\Filament\Resources\Offices\RelationManagers\ProcessesRelationManager;
 use App\Filament\Resources\Offices\Schemas\OfficeForm;
 use App\Filament\Resources\Offices\Tables\OfficesTable;
 use App\Models\Office;
@@ -40,6 +41,7 @@ class OfficeResource extends Resource
     {
         return [
             SectionRelationManager::class,
+            ProcessesRelationManager::class,
         ];
     }
 
