@@ -4,13 +4,8 @@ namespace App\Filament\Actions\Concerns;
 
 use App\Models\Document;
 use App\Models\Transmittal;
-use Infolists\Components\Tabs\Tab;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Group;
-use Filament\Tables\Columns\Layout\Grid;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-
+// Note: This trait is currently unused but kept for reference
+// Components used here may not be available in current Filament version
 
 trait TransmittalHistoryInfolist
 {
