@@ -58,7 +58,6 @@ class TransmittalHistoryOverview extends BaseWidget
 
     protected function getCurrentLocation(): array
     {
-        // If there's an active transmittal (not received yet), document is in transit
         if ($this->record->activeTransmittal) {
             $toOffice = $this->record->activeTransmittal->toOffice;
             return [
@@ -69,7 +68,6 @@ class TransmittalHistoryOverview extends BaseWidget
             ];
         }
 
-        // Get the most recent received transmittal to determine current location
         $lastReceivedTransmittal = $this->record->transmittals()
             ->whereNotNull('received_at')
             ->orderBy('received_at', 'desc')
@@ -85,7 +83,6 @@ class TransmittalHistoryOverview extends BaseWidget
             ];
         }
 
-        // If no transmittals have been received, document is at origin office
         $originOffice = $this->record->office;
         return [
             'office' => $originOffice->acronym ?? $originOffice->name ?? 'Origin Office',
