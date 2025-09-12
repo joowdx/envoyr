@@ -5,22 +5,27 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Form;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use App\Filament\Resources\Offices\OfficeResource;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class ProcessesRelationManager extends RelationManager
 {
     protected static string $relationship = 'processes';
 
-    protected static ?string $relatedResource = OfficeResource::class;
+    protected static ?string $recordTitleAttribute = 'classification.name'; // ✅ Fixed inconsistency
 
-    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public function getTabLabel(): string
+    {
+        return 'Processes';
+    }
+
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                TextColumn::make('process_name')
+                TextInput::make('process_name')
                     ->label('Process Name')
                     ->required(),
                 Select::make('classification_id')
@@ -33,6 +38,7 @@ class ProcessesRelationManager extends RelationManager
                     ->columnSpanFull(),
             ]);
     }
+
     public function table(Table $table): Table
     {
         return $table
@@ -46,7 +52,7 @@ class ProcessesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordTitleAttribute('classification_id')
+            ->recordTitleAttribute('classification.name') // ✅ Fixed inconsistency
             ->headerActions([
                 CreateAction::make(),
             ]);

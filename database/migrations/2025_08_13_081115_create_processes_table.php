@@ -16,15 +16,18 @@ return new class extends Migration
     {
         Schema::create('processes', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->ulid('user_id'); // Changed to ULID for User reference
+            $table->ulid('office_id')->nullable();
+            $table->string('status')->nullable();
+            $table->softDeletes();
             $table->foreignIdFor(Document::class)->constrained('documents')->cascadeOnDelete();
             $table->foreignIdFor(Transmittal::class)->constrained('transmittals')->cascadeOnDelete();
-            $table->ulid('user_id'); // Changed to ULID for User reference
-            $table->timestamp('processed_at')->nullable();
-            $table->string('status')->nullable();
             $table->timestamps();
+            $table->timestamp('processed_at')->nullable();
+            
 
-            // Add foreign key constraint for user_id
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('office_id')->references('id')->on('offices')->cascadeOnDelete();
         });
     }
 
