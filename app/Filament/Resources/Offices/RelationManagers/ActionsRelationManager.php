@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 use App\Models\ActionType;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -26,13 +27,17 @@ class ActionsRelationManager extends RelationManager
             ->schema([
                 Select::make('action_type_id')
                     ->label('Action Type')
-                    ->relationship('actionType', 'name', function ($query) {
-                        return $query->where('office_id', $this->ownerRecord->id)
-                                   ->where('is_active', true);
-                    })
+                    ->relationship(
+                        name: 'actionType', 
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn ($query) => $query
+                            ->where('office_id', $this->ownerRecord->id)
+                            ->where('is_active', true)
+                    )
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->columnSpanFull()
                     ->createOptionForm([
                         TextInput::make('name')
                             ->label('Action Name')
@@ -47,6 +52,12 @@ class ActionsRelationManager extends RelationManager
                             ->placeholder('e.g., Under Review, Approved, Processing')
                             ->helperText('What status will documents have when this action is applied?'),
                     ])
+                    ->createOptionAction(
+                        fn (Action $action) => $action
+                            ->modalHeading('Create New Action')
+                            ->modalDescription('Define the action and resulting document status.')
+                            ->modalWidth('md'),
+                    )
                     ->createOptionUsing(function ($data) {
                         $data['office_id'] = $this->ownerRecord->id;
                         $data['slug'] = Str::slug($data['name']);
@@ -89,6 +100,7 @@ class ActionsRelationManager extends RelationManager
                     ->label('Create Action')
                     ->icon('heroicon-s-plus')
                     ->modalHeading('Create Document Action')
+                    ->modalWidth(width: 'lg')
                     ->modalDescription('Define what action this office performs and the resulting document status.'),
             ])
             ->recordActions([
