@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('office_actions', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-            $table->foreignId('office_id')->constrained()->cascadeOnDelete();
+            $table->ulid('office_id');
             $table->foreignId('action_type_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->ulid('user_id');
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('office_id')->references('id')->on('offices')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
     }
 

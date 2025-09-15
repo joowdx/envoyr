@@ -2,21 +2,23 @@
 
 namespace App\Filament\Resources\Offices;
 
-use App\Enums\UserRole;
-use App\Filament\Resources\Offices\Pages\CreateOffice;
-use App\Filament\Resources\Offices\Pages\EditOffice;
-use App\Filament\Resources\Offices\Pages\ListOffices;
-use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
-use App\Filament\Resources\Offices\Schemas\OfficeForm;
-use App\Filament\Resources\Offices\Tables\OfficesTable;
-use App\Models\Office;
 use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
+use App\Models\Office;
+use App\Enums\UserRole;
 use Filament\Tables\Table;
+use App\Models\OfficeAction;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\Offices\Pages\EditOffice;
+use App\Filament\Resources\Offices\Pages\ListOffices;
+use App\Filament\Resources\Offices\Pages\CreateOffice;
+use App\Filament\Resources\Offices\Schemas\OfficeForm;
+use App\Filament\Resources\Offices\Tables\OfficesTable;
+use App\Filament\Resources\Offices\RelationManagers\ActionsRelationManager;
+use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
 
 class OfficeResource extends Resource
 {
@@ -40,6 +42,7 @@ class OfficeResource extends Resource
     {
         return [
             SectionRelationManager::class,
+            ActionsRelationManager::class,
         ];
     }
 
