@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Documents;
 use App\Filament\Resources\Documents\Pages\CreateDocument;
 use App\Filament\Resources\Documents\Pages\EditDocument;
 use App\Filament\Resources\Documents\Pages\ListDocuments;
+use App\Filament\Resources\Documents\Pages\TransmitDocument;
 use App\Filament\Resources\Documents\Pages\ViewDocument;
 use App\Filament\Resources\Documents\RelationManagers\AttachmentsRelationManager;
 use App\Filament\Resources\Documents\Schemas\DocumentForm;
@@ -50,6 +51,7 @@ class DocumentResource extends Resource
             'create' => CreateDocument::route('/create'),
             'edit' => EditDocument::route('/{record}/edit'),
             'view' => ViewDocument::route('/{record}'),
+            'transmit' => TransmitDocument::route('/{record}/transmit'),
         ];
     }
 

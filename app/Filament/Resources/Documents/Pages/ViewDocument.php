@@ -65,4 +65,5 @@ class ViewDocument extends ViewRecord
             \App\Filament\Resources\Documents\Widgets\TransmittalHistoryTable::class,
         ];
     }
+
 }

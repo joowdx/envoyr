@@ -1,0 +1,269 @@
+<?php
+
+namespace App\Filament\Resources\Documents\Pages;
+
+use App\Enums\UserRole;
+use App\Filament\Resources\Documents\DocumentResource;
+use App\Models\Document;
+use App\Models\Office;
+use App\Models\Section;
+use App\Models\User;
+use Exception;
+use Filament\Actions;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class TransmitDocument extends Page implements HasForms
+{
+    use InteractsWithForms;
+    protected static string $resource = DocumentResource::class;
+
+    protected string $view = 'filament.resources.documents.pages.transmit-document';
+
+    public ?array $data = [];
+
+    public Document $record;
+
+    public function mount(Document $record): void
+    {
+        $this->record = $record;
+        
+        // Check if document can be transmitted
+        if (!$this->canTransmitDocument($record)) {
+            Notification::make()
+                ->title('Cannot transmit document')
+                ->body('You do not have permission to transmit this document.')
+                ->danger()
+                ->send();
+            
+            $this->redirect(DocumentResource::getUrl('view', ['record' => $record]));
+            return;
+        }
+
+        if ($record->activeTransmittal()->exists()) {
+            Notification::make()
+                ->title('Cannot transmit document')
+                ->body('This document has an active transmittal that has not been received yet.')
+                ->danger()
+                ->send();
+            
+            $this->redirect(DocumentResource::getUrl('view', ['record' => $record]));
+            return;
+        }
+
+        $this->form->fill();
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Toggle::make('pick_up')
+                    ->label('Pick Up')
+                    ->helperText('Enable if the document needs to be picked up')
+                    ->default(false)
+                    ->live()
+                    ->columnSpanFull(),
+                Select::make('office_id')
+                    ->label('Office')
+                    ->options(Office::pluck('name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if (! $state) {
+                            $set('section_id', null);
+                        }
+                    }),
+                Select::make('section_id')
+                    ->label('Section')
+                    ->options(function (callable $get) {
+                        $officeId = $get('office_id');
+
+                        if (! $officeId) {
+                            return [];
+                        }
+
+                        $office = Office::find($officeId);
+
+                        if (! $office || $office->id !== Auth::user()->office_id) {
+                            return [];
+                        }
+
+                        return Section::where('office_id', $officeId)
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (callable $get) => $get('office_id') === Auth::user()->office_id)
+                    ->required(fn (callable $get) => $get('office_id') === Auth::user()->office_id),
+                Select::make('liaison_id')
+                    ->label('Liaison')
+                    ->options(function (callable $get) {
+                        return User::where('office_id', Auth::user()->office_id)
+                            ->when($get('office_id') !== Auth::user()->office_id, function ($query) {
+                                return $query->where('role', UserRole::LIAISON);
+                            })
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->required(fn (callable $get) => ! $get('pick_up'))
+                    ->visible(fn (callable $get) => ! $get('pick_up')),
+                Textarea::make('purpose')
+                    ->label('Purpose')
+                    ->markAsRequired()
+                    ->rule('required')
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
+                Textarea::make('remarks')
+                    ->label('Remarks')
+                    ->nullable()
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
+            ])
+            ->statePath('data')
+            ->model($this->record);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('transmit')
+                ->label('Transmit Document')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('primary')
+                ->action('transmit'),
+            Actions\Action::make('cancel')
+                ->label('Cancel')
+                ->color('gray')
+                ->url(DocumentResource::getUrl('view', ['record' => $this->record])),
+        ];
+    }
+
+    public function transmit(): void
+    {
+        $data = $this->form->getState();
+        
+        $this->record->refresh();
+        
+        if ($this->record->activeTransmittal()->exists()) {
+            Notification::make()
+                ->title('Cannot transmit document')
+                ->body('This document has an active transmittal that has not been received yet.')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        try {
+            DB::transaction(function () use ($data) {
+                if ($this->record->transmittals()->whereNull('received_at')->exists()) {
+                    throw new Exception('Document has an active transmittal');
+                }
+                
+                $transmittal = $this->record->transmittals()->create([
+                    'purpose' => $data['purpose'],
+                    'remarks' => $data['remarks'],
+                    'from_office_id' => Auth::user()->office_id,
+                    'to_office_id' => $data['office_id'],
+                    'from_section_id' => Auth::user()->section_id,
+                    'to_section_id' => $data['section_id'] ?? null,
+                    'from_user_id' => Auth::id(),
+                    'liaison_id' => $data['liaison_id'] ?? null,
+                    'pick_up' => $data['pick_up'],
+                ]);
+
+                // Copy current document attachments to transmittal
+                $this->createTransmittalAttachmentSnapshot($this->record, $transmittal);
+
+                $this->record->processes()->create([
+                    'transmittal_id' => $transmittal->id,
+                    'user_id' => Auth::id(),
+                    'processed_at' => now(),
+                    'status' => 'transmitted',
+                ]);
+            });
+
+            Notification::make()
+                ->title('Document transmitted successfully')
+                ->success()
+                ->send();
+
+            $this->redirect(DocumentResource::getUrl('view', ['record' => $this->record]));
+
+        } catch (Exception $e) {
+            Notification::make()
+                ->title('Document transmission failed')
+                ->body('An error occurred while transmitting the document. Please try again.')
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function getTitle(): string
+    {
+        return "Transmit Document: {$this->record->title}";
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Transmit Document';
+    }
+
+    private function canTransmitDocument(Document $record): bool
+    {
+        // Check if document is published and can be transmitted
+        if (!$record->isPublished() || $record->dissemination) {
+            return false;
+        }
+
+        $currentOfficeId = Auth::user()->office_id;
+        
+        if ($record->activeTransmittal) {
+            return $record->activeTransmittal->to_office_id === $currentOfficeId;
+        }
+        
+        $lastReceivedTransmittal = $record->transmittals()
+            ->whereNotNull('received_at')
+            ->orderBy('received_at', 'desc')
+            ->first();
+            
+        if ($lastReceivedTransmittal) {
+            return $lastReceivedTransmittal->to_office_id === $currentOfficeId;
+        }
+        
+        return $record->office_id === $currentOfficeId;
+    }
+
+    private function createTransmittalAttachmentSnapshot(Document $document, $transmittal): void
+    {
+        $draftAttachment = $document->attachment;
+
+        if ($draftAttachment) {
+            $transmittalAttachment = $transmittal->attachments()->create([
+                'document_id' => $document->id,
+            ]);
+
+            foreach ($draftAttachment->contents as $content) {
+                $transmittalAttachment->contents()->create([
+                    'sort' => $content->sort,
+                    'title' => $content->title,
+                    'file' => $content->file,
+                    'path' => $content->path,
+                    'hash' => $content->hash,
+                    'context' => $content->context,
+                ]);
+            }
+        }
+    }
+}
