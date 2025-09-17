@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Offices\RelationManagers;
 
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
@@ -14,7 +15,7 @@ class ProcessesRelationManager extends RelationManager
 {
     protected static string $relationship = 'processes';
 
-    protected static ?string $recordTitleAttribute = 'classification.name'; // ✅ Fixed inconsistency
+    protected static ?string $recordTitleAttribute = 'classification.name'; 
 
     public function getTabLabel(): string
     {
@@ -24,6 +25,7 @@ class ProcessesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->schema([
                 TextInput::make('process_name')
                     ->label('Process Name')
@@ -34,8 +36,7 @@ class ProcessesRelationManager extends RelationManager
                     ->label('Classification')
                     ->preload()
                     ->searchable()
-                    ->placeholder('Select Classification')
-                    ->columnSpanFull(),
+                    ->placeholder('Select Classification'),
             ]);
     }
 
@@ -52,9 +53,10 @@ class ProcessesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordTitleAttribute('classification.name') // ✅ Fixed inconsistency
+            ->recordTitleAttribute('classification.name') 
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->modalWidth('md'),
             ]);
     }
 }
