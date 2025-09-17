@@ -29,12 +29,13 @@ class AttachmentsRelationManager extends RelationManager
             ->components([
                 Forms\Components\Repeater::make('contents')
                     ->relationship('contents')
-                    ->label('Files')
+                    ->label('Files / Contents')
                     ->schema([
                         Forms\Components\TextInput::make('title')
                             ->required()
-                            ->label('File Title')
+                            ->label('Content Title')
                             ->columnSpanFull(),
+
                         Forms\Components\FileUpload::make('file')
                             ->multiple()
                             ->label('Upload Files')
@@ -42,17 +43,41 @@ class AttachmentsRelationManager extends RelationManager
                             ->columnSpanFull()
                             ->directory('attachments')
                             ->visibility('private'),
+
+                        Forms\Components\TextInput::make('context.control')
+                            ->label('Control #'),
+                        Forms\Components\TextInput::make('context.pages')
+                            ->label('Pages')
+                            ->type('number')
+                            ->minValue(1),
+                        Forms\Components\TextInput::make('context.copies')
+                            ->label('Copies')
+                            ->type('number')
+                            ->minValue(1),
+
+                        Forms\Components\TextInput::make('context.particulars')
+                            ->label('Particulars'),
+                        Forms\Components\TextInput::make('context.payee')
+                            ->label('Payee'),
+                        Forms\Components\TextInput::make('context.amount')
+                            ->label('Amount')
+                            ->type('number')
+                            ->step('0.01')
+                            ->minValue(0),
+
+                        Forms\Components\Textarea::make('context.remarks')
+                            ->label('Remarks')
+                            ->rows(2)
+                            ->columnSpanFull(),
+
                         Forms\Components\Hidden::make('sort')
                             ->default(0),
-                        Forms\Components\Textarea::make('context')
-                            ->label('Notes/Context')
-                            ->rows(3)
-                            ->columnSpanFull(),
                     ])
+                    ->columns(3)
                     ->orderColumn('sort')
                     ->collapsible()
-                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Untitled File')
-                    ->addActionLabel('Add Attachment')
+                    ->itemLabel(fn (array $state): ?string => $state['title'] ?? 'Untitled')
+                    ->addActionLabel('Add Content')
                     ->columnSpanFull(),
             ]);
     }
@@ -87,7 +112,6 @@ class AttachmentsRelationManager extends RelationManager
                     ->modalHeading('Add New Attachment')
                     ->modalWidth('lg')
                     ->mutateFormDataUsing(function (array $data): array {
-                        // Ensure the attachment is created as a draft (no transmittal_id)
                         $data['transmittal_id'] = null;
                         return $data;
                     }),
@@ -105,7 +129,6 @@ class AttachmentsRelationManager extends RelationManager
                 ]),
             ])
             ->modifyQueryUsing(function ($query) {
-                // Only show draft attachments (not transmittal attachments)
                 return $query->whereNull('transmittal_id');
             });
     }
