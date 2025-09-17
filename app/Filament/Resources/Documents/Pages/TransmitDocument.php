@@ -36,7 +36,6 @@ class TransmitDocument extends Page implements HasForms
     {
         $this->record = $record;
         
-        // Check if document can be transmitted
         if (!$this->canTransmitDocument($record)) {
             Notification::make()
                 ->title('Cannot transmit document')
@@ -65,6 +64,7 @@ class TransmitDocument extends Page implements HasForms
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
                 Toggle::make('pick_up')
                     ->label('Pick Up')
@@ -183,7 +183,6 @@ class TransmitDocument extends Page implements HasForms
                     'pick_up' => $data['pick_up'],
                 ]);
 
-                // Copy current document attachments to transmittal
                 $this->createTransmittalAttachmentSnapshot($this->record, $transmittal);
 
                 $this->record->processes()->create([
@@ -222,7 +221,6 @@ class TransmitDocument extends Page implements HasForms
 
     private function canTransmitDocument(Document $record): bool
     {
-        // Check if document is published and can be transmitted
         if (!$record->isPublished() || $record->dissemination) {
             return false;
         }
