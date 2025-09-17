@@ -61,7 +61,7 @@ class TransmitDocument extends Page implements HasForms
         }
 
         $this->loadExistingContents();
-        $this->form->fill();
+        $this->form->fill($this->data);
     }
 
     public function form(Schema $schema): Schema
@@ -310,7 +310,7 @@ class TransmitDocument extends Page implements HasForms
     {
         $attachment = $this->record->attachment;
         if ($attachment) {
-            $this->data['contents'] = $attachment->contents()
+            $contents = $attachment->contents()
                 ->orderBy('sort')
                 ->get()
                 ->map(fn ($content) => [
@@ -318,7 +318,11 @@ class TransmitDocument extends Page implements HasForms
                     'context' => $content->context ?? [],
                 ])
                 ->toArray();
-        }
+            
+            $this->data['contents'] = $contents;
+        } else {
+            $this->data['contents'] = [];
+        }   
     }
 
     private function createTransmittalAttachmentSnapshot(Document $document, $transmittal): void
@@ -329,7 +333,6 @@ class TransmitDocument extends Page implements HasForms
             'document_id' => $document->id,
         ]);
 
-        // Use contents from form if provided, otherwise fallback to existing attachment
         if (isset($data['contents']) && is_array($data['contents'])) {
             foreach ($data['contents'] as $index => $contentData) {
                 $transmittalAttachment->contents()->create([
@@ -339,7 +342,6 @@ class TransmitDocument extends Page implements HasForms
                 ]);
             }
         } else {
-            // Fallback to existing attachment contents
             $draftAttachment = $document->attachment;
             if ($draftAttachment) {
                 foreach ($draftAttachment->contents as $content) {
