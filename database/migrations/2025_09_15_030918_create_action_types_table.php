@@ -16,12 +16,14 @@ return new class extends Migration
             $table->ulid('office_id');
             $table->string('name');
             $table->string('status_name');
+            $table->string('finalizing_action')->nullable(); // e.g., "Finalize Review"
             $table->string('slug')->unique();
             $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['office_id', 'slug']);
+            $table->foreignId('prerequisite_action_type_id')->nullable()->constrained('action_types');
             $table->foreign('office_id')->references('id')->on('offices')->cascadeOnDelete();
         });
     }

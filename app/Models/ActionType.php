@@ -15,6 +15,8 @@ class ActionType extends Model
         'office_id',
         'name',
         'status_name',
+        'finalizing_action',
+        'prerequisite_action_type_id',
         'slug',
         'description',
         'is_active',
@@ -52,5 +54,10 @@ class ActionType extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function prerequisiteActionType(): BelongsTo
+    {
+        return $this->belongsTo(ActionType::class, 'prerequisite_action_type_id');
     }
 }
