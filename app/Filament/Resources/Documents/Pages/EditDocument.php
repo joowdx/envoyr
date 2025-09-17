@@ -26,7 +26,6 @@ class EditDocument extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Load contents from the main attachment
         $attachment = $this->record->attachment;
         if ($attachment) {
             $data['contents'] = $attachment->contents()
@@ -34,6 +33,7 @@ class EditDocument extends EditRecord
                 ->get()
                 ->map(fn ($content) => [
                     'title' => $content->title,
+                    'context' => $content->context ?? [],
                 ])
                 ->toArray();
         }
@@ -45,7 +45,6 @@ class EditDocument extends EditRecord
     {
         $data = $this->form->getState();
         
-        // Get or create the main attachment
         $attachment = $this->record->attachment;
         if (!$attachment) {
             $attachment = Attachment::create([
@@ -54,14 +53,15 @@ class EditDocument extends EditRecord
             ]);
         }
 
-        // Clear existing contents and recreate them
+        
         $attachment->contents()->delete();
         
         if (isset($data['contents']) && is_array($data['contents'])) {
             foreach ($data['contents'] as $index => $contentData) {
                 $attachment->contents()->create([
-                    'title' => $contentData['title'],
+                    'title' => $contentData['title'] ?? 'Untitled Content',
                     'sort' => $index + 1,
+                    'context' => $contentData['context'] ?? [],
                 ]);
             }
         }

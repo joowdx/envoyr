@@ -13,6 +13,8 @@ use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -58,6 +60,7 @@ class TransmitDocument extends Page implements HasForms
             return;
         }
 
+        $this->loadExistingContents();
         $this->form->fill();
     }
 
@@ -130,6 +133,66 @@ class TransmitDocument extends Page implements HasForms
                     ->nullable()
                     ->maxLength(1000)
                     ->columnSpanFull(),
+                    
+                Repeater::make('contents')
+                    ->addActionLabel('Add Content')
+                    ->columnSpanFull()
+                    ->orderColumn('sort')
+                    ->hint('You can add, remove, or modify content items before transmitting')
+                    ->helperText('Each content item represents a file, document, or other attachment')
+                    ->itemLabel(fn ($state) => $state['title'] ?? 'New Content')
+                    ->collapsed()
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Content Title')
+                            ->required()
+                            ->columnSpanFull()
+                            ->helperText('Enter a descriptive title for this content item'),
+                            
+                        TextInput::make('context.control')
+                            ->label('Control #')
+                            ->columnSpan(1)
+                            ->helperText('Control number'),
+                            
+                        TextInput::make('context.pages')
+                            ->label('Pages')
+                            ->type('number')
+                            ->minValue(1)
+                            ->columnSpan(1)
+                            ->helperText('Number of pages'),
+                            
+                        TextInput::make('context.copies')
+                            ->label('Copies')
+                            ->type('number')
+                            ->minValue(1)
+                            ->columnSpan(1)
+                            ->helperText('Number of copies'),
+                        
+                        TextInput::make('context.particulars')
+                            ->label('Particulars')
+                            ->columnSpan(1)
+                            ->helperText('Additional details'),
+                            
+                        TextInput::make('context.payee')
+                            ->label('Payee')
+                            ->columnSpan(1)
+                            ->helperText('Payment recipient'),
+                            
+                        TextInput::make('context.amount')
+                            ->label('Amount')
+                            ->type('number')
+                            ->step('0.01')
+                            ->minValue(0)
+                            ->columnSpan(1)
+                            ->helperText('Monetary amount'),
+                        
+                        Textarea::make('context.remarks')
+                            ->label('Remarks')
+                            ->rows(2)
+                            ->columnSpanFull()
+                            ->helperText('Additional notes or remarks'),
+                    ])
+                    ->columns(3),
             ])
             ->statePath('data')
             ->model($this->record);
@@ -243,24 +306,52 @@ class TransmitDocument extends Page implements HasForms
         return $record->office_id === $currentOfficeId;
     }
 
+    private function loadExistingContents(): void
+    {
+        $attachment = $this->record->attachment;
+        if ($attachment) {
+            $this->data['contents'] = $attachment->contents()
+                ->orderBy('sort')
+                ->get()
+                ->map(fn ($content) => [
+                    'title' => $content->title,
+                    'context' => $content->context ?? [],
+                ])
+                ->toArray();
+        }
+    }
+
     private function createTransmittalAttachmentSnapshot(Document $document, $transmittal): void
     {
-        $draftAttachment = $document->attachment;
+        $data = $this->form->getState();
+        
+        $transmittalAttachment = $transmittal->attachments()->create([
+            'document_id' => $document->id,
+        ]);
 
-        if ($draftAttachment) {
-            $transmittalAttachment = $transmittal->attachments()->create([
-                'document_id' => $document->id,
-            ]);
-
-            foreach ($draftAttachment->contents as $content) {
+        // Use contents from form if provided, otherwise fallback to existing attachment
+        if (isset($data['contents']) && is_array($data['contents'])) {
+            foreach ($data['contents'] as $index => $contentData) {
                 $transmittalAttachment->contents()->create([
-                    'sort' => $content->sort,
-                    'title' => $content->title,
-                    'file' => $content->file,
-                    'path' => $content->path,
-                    'hash' => $content->hash,
-                    'context' => $content->context,
+                    'sort' => $index + 1,
+                    'title' => $contentData['title'] ?? 'Untitled Content',
+                    'context' => $contentData['context'] ?? [],
                 ]);
+            }
+        } else {
+            // Fallback to existing attachment contents
+            $draftAttachment = $document->attachment;
+            if ($draftAttachment) {
+                foreach ($draftAttachment->contents as $content) {
+                    $transmittalAttachment->contents()->create([
+                        'sort' => $content->sort,
+                        'title' => $content->title,
+                        'file' => $content->file,
+                        'path' => $content->path,
+                        'hash' => $content->hash,
+                        'context' => $content->context,
+                    ]);
+                }
             }
         }
     }

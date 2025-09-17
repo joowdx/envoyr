@@ -24,18 +24,17 @@ class CreateDocument extends CreateRecord
     {
         $data = $this->form->getState();
         
-        // Create the main attachment for this document
         $attachment = Attachment::create([
             'document_id' => $this->record->id,
-            'transmittal_id' => null, // Main document attachment
+            'transmittal_id' => null,
         ]);
 
-        // Create contents if provided
         if (isset($data['contents']) && is_array($data['contents'])) {
             foreach ($data['contents'] as $index => $contentData) {
                 $attachment->contents()->create([
-                    'title' => $contentData['title'],
+                    'title' => $contentData['title'] ?? 'Untitled Content',
                     'sort' => $index + 1,
+                    'context' => $contentData['context'] ?? [],
                 ]);
             }
         }
