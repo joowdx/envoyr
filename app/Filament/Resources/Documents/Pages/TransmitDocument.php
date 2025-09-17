@@ -274,7 +274,7 @@ class TransmitDocument extends Page implements HasForms
 
     public function getTitle(): string
     {
-        return "Transmit Document: {$this->record->title}";
+        return "Transmit : {$this->record->title}";
     }
 
     public static function getNavigationLabel(): string
