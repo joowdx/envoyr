@@ -19,6 +19,8 @@ use App\Filament\Resources\Offices\Schemas\OfficeForm;
 use App\Filament\Resources\Offices\Tables\OfficesTable;
 use App\Filament\Resources\Offices\RelationManagers\ActionsRelationManager;
 use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
+use App\Filament\Resources\Offices\RelationManagers\ProcessesRelationManager;
+
 
 class OfficeResource extends Resource
 {
@@ -42,6 +44,7 @@ class OfficeResource extends Resource
     {
         return [
             SectionRelationManager::class,
+            ProcessesRelationManager::class,
             ActionsRelationManager::class,
         ];
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -41,13 +42,27 @@ class ActionType extends Model
         parent::boot();
 
         static::creating(function ($actionType) {
-            $actionType->slug = Str::slug($actionType->name);
+            Log::info('ActionType boot creating event triggered', [
+                'name' => $actionType->name,
+                'office_id' => $actionType->office_id,
+                'status_name' => $actionType->status_name,
+                'all_attributes' => $actionType->getAttributes()
+            ]);
+            
+            if ($actionType->name) {
+                $actionType->slug = Str::slug($actionType->name);
+                Log::info('Generated slug: ' . $actionType->slug);
+            } else {
+                Log::warning('ActionType name is empty, cannot generate slug');
+            }
         });
 
         static::updating(function ($actionType) {
-            if ($actionType->isDirty('name')) {
+            if ($actionType->isDirty('name') && $actionType->name) {
                 $actionType->slug = Str::slug($actionType->name);
             }
+        });
+    }
         });
     }
 
