@@ -19,12 +19,12 @@
                         {{ $this->form->getComponent('office_id') }}
                     </div>
                     <div>
-                        {{ $this->form->getComponent('section_id') }}
+                        {{ $this->form->getComponent('liaison_id') }}
                     </div>
                 </div>
 
-                    <div>
-                    {{ $this->form->getComponent('liaison_id') }}
+                <div>
+                    {{ $this->form->getComponent('section_id') }}
                 </div>
 
                 <div class="space-y-4">
