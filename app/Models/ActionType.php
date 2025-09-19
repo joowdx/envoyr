@@ -60,10 +60,8 @@ class ActionType extends Model
         static::updating(function ($actionType) {
             if ($actionType->isDirty('name') && $actionType->name) {
                 $actionType->slug = Str::slug($actionType->name);
-            }
-        });
-    }
-        });
+        }
+    });
     }
 
     public function scopeActive($query)
