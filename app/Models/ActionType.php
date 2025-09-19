@@ -63,6 +63,8 @@ class ActionType extends Model
             }
         });
     }
+        });
+    }
 
     public function scopeActive($query)
     {
