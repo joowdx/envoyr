@@ -38,4 +38,14 @@ class Office extends Model
     {
         return $this->hasMany(Process::class);
     }
+
+    public function actionTypes(): HasMany
+    {
+        return $this->hasMany(ActionType::class);
+    }
+
+    public function actions(): HasMany
+    {
+        return $this->hasMany(OfficeAction::class);
+    }
 }
