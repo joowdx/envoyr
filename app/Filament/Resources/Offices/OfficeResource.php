@@ -11,12 +11,13 @@ use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\Offices\Pages\EditOffice;
 use App\Filament\Resources\Offices\Pages\ListOffices;
 use App\Filament\Resources\Offices\Pages\CreateOffice;
 use App\Filament\Resources\Offices\Schemas\OfficeForm;
 use App\Filament\Resources\Offices\Tables\OfficesTable;
-use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
+use App\Filament\Resources\Offices\RelationManagers\ActionsRelationManager;
 use App\Filament\Resources\Offices\RelationManagers\ProcessesRelationManager;
 
 class OfficeResource extends Resource
@@ -42,6 +43,7 @@ class OfficeResource extends Resource
         return [
             SectionRelationManager::class,
             ProcessesRelationManager::class,
+            ActionsRelationManager::class,
         ];
     }
 
@@ -64,7 +66,7 @@ class OfficeResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $query = parent::getEloquentQuery();
 
         if ($user->role === UserRole::ROOT) {
@@ -73,10 +75,9 @@ class OfficeResource extends Resource
 
         return $query->where('id', $user->office_id);
     }
-
     public static function getNavigationUrl(): string
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user && $user->role === UserRole::ADMINISTRATOR && $user->office_id) {
             return static::getUrl('edit', ['record' => $user->office_id]);
@@ -85,3 +86,4 @@ class OfficeResource extends Resource
         return static::getUrl('index');
     }
 }
+
