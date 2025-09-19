@@ -9,16 +9,18 @@ use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Auth;
 use App\Filament\Resources\Offices\Pages\EditOffice;
 use App\Filament\Resources\Offices\Pages\ListOffices;
 use App\Filament\Resources\Offices\Pages\CreateOffice;
 use App\Filament\Resources\Offices\Schemas\OfficeForm;
 use App\Filament\Resources\Offices\Tables\OfficesTable;
 use App\Filament\Resources\Offices\RelationManagers\ActionsRelationManager;
+use App\Filament\Resources\Offices\RelationManagers\SectionRelationManager;
 use App\Filament\Resources\Offices\RelationManagers\ProcessesRelationManager;
+
 
 class OfficeResource extends Resource
 {
