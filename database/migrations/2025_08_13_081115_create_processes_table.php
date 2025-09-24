@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string(column: 'name')->nullable();
             $table->softDeletes();
             $table->timestamps();
-            $table->timestamp('processed_at')->nullable();
             
 
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();

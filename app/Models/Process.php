@@ -16,8 +16,7 @@ class Process extends Model
         'user_id',
         'classification_id',
         'office_id',
-        'processed_at',
-        'status',
+        'name',
     ];
 
     public function user(): BelongsTo

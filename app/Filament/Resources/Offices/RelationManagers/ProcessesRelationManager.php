@@ -24,7 +24,7 @@ class ProcessesRelationManager extends RelationManager
 {
     protected static string $relationship = 'processes';
 
-    protected static ?string $recordTitleAttribute = 'status'; 
+    protected static ?string $recordTitleAttribute = 'name'; 
 
     protected array $actionTypesToAttach = [];
 
@@ -40,7 +40,7 @@ class ProcessesRelationManager extends RelationManager
         return $schema
             ->columns(1)
             ->schema([
-                TextInput::make('status')
+                TextInput::make('name')
                     ->label('Process Name')
                     ->required(),
                 Select::make('classification_id')
@@ -73,7 +73,7 @@ class ProcessesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('status')
+                TextColumn::make('name')
                     ->label('Process Name')
                     ->searchable()
                     ->sortable(),
@@ -82,7 +82,7 @@ class ProcessesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordTitleAttribute('status') 
+            ->recordTitleAttribute( 'name') 
             ->headerActions([
                 CreateAction::make()
                     ->modalWidth('md'),
