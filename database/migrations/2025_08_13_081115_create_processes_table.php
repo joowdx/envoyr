@@ -19,7 +19,7 @@ return new class extends Migration
             $table->ulid('user_id'); 
             $table->ulid('office_id')->nullable();
             $table->ulid('classification_id')->nullable();
-            $table->string('status')->nullable();
+            $table->string(column: 'name')->nullable();
             $table->softDeletes();
             $table->timestamps();
             $table->timestamp('processed_at')->nullable();
