@@ -7,6 +7,7 @@ use App\Filament\Resources\Documents\DocumentResource;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\Section;
+use App\Models\Process;
 use App\Models\User;
 use Exception;
 use Filament\Actions;
@@ -122,11 +123,21 @@ class TransmitDocument extends Page implements HasForms
                     ->preload()
                     ->required(fn (callable $get) => ! $get('pick_up'))
                     ->visible(fn (callable $get) => ! $get('pick_up')),
-                Textarea::make('purpose')
-                    ->label('Purpose')
-                    ->markAsRequired()
-                    ->rule('required')
-                    ->maxLength(1000)
+                Select::make('process_id')
+                    ->label('Process')
+                    ->options(function (callable $get) {
+                        $toOffice = $get('office_id');
+                        if (! $toOffice) {
+                            return [];
+                        }
+                        return Process::where('office_id', $toOffice)
+                            ->orderBy('status')
+                            ->pluck('status', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->required(false)
                     ->columnSpanFull(),
                 Textarea::make('remarks')
                     ->label('Remarks')
@@ -235,7 +246,7 @@ class TransmitDocument extends Page implements HasForms
                 }
                 
                 $transmittal = $this->record->transmittals()->create([
-                    'purpose' => $data['purpose'],
+                    'process_id' => $data['process_id'] ?? null,
                     'remarks' => $data['remarks'],
                     'from_office_id' => Auth::user()->office_id,
                     'to_office_id' => $data['office_id'],
@@ -248,12 +259,7 @@ class TransmitDocument extends Page implements HasForms
 
                 $this->createTransmittalAttachmentSnapshot($this->record, $transmittal);
 
-                $this->record->processes()->create([
-                    'transmittal_id' => $transmittal->id,
-                    'user_id' => Auth::id(),
-                    'processed_at' => now(),
-                    'status' => 'transmitted',
-                ]);
+                // No new process row; only link selected process_id to transmittal
             });
 
             Notification::make()

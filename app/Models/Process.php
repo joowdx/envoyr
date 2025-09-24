@@ -16,6 +16,8 @@ class Process extends Model
         'user_id',
         'classification_id',
         'office_id',
+        'transmittal_id',
+        'document_id',
         'processed_at',
         'status',
     ];
@@ -35,6 +37,16 @@ class Process extends Model
         return $this->belongsTo(Office::class);
     }
 
+    public function transmittal(): BelongsTo
+    {
+        return $this->belongsTo(Transmittal::class);
+    }
+
+    public function document(): BelongsTo
+    {
+        return $this->belongsTo(Document::class);
+    }
+
     public static function booted()
     {
         static::creating(function ($model) {
@@ -47,6 +59,6 @@ class Process extends Model
     public function actions()
     {
         return $this->belongsToMany(ActionType::class, 'process_action', 'process_id', 'action_type_id')
-                    ->withTimestamps(); // Track when actions are added
+                    ->withTimestamps();
     }
 }

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Document;
 use App\Models\Office;
 use App\Models\Section;
+use App\Models\Process;
 use App\Models\Transmittal;
 use App\Models\User;
 use Exception;
@@ -56,6 +57,7 @@ trait TransmitDocument
                     if (! $state) {
                         $set('section_id', null);
                     }
+                    $set('process_id', null);
                 }),
             Select::make('section_id')
                 ->label('Section')
@@ -92,11 +94,21 @@ trait TransmitDocument
                 ->preload()
                 ->required(fn (callable $get) => ! $get('pick_up'))
                 ->visible(fn (callable $get) => ! $get('pick_up')),
-            Textarea::make('purpose')
-                ->label('Purpose')
-                ->markAsRequired()
-                ->rule('required')
-                ->maxLength(1000)
+            Select::make('process_id')
+                ->label('Process')
+                ->options(function (Get $get) {
+                    $toOffice = $get('office_id');
+                    if (! $toOffice) {
+                        return [];
+                    }
+                    return Process::where('office_id', $toOffice)
+                        ->orderBy('status')
+                        ->pluck('status', 'id');
+                })
+                ->searchable()
+                ->preload()
+                ->live()
+                ->required(false)
                 ->columnSpanFull(),
             Textarea::make('remarks')
                 ->label('Remarks')
@@ -121,8 +133,8 @@ trait TransmitDocument
                     }
                     
                     $transmittal = $record->transmittals()->create([
-                        'purpose' => $data['purpose'],
-                        'remarks' => $data['remarks'],
+                        'process_id' => $data['process_id'] ?? null,
+                        'remarks' => $data['remarks'] ?? null,
                         'from_office_id' => Auth::user()->office_id,
                         'to_office_id' => $data['office_id'],
                         'from_section_id' => Auth::user()->section_id,
@@ -132,15 +144,7 @@ trait TransmitDocument
                         'pick_up' => $data['pick_up'],
                     ]);
 
-                    // MISSING: Copy current document attachments to transmittal
                     $this->createTransmittalAttachmentSnapshot($record, $transmittal);
-
-                    $record->processes()->create([
-                        'transmittal_id' => $transmittal->id,
-                        'user_id' => Auth::id(),
-                        'processed_at' => now(),
-                        'status' => 'transmitted',
-                    ]);
                 });
 
                 $this->success();

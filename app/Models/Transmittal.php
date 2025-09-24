@@ -15,7 +15,7 @@ class Transmittal extends Model
 
     protected $fillable = [
         'code',
-        'purpose',
+        'process_id',
         'remarks',
         'pick_up',
         'document_id',
@@ -79,6 +79,11 @@ class Transmittal extends Model
     public function liaison(): BelongsTo
     {
         return $this->belongsTo(User::class, 'liaison_id');
+    }
+
+    public function process(): BelongsTo
+    {
+        return $this->belongsTo(Process::class);
     }
 
     public function contents(): HasManyThrough

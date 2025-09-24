@@ -36,8 +36,8 @@ class TransmittalHistoryTable extends BaseWidget
                     ->label('To Office')
                     ->color('primary'),
                     
-                Tables\Columns\TextColumn::make('purpose')
-                    ->label('Purpose')
+                Tables\Columns\TextColumn::make('process')
+                    ->label('Process')
                     ->limit(30)
                     ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
                         $state = $column->getState();
