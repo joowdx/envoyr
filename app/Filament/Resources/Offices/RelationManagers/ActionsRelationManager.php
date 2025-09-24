@@ -13,12 +13,19 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class ActionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'actionTypes';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
+    {
+        return Tab::make('Actions');
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -49,6 +56,7 @@ class ActionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Actions')
             ->columns([
                 TextColumn::make('name')
                     ->label('Action Name')
@@ -74,11 +82,11 @@ class ActionsRelationManager extends RelationManager
             ->emptyStateDescription('Create action types that this office can perform on documents.')
             ->headerActions([
                 CreateAction::make()
-                    ->label('Create Action Type')
+                    ->label('Create Action')
                     ->icon('heroicon-s-plus')
-                    ->modalHeading('Create New Action Type')
+                    ->modalHeading('Create New Action')
                     ->modalWidth('lg')
-                    ->modalDescription('Define a new action type for this office.'),
+                    ->modalDescription('Define a new action for this office.'),
             ])
             ->recordActions([
                 DeleteAction::make(),
