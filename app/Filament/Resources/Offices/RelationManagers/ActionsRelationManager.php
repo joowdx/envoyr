@@ -46,9 +46,6 @@ class ActionsRelationManager extends RelationManager
                     ->required()
                     ->placeholder('e.g., Under Review, Approved, Processing')
                     ->helperText('What status will documents have when this action is applied?'),
-                TextInput::make('finalizing_action')
-                    ->label('Finalizing Action')
-                    ->nullable()
             ])
             ->columns(1);
     }
@@ -78,8 +75,8 @@ class ActionsRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('No Action Types Defined')
-            ->emptyStateDescription('Create action types that this office can perform on documents.')
+            ->emptyStateHeading('No Actions Defined')
+            ->emptyStateDescription('Create actions that this office can perform on documents.')
             ->headerActions([
                 CreateAction::make()
                     ->label('Create Action')
