@@ -6,9 +6,12 @@ use App\Models\ActionType;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Schemas\Schema;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -86,7 +89,13 @@ class ActionsRelationManager extends RelationManager
                     ->modalDescription('Define a new action for this office.'),
             ])
             ->recordActions([
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make()
+                        ->modalWidth('md'),
+                    ViewAction::make()
+                        ->modalWidth('md'),
+                    DeleteAction::make(),
+                ])
             ]);
     }
     protected function mutateFormDataBeforeCreate(array $data): array
