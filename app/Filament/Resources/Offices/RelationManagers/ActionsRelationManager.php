@@ -12,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +21,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Filters\TrashedFilter;
 
 class ActionsRelationManager extends RelationManager
 {
@@ -97,7 +99,11 @@ class ActionsRelationManager extends RelationManager
                     ViewAction::make()
                         ->modalWidth('md'),
                     DeleteAction::make(),
+                    RestoreAction::make(),
                 ])
+            ])
+            ->filters([
+                TrashedFilter::make(),
             ]);
     }
     protected function mutateFormDataBeforeCreate(array $data): array
