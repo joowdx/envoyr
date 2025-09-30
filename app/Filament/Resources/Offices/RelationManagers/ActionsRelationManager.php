@@ -17,6 +17,7 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\RelationManagers\RelationManager;
 
@@ -88,14 +89,42 @@ class ActionsRelationManager extends RelationManager
                     ->icon('heroicon-s-plus')
                     ->modalHeading('Create New Action')
                     ->modalWidth('lg')
-                    ->modalDescription('Define a new action for this office.'),
+                    ->modalDescription('Define a new action for this office.')
+                    ->before(function (CreateAction $action, array $data) {
+                        $exists = ActionType::where('office_id', $this->ownerRecord->id)
+                            ->where('name', $data['name'])
+                            ->exists();
+                            
+                        if ($exists) {
+                            Notification::make()
+                                ->title('Action Already Exists')
+                                ->body("An action named '{$data['name']}' already exists for this office. Please choose a different name.")
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                                
+                            $action->halt(); 
+                        }
+                    }),
             ])
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
                         ->modalWidth('md'),
                     ViewAction::make()
-                        ->modalWidth('md'),
+                        ->modalWidth('md')
+                        ->schema([
+                            Select::make('prerequisite_action_type_id')
+                                ->label('Prerequisite Action')
+                                ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                                ->disabled(), 
+                            TextInput::make('name')
+                                ->label('Action Name')
+                                ->disabled(), 
+                            TextInput::make('status_name')
+                                ->label('Document Status')
+                                ->disabled(),
+                        ]),
                     DeleteAction::make(),
                     RestoreAction::make(),
                 ])
