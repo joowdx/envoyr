@@ -18,10 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Tabs\Tab;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Filters\TrashedFilter;
 
 class ActionsRelationManager extends RelationManager
 {
@@ -87,6 +84,7 @@ class ActionsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Create Action')
+                    ->createAnother(false)
                     ->icon('heroicon-s-plus')
                     ->modalHeading('Create New Action')
                     ->modalWidth('lg')
@@ -101,25 +99,16 @@ class ActionsRelationManager extends RelationManager
                     DeleteAction::make(),
                     RestoreAction::make(),
                 ])
-            ])
-            ->filters([
-                TrashedFilter::make(),
             ]);
     }
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['office_id'] = $this->ownerRecord->id;
         $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = true;
+        $data['is_active'] = $data['is_active'] ??= true;
         
         return $data;
     }
 
-    public static function getRecordRouteBindingEloquentQuery(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
+
 }
