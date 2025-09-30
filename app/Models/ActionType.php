@@ -16,7 +16,6 @@ class ActionType extends Model
         'office_id',
         'name',
         'status_name',
-        'finalizing_action',
         'prerequisite_action_type_id',
         'slug',
         'description',
