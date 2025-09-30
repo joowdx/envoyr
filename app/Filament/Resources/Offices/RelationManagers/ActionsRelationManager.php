@@ -7,11 +7,18 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class ActionsRelationManager extends RelationManager
@@ -19,6 +26,11 @@ class ActionsRelationManager extends RelationManager
     protected static string $relationship = 'actionTypes';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getTabComponent(Model $ownerRecord, string $pageClass): Tab
+    {
+        return Tab::make('Actions');
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -39,9 +51,6 @@ class ActionsRelationManager extends RelationManager
                     ->required()
                     ->placeholder('e.g., Under Review, Approved, Processing')
                     ->helperText('What status will documents have when this action is applied?'),
-                TextInput::make('finalizing_action')
-                    ->label('Finalizing Action')
-                    ->nullable()
             ])
             ->columns(1);
     }
@@ -49,6 +58,7 @@ class ActionsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Actions')
             ->columns([
                 TextColumn::make('name')
                     ->label('Action Name')
@@ -70,26 +80,64 @@ class ActionsRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->emptyStateHeading('No Action Types Defined')
-            ->emptyStateDescription('Create action types that this office can perform on documents.')
+            ->emptyStateHeading('No Actions Defined')
+            ->emptyStateDescription('Create actions that this office can perform on documents.')
             ->headerActions([
                 CreateAction::make()
-                    ->label('Create Action Type')
+                    ->label('Create Action')
+                    ->createAnother(false)
                     ->icon('heroicon-s-plus')
-                    ->modalHeading('Create New Action Type')
+                    ->modalHeading('Create New Action')
                     ->modalWidth('lg')
-                    ->modalDescription('Define a new action type for this office.'),
+                    ->modalDescription('Define a new action for this office.')
+                    ->before(function (CreateAction $action, array $data) {
+                        $exists = ActionType::where('office_id', $this->ownerRecord->id)
+                            ->where('name', $data['name'])
+                            ->exists();
+                            
+                        if ($exists) {
+                            Notification::make()
+                                ->title('Action Already Exists')
+                                ->body("An action named '{$data['name']}' already exists for this office. Please choose a different name.")
+                                ->warning()
+                                ->persistent()
+                                ->send();
+                                
+                            $action->halt(); 
+                        }
+                    }),
             ])
             ->recordActions([
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make()
+                        ->modalWidth('md'),
+                    ViewAction::make()
+                        ->modalWidth('md')
+                        ->schema([
+                            Select::make('prerequisite_action_type_id')
+                                ->label('Prerequisite Action')
+                                ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                                ->disabled(), 
+                            TextInput::make('name')
+                                ->label('Action Name')
+                                ->disabled(), 
+                            TextInput::make('status_name')
+                                ->label('Document Status')
+                                ->disabled(),
+                        ]),
+                    DeleteAction::make(),
+                    RestoreAction::make(),
+                ])
             ]);
     }
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['office_id'] = $this->ownerRecord->id;
         $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = true;
+        $data['is_active'] = $data['is_active'] ??= true;
         
         return $data;
     }
+
+
 }
