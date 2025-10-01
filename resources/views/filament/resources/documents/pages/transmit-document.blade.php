@@ -29,7 +29,7 @@
 
                 <div class="space-y-4">
                     <div>
-                        {{ $this->form->getComponent('process') }}
+                        {{ $this->form->getComponent('process_id') }}
                     </div>
                     <div>
                         {{ $this->form->getComponent('remarks') }}

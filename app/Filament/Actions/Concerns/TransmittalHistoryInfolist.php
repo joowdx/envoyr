@@ -72,7 +72,7 @@ trait TransmittalHistoryInfolist
                                 $attachmentCount = $transmittal->attachments->sum(fn($att) => $att->contents->count());
                                 
                                 $history .= "#{$num}: {$from} → {$to} ({$date}) - {$status} - {$attachmentCount} files\n";
-                                $history .= "Process: {$transmittal->process}\n";
+                                $history .= "Process: " . ($transmittal->process?->name ?? 'None') . "\n";
                                 if ($transmittal->remarks) {
                                     $history .= "Remarks: {$transmittal->remarks}\n";
                                 }

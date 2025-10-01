@@ -86,6 +86,7 @@ class TransmitDocument extends Page implements HasForms
                     ->afterStateUpdated(function ($state, callable $set) {
                         if (! $state) {
                             $set('section_id', null);
+                            $set('process_id', null);
                         }
                     }),
                 Select::make('section_id')
@@ -131,8 +132,8 @@ class TransmitDocument extends Page implements HasForms
                             return [];
                         }
                         return Process::where('office_id', $toOffice)
-                            ->orderBy('status')
-                            ->pluck('status', 'id');
+                            ->orderBy('name')
+                            ->pluck('name', 'id');
                     })
                     ->searchable()
                     ->preload()
