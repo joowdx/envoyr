@@ -10,6 +10,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\CheckboxList;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\View;
@@ -18,6 +19,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Section;
 
 class ProcessesRelationManager extends RelationManager
 {
@@ -49,24 +52,18 @@ class ProcessesRelationManager extends RelationManager
                     ->preload()
                     ->searchable()
                     ->placeholder('Select Classification'),
-                Repeater::make('action_types') 
-                    ->label('Actions')
-                    ->schema([
-                        Select::make('action_type_id')
-                            ->label('Action')
-                            ->options(function () use ($ownerRecord) {
-                                return ActionType::where('office_id', $ownerRecord->id)
+                Section::make([
+                    CheckboxList::make('Actions')
+                                    ->options(fn () => ActionType::where('office_id', $ownerRecord->id)
                                     ->where('is_active', true)
-                                    ->pluck('name', 'id');
-                            })
+                                    ->pluck('name', 'id')
+                            )
+                            ->columns(3)
                             ->required()
-                            ->searchable()
-                            ->placeholder('Select Action'),
-                    ])
-                    ->addActionLabel('Add Action')
-                    ->columns(1),
-                ]);
-                    }
+                            ->bulkToggleable(),
+                        ]),
+                    ]);           
+        }
 
     public function table(Table $table): Table
     {
