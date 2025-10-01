@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 
 use App\Models\ActionType;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -90,15 +89,12 @@ class ProcessesRelationManager extends RelationManager
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
-                        ->label('Edit')
                         ->modalWidth('md')
                         ->hidden(fn () => !Auth::user()->can('update', $this->ownerRecord)),
                     ViewAction::make()
-                        ->label('View')
                         ->modalWidth('md')
                         ->hidden(fn () => !Auth::user()->can('view', $this->ownerRecord)),
                     DeleteAction::make()
-                        ->label('Delete')
                         ->requiresConfirmation()
                         ->hidden(fn () => !Auth::user()->can('delete', $this->ownerRecord)),
                 ]),
