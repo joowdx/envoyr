@@ -20,6 +20,7 @@ return new class extends Migration
             $table->ulid('office_id')->nullable();
             $table->ulid('classification_id')->nullable();
             $table->string(column: 'name')->nullable();
+            $table->json('action_sequence')->nullable();
             $table->softDeletes();
             $table->timestamps();
             

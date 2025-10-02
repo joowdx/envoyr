@@ -17,6 +17,11 @@ class Process extends Model
         'classification_id',
         'office_id',
         'name',
+        'action_sequence'
+    ];
+
+    protected $casts = [
+        'action_sequence' => 'array',
     ];
 
     public function user(): BelongsTo
