@@ -14,17 +14,36 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Filament\View\PanelsRenderHook;
+use Filament\Support\Facades\FilamentView;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Blade;
 
 class FilamentPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        // Register render hooks for custom assets
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_START, 
+            fn () => Blade::render('@vite(\'resources/css/app.css\')')
+        );
+        
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_START, 
+            fn () => Blade::render('@vite(\'resources/css/stepper.css\')')
+        );
+        
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_START, 
+            fn () => Blade::render('@vite(\'resources/js/stepper-utils.js\')')
+        );
+
         return $panel
             ->default()
             ->id('')

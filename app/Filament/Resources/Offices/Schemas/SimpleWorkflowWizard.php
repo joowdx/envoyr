@@ -62,67 +62,74 @@ class SimpleWorkflowWizard
 
     private static function sequenceActionsStep($ownerRecord): Step
     {
-        return Step::make('Arrange Sequence')
-            ->description('Put your selected actions in the correct processing order')
+        return Step::make('Build Action Sequence')
+            ->description('Select actions to add them to your workflow sequence')
             ->icon('heroicon-o-arrows-up-down')
             ->schema([
-                Repeater::make('action_sequence')
-                    ->label('Document Processing Sequence')
-                    ->schema([
-                        Select::make('action_type_id')
-                            ->label('Action')
-                            ->options(fn () => ActionType::where('office_id', $ownerRecord->id)
-                                ->where('is_active', true)
-                                ->pluck('name', 'id')
-                            )
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function ($state, $set) {
-                                if ($state) {
-                                    $action = ActionType::find($state);
-                                    $set('resulting_status', $action?->status_name);
-                                    $set('action_name', $action?->name);
-                                }
-                            })
-                            ->helperText('Choose an action from your selected list'),
-
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('resulting_status')
-                                    ->label('Document Status After Action')
-                                    ->disabled()
-                                    ->placeholder('Status will appear here'),
-
-                                TextInput::make('step_order')
-                                    ->label('Step Number')
-                                    ->numeric()
-                                    ->default(fn ($get) => count($get('../../action_sequence')))
-                                    ->required()
-                                    ->helperText('Processing order (1, 2, 3...)'),
-                            ]),
-
-                        Textarea::make('step_description')
-                            ->label('Processing Instructions')
-                            ->placeholder('What should staff do in this step?')
-                            ->rows(2)
-                            ->helperText('Optional instructions for document processing'),
-                    ])
-                    ->addActionLabel('Add Processing Step')
-                    ->reorderableWithButtons()
-                    ->orderColumn('step_order')
-                    ->collapsible()
-                    ->itemLabel(function (array $state): ?string {
-                        if (empty($state['action_type_id'])) {
-                            return 'New Processing Step';
-                        }
-                        
-                        $action = ActionType::find($state['action_type_id']);
-                        $stepOrder = $state['step_order'] ?? 'N/A';
-                        
-                        return "Step {$stepOrder}: {$action?->name}";
+                // Action selector
+                Select::make('action_to_add')
+                    ->label('Add Action to Workflow')
+                    ->options(function () use ($ownerRecord) {
+                        return ActionType::where('office_id', $ownerRecord->id)
+                            ->where('is_active', true)
+                            ->pluck('name', 'id');
                     })
-                    ->minItems(1)
-                    ->maxItems(10),
+                    ->searchable()
+                    ->placeholder('Select an action to add to the workflow...')
+                    ->live()
+                    ->afterStateUpdated(function ($state, $set, $get) {
+                        if ($state) {
+                            // Get current sequence
+                            $currentSequence = json_decode($get('action_sequence') ?? '[]', true);
+                            
+                            // Get the selected action details
+                            $action = ActionType::find($state);
+                            if ($action) {
+                                // Add to sequence with step order
+                                $stepOrder = count($currentSequence) + 1;
+                                $currentSequence[] = [
+                                    'id' => $action->id,
+                                    'action_type_id' => $action->id,
+                                    'name' => $action->name,
+                                    'status_name' => $action->status_name,
+                                    'step_order' => $stepOrder,
+                                    'resulting_status' => $action->status_name,
+                                    'action_name' => $action->name,
+                                ];
+                                
+                                // Update hidden field
+                                $set('action_sequence', json_encode($currentSequence));
+                                
+                                // Clear the selector
+                                $set('action_to_add', null);
+                            }
+                        }
+                    })
+                    ->helperText('Choose an action to add it to your workflow sequence'),
+
+                // Hidden field to store the sequence data
+                \Filament\Forms\Components\Hidden::make('action_sequence')
+                    ->default('[]'),
+                
+                // The dynamic stepper component
+                \Filament\Forms\Components\ViewField::make('stepper')
+                    ->view('components.action-sequence-stepper')
+                    ->viewData(function ($get) use ($ownerRecord) {
+                        $selectedActions = json_decode($get('action_sequence') ?? '[]', true);
+                        
+                        return [
+                            'office' => $ownerRecord ? [
+                                'id' => $ownerRecord->id,
+                                'name' => $ownerRecord->name,
+                                'acronym' => $ownerRecord->acronym ?? null,
+                            ] : null,
+                            'selectedActions' => $selectedActions,
+                            'isModal' => false,
+                            'fieldName' => 'action_sequence',
+                        ];
+                    })
+                    ->live()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -137,7 +144,16 @@ class SimpleWorkflowWizard
                     ->state(function ($get) use ($ownerRecord) {
                         $classificationId = $get('classification_id');
                         $processName = $get('process_name');
-                        $actionSequence = $get('action_sequence') ?? [];
+                        
+                        // Handle both JSON string and array formats
+                        $actionSequenceRaw = $get('action_sequence');
+                        $actionSequence = [];
+                        
+                        if (is_string($actionSequenceRaw)) {
+                            $actionSequence = json_decode($actionSequenceRaw, true) ?? [];
+                        } elseif (is_array($actionSequenceRaw)) {
+                            $actionSequence = $actionSequenceRaw;
+                        }
                         
                         if (!$classificationId || !$processName || empty($actionSequence)) {
                             return '⚠️ Please complete the previous steps to see your workflow preview.';
@@ -158,12 +174,20 @@ class SimpleWorkflowWizard
                         $preview .= "### 🔄 Document Processing Sequence:\n\n";
                         
                         foreach ($actionSequence as $step) {
-                            if (!empty($step['action_type_id'])) {
-                                $action = ActionType::find($step['action_type_id']);
-                                $stepOrder = $step['step_order'] ?? 'N/A';
-                                
-                                $preview .= "**Step {$stepOrder}:** {$action?->name}\n";
-                                $preview .= "- Document status becomes: _{$step['resulting_status']}_\n";
+                            // Handle both new stepper format and old repeater format
+                            $actionId = $step['action_type_id'] ?? $step['id'] ?? null;
+                            $actionName = $step['action_name'] ?? $step['name'] ?? null;
+                            $stepOrder = $step['step_order'] ?? 'N/A';
+                            $resultingStatus = $step['resulting_status'] ?? $step['status_name'] ?? 'Unknown';
+                            
+                            if ($actionId && !$actionName) {
+                                $action = ActionType::find($actionId);
+                                $actionName = $action?->name;
+                            }
+                            
+                            if ($actionName) {
+                                $preview .= "**Step {$stepOrder}:** {$actionName}\n";
+                                $preview .= "- Document status becomes: _{$resultingStatus}_\n";
                                 
                                 if (!empty($step['step_description'])) {
                                     $preview .= "- Instructions: _{$step['step_description']}_\n";
