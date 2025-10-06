@@ -43,9 +43,9 @@ class OfficeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            SectionRelationManager::class,
-            ProcessesRelationManager::class,
             ActionsRelationManager::class,
+            ProcessesRelationManager::class,
+            SectionRelationManager::class,
         ];
     }
 

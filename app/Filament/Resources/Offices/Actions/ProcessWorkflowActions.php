@@ -7,6 +7,8 @@ use App\Models\Process;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
+use App\Filament\Resources\Offices\Schemas\SimpleWorkflowWizard;
+use App\Filament\Resources\Offices\Schemas\VisualWorkflowSchema;
 use App\Filament\Resources\Offices\Schemas\ProcessWorkflowSchema;
 
 class ProcessWorkflowActions
@@ -117,5 +119,174 @@ class ProcessWorkflowActions
             ->body("Updated workflow '{$data['process_name']}' with " . count($actionWorkflow) . " sequential steps.")
             ->success()
             ->send();
+    }
+
+    public static function createSimpleWorkflowAction($ownerRecord): Action
+    {
+        return Action::make('create_simple_workflow')
+            ->label('Simple Workflow Wizard')
+            ->icon('heroicon-s-sparkles')
+            ->color('success')
+            ->modalHeading('Simple Workflow Creator')
+            ->modalDescription('Create a workflow in just a few easy steps')
+            ->modalWidth('4xl')
+            ->schema(SimpleWorkflowWizard::createSimpleWorkflow($ownerRecord))
+            ->action(function (array $data) use ($ownerRecord) {
+                self::createSimpleWorkflow($data, $ownerRecord);
+            });
+    }
+
+    private static function createSimpleWorkflow(array $data, $ownerRecord): void
+    {
+        $selectedActions = $data['selected_actions'] ?? [];
+        $template = $data['workflow_template'];
+        
+        // Apply template logic if not custom
+        if ($template !== 'custom') {
+            $actionSequence = self::applyWorkflowTemplate($template, $selectedActions, $ownerRecord);
+        } else {
+            $actionSequence = array_map(function ($actionId, $index) {
+                return [
+                    'action_type_id' => $actionId,
+                    'step_order' => $index + 1,
+                    'step_description' => '',
+                ];
+            }, $selectedActions, array_keys($selectedActions));
+        }
+        
+        Process::create([
+            'name' => $data['process_name'],
+            'classification_id' => $data['classification_id'],
+            'description' => $data['workflow_purpose'] ?? null,
+            'office_id' => $ownerRecord->id,
+            'user_id' => Auth::id(),
+            'action_sequence' => json_encode($actionSequence),
+            'status' => 'Active',
+            'processed_at' => now(),
+        ]);
+        
+        Notification::make()
+            ->title('Workflow Created Successfully!')
+            ->body("'{$data['process_name']}' is ready to use")
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Apply predefined workflow templates based on Document Tracking System patterns
+     * Aligns with flowchart: Document Creation → Processing → Status Updates
+     */
+    private static function applyWorkflowTemplate(string $template, array $selectedActions, $ownerRecord): array
+    {
+        $actionSequence = [];
+        
+        // Get available actions for this office per ER diagram ActionType entity
+        $availableActions = \App\Models\ActionType::where('office_id', $ownerRecord->id)
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('id');
+        
+        switch ($template) {
+            case 'receive_review_approve':
+                // Common document processing flow: Receive → Review → Approve
+                $templateFlow = [
+                    'receive' => ['Review', 'Receive', 'Accept'],
+                    'review' => ['Review', 'Evaluate', 'Check'],
+                    'approve' => ['Approve', 'Authorize', 'Confirm']
+                ];
+                break;
+                
+            case 'receive_process_forward':
+                // Processing and forwarding flow per flowchart forwarding logic
+                $templateFlow = [
+                    'receive' => ['Receive', 'Accept', 'Log'],
+                    'process' => ['Process', 'Handle', 'Execute'],
+                    'forward' => ['Forward', 'Send', 'Transmit']
+                ];
+                break;
+                
+            case 'receive_approve_return':
+                // Return to originating office flow per flowchart return logic
+                $templateFlow = [
+                    'receive' => ['Receive', 'Accept'],
+                    'approve' => ['Approve', 'Authorize'],
+                    'return' => ['Return', 'Send Back']
+                ];
+                break;
+                
+            default:
+                // Custom template - use selected actions as-is
+                return array_map(function ($actionId, $index) use ($availableActions) {
+                    $action = $availableActions[$actionId] ?? null;
+                    return [
+                        'action_type_id' => $actionId,
+                        'step_order' => $index + 1,
+                        'step_description' => $action ? "Perform {$action->name}" : '',
+                        'resulting_status' => $action?->status_name ?? 'Unknown',
+                    ];
+                }, $selectedActions, array_keys($selectedActions));
+        }
+        
+        // Match selected actions to template flow
+        $stepOrder = 1;
+        foreach ($templateFlow as $stepType => $keywords) {
+            foreach ($selectedActions as $actionId) {
+                $action = $availableActions[$actionId] ?? null;
+                if (!$action) continue;
+                
+                // Check if action name matches template keywords
+                $actionName = strtolower($action->name);
+                $matchFound = false;
+                
+                foreach ($keywords as $keyword) {
+                    if (str_contains($actionName, strtolower($keyword))) {
+                        $actionSequence[] = [
+                            'action_type_id' => $actionId,
+                            'step_order' => $stepOrder++,
+                            'step_description' => self::getTemplateStepDescription($stepType, $action->name),
+                            'resulting_status' => $action->status_name,
+                            'template_step' => $stepType,
+                        ];
+                        $matchFound = true;
+                        break 2; // Break both loops
+                    }
+                }
+            }
+        }
+        
+        // Add any remaining actions that didn't match template
+        foreach ($selectedActions as $actionId) {
+            $alreadyAdded = collect($actionSequence)->contains('action_type_id', $actionId);
+            if (!$alreadyAdded) {
+                $action = $availableActions[$actionId] ?? null;
+                if ($action) {
+                    $actionSequence[] = [
+                        'action_type_id' => $actionId,
+                        'step_order' => $stepOrder++,
+                        'step_description' => "Additional step: {$action->name}",
+                        'resulting_status' => $action->status_name,
+                        'template_step' => 'additional',
+                    ];
+                }
+            }
+        }
+        
+        return $actionSequence;
+    }
+
+    /**
+     * Generate step descriptions based on Document Tracking System workflow templates
+     */
+    private static function getTemplateStepDescription(string $stepType, string $actionName): string
+    {
+        return match($stepType) {
+            'receive' => "Initial document reception and logging - {$actionName}",
+            'review' => "Document review and evaluation process - {$actionName}",
+            'approve' => "Document approval and authorization - {$actionName}",
+            'process' => "Document processing and handling - {$actionName}",
+            'forward' => "Forward document to next office per flowchart - {$actionName}",
+            'return' => "Return document to originating office - {$actionName}",
+            default => "Perform action: {$actionName}",
+        };
     }
 }

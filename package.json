@@ -15,6 +15,7 @@
         "vite": "^7.0.4"
     },
     "dependencies": {
+        "flowbite": "^3.1.2",
         "puppeteer": "^24.19.0"
     }
 }
