@@ -4,11 +4,11 @@
 namespace App\Filament\Resources\Offices\Actions;
 
 use App\Models\Process;
+use App\Models\ActionType;
 use Filament\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 use App\Filament\Resources\Offices\Schemas\SimpleWorkflowWizard;
-use App\Filament\Resources\Offices\Schemas\VisualWorkflowSchema;
 use App\Filament\Resources\Offices\Schemas\ProcessWorkflowSchema;
 
 class ProcessWorkflowActions
@@ -138,37 +138,51 @@ class ProcessWorkflowActions
 
     private static function createSimpleWorkflow(array $data, $ownerRecord): void
     {
-        $selectedActions = $data['selected_actions'] ?? [];
-        $template = $data['workflow_template'];
+        // Get action sequence from stepper data
+        $actionSequenceJson = $data['action_sequence'] ?? '[]';
+        $actionSequence = json_decode($actionSequenceJson, true) ?? [];
         
-        // Apply template logic if not custom
-        if ($template !== 'custom') {
-            $actionSequence = self::applyWorkflowTemplate($template, $selectedActions, $ownerRecord);
-        } else {
-            $actionSequence = array_map(function ($actionId, $index) {
-                return [
-                    'action_type_id' => $actionId,
-                    'step_order' => $index + 1,
-                    'step_description' => '',
-                ];
-            }, $selectedActions, array_keys($selectedActions));
+        if (empty($actionSequence)) {
+            Notification::make()
+                ->title('No Actions Selected')
+                ->body('Please add at least one action to your workflow sequence using the stepper.')
+                ->warning()
+                ->send();
+            return;
         }
-        
-        Process::create([
+
+        // Convert stepper data to workflow format
+        $workflowSteps = [];
+        foreach ($actionSequence as $index => $step) {
+            $actionType = ActionType::find($step['action_type_id'] ?? $step['id'] ?? null);
+            
+            if ($actionType) {
+                $workflowSteps[] = [
+                    'action_type_id' => $actionType->id,
+                    'step_order' => $index + 1,
+                    'step_description' => "Perform {$actionType->name} - Document status becomes: {$actionType->status_name}",
+                    'resulting_status' => $actionType->status_name,
+                ];
+            }
+        }
+
+        // Create Process workflow record per ER diagram
+        $process = Process::create([
             'name' => $data['process_name'],
             'classification_id' => $data['classification_id'],
-            'description' => $data['workflow_purpose'] ?? null,
+            'description' => $data['workflow_purpose'] ?? "Simple workflow with " . count($workflowSteps) . " sequential actions",
             'office_id' => $ownerRecord->id,
             'user_id' => Auth::id(),
-            'action_sequence' => json_encode($actionSequence),
+            'action_sequence' => json_encode($workflowSteps),
             'status' => 'Active',
             'processed_at' => now(),
         ]);
-        
+
         Notification::make()
-            ->title('Workflow Created Successfully!')
-            ->body("'{$data['process_name']}' is ready to use")
+            ->title('Simple Workflow Created Successfully!')
+            ->body("Created '{$data['process_name']}' with " . count($workflowSteps) . " actions using the stepper interface.")
             ->success()
+            ->duration(5000)
             ->send();
     }
 
@@ -181,7 +195,7 @@ class ProcessWorkflowActions
         $actionSequence = [];
         
         // Get available actions for this office per ER diagram ActionType entity
-        $availableActions = \App\Models\ActionType::where('office_id', $ownerRecord->id)
+        $availableActions = ActionType::where('office_id', $ownerRecord->id)
             ->where('is_active', true)
             ->get()
             ->keyBy('id');

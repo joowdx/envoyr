@@ -5,14 +5,16 @@ namespace App\Filament\Resources\Offices\Schemas;
 
 use App\Models\ActionType;
 use App\Models\Classification;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Wizard;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Wizard\Step;
-use Filament\Forms\Components\Repeater;
 
 class SimpleWorkflowWizard
 {
@@ -108,11 +110,11 @@ class SimpleWorkflowWizard
                     ->helperText('Choose an action to add it to your workflow sequence'),
 
                 // Hidden field to store the sequence data
-                \Filament\Forms\Components\Hidden::make('action_sequence')
+                Hidden::make('action_sequence')
                     ->default('[]'),
                 
                 // The dynamic stepper component
-                \Filament\Forms\Components\ViewField::make('stepper')
+                ViewField::make('stepper')
                     ->view('components.action-sequence-stepper')
                     ->viewData(function ($get) use ($ownerRecord) {
                         $selectedActions = json_decode($get('action_sequence') ?? '[]', true);
