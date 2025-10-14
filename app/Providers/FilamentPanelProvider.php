@@ -20,6 +20,9 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Blade;
 
 class FilamentPanelProvider extends PanelProvider
 {
@@ -60,5 +63,13 @@ class FilamentPanelProvider extends PanelProvider
                 EnsureUserHasName::class,
                 EnsureUserNotDeactivated::class,
             ]);
+    }
+    
+    public function boot(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_START, 
+            fn () => Blade::render('@vite(\'resources/css/app.css\')')
+        );
     }
 }

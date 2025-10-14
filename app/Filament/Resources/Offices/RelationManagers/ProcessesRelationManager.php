@@ -10,14 +10,17 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Actions;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class ProcessesRelationManager extends RelationManager
@@ -75,7 +78,28 @@ class ProcessesRelationManager extends RelationManager
                             ->optionsLimit(50)
                             ->noSearchResultsMessage('No actions found. Please create action types first.')
                             ->minItems(1)
-                            ->maxItems(10),
+                            ->maxItems(10)
+                            ->live()
+                            ->afterStateUpdated(function ($state, $set) {
+                                // Trigger stepper update
+                                $set('stepper_data', $state);
+                            }),
+                        
+                        ViewField::make('workflow_preview')
+                            ->view('components.workflow-stepper')
+                            ->viewData(function ($get) {
+                                $selectedActions = $get('action_type_id') ?? [];
+                                $actionTypes = ActionType::where('office_id', $this->ownerRecord->id)
+                                    ->where('is_active', true)
+                                    ->get()
+                                    ->keyBy('id');
+                                
+                                return [
+                                    'selectedActions' => $selectedActions,
+                                    'actionTypes' => $actionTypes,
+                                ];
+                            })
+                            ->visible(fn ($get) => !empty($get('action_type_id'))),
                     ])
                     ->columnSpan(2),
             ])
@@ -112,7 +136,7 @@ class ProcessesRelationManager extends RelationManager
             ->recordTitleAttribute('name') 
             ->headerActions([
                 CreateAction::make()
-                    ->modalWidth('lg')
+                    ->modalWidth(Width::SevenExtraLarge) // Responsive modal for workflow steps
                     ->modalHeading('Create Document Process Workflow')
                     ->mutateDataUsing(function (array $data): array {
                         // Set process creator and office per ER diagram relationships
@@ -148,12 +172,12 @@ class ProcessesRelationManager extends RelationManager
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Edit')
-                        ->modalWidth('lg')
+                        ->modalWidth(Width::SevenExtraLarge)
                         ->modalHeading('Edit Process Workflow')
                         ->hidden(fn () => !Auth::user()->can('update', $this->ownerRecord)),
                     ViewAction::make()
                         ->label('View')
-                        ->modalWidth('lg')
+                        ->modalWidth(Width::FiveExtraLarge)
                         ->modalHeading('Process Workflow Details')
                         ->schema([
                             Section::make('Process Information')
@@ -172,8 +196,56 @@ class ProcessesRelationManager extends RelationManager
                                 ])
                                 ->compact(),
 
+                            Section::make('Workflow Visualization')
+                                ->description('Visual representation of the process workflow')
+                                ->schema([
+                                    ViewField::make('workflow_preview')
+                                        ->view('components.workflow-stepper')
+                                        ->viewData(function ($record) {
+                                            if (!$record) {
+                                                return [
+                                                    'selectedActions' => [],
+                                                    'actionTypes' => collect(),
+                                                ];
+                                            }
+                                            
+                                            // Force load the actions if not already loaded
+                                            if (!$record->relationLoaded('actions')) {
+                                                $record->load('actions');
+                                            }
+                                            
+                                            $selectedActions = $record->actions
+                                                ->sortBy('pivot.sequence_order')
+                                                ->pluck('id')
+                                                ->toArray();
+                                            
+                                            $actionTypes = ActionType::where('office_id', $this->ownerRecord->id)
+                                                ->where('is_active', true)
+                                                ->get()
+                                                ->keyBy('id');
+                                            
+                                            return [
+                                                'selectedActions' => $selectedActions,
+                                                'actionTypes' => $actionTypes,
+                                                'title' => 'Workflow Sequence',
+                                            ];
+                                        })
+                                        ->visible(function ($record) {
+                                            if (!$record) return false;
+                                            
+                                            if (!$record->relationLoaded('actions')) {
+                                                $record->load('actions');
+                                            }
+                                            
+                                            return $record->actions->isNotEmpty();
+                                        }),
+                                ])
+                                ->compact()
+                                ->collapsible()
+                                ->collapsed(false),
+
                             Section::make('Workflow Actions')
-                                ->description('Actions that will be performed in this process')
+                                ->description('Detailed list of actions in this process')
                                 ->schema([
                                     Textarea::make('actions_list')
                                         ->label('Process Workflow')
