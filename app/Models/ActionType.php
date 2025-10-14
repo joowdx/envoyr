@@ -8,15 +8,16 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ActionType extends Model
 {
     use SoftDeletes;
+    
     protected $fillable = [
         'office_id',
         'name',
         'status_name',
-        'prerequisite_action_type_id',
         'slug',
         'description',
         'is_active',
@@ -34,6 +35,26 @@ class ActionType extends Model
     public function actions(): HasMany
     {
         return $this->hasMany(OfficeAction::class);
+    }
+
+    public function prerequisites(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ActionType::class,
+            'action_type_dependencies',
+            'action_type_id',
+            'prerequisite_action_type_id'
+        )->withTimestamps();
+    }
+
+    public function dependentActions(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            ActionType::class,
+            'action_type_dependencies',
+            'prerequisite_action_type_id',
+            'action_type_id'
+        )->withTimestamps();
     }
 
     protected static function boot()
@@ -59,8 +80,8 @@ class ActionType extends Model
         static::updating(function ($actionType) {
             if ($actionType->isDirty('name') && $actionType->name) {
                 $actionType->slug = Str::slug($actionType->name);
-        }
-    });
+            }
+        });
     }
 
     public function scopeActive($query)
@@ -68,8 +89,16 @@ class ActionType extends Model
         return $query->where('is_active', true);
     }
 
-    public function prerequisiteActionType(): BelongsTo
+    // Helper: Check if specific action is a prerequisite
+    public function hasPrerequisite(ActionType $actionType): bool
     {
-        return $this->belongsTo(ActionType::class, 'prerequisite_action_type_id');
+        return $this->prerequisites()->where('action_types.id', $actionType->id)->exists();
+    }
+
+    // Helper: Check if all prerequisites are completed
+    public function canBeExecuted(array $completedActionTypeIds): bool
+    {
+        $prerequisiteIds = $this->prerequisites()->pluck('action_types.id')->toArray();
+        return empty(array_diff($prerequisiteIds, $completedActionTypeIds));
     }
 }
