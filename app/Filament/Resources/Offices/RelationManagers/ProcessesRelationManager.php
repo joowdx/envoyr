@@ -4,28 +4,27 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 
 use App\Models\ActionType;
 use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
 
 class ProcessesRelationManager extends RelationManager
 {
     protected static string $relationship = 'processes';
 
-    protected static ?string $recordTitleAttribute = 'status'; 
+    protected static ?string $recordTitleAttribute = 'name'; 
 
     protected array $actionTypesToAttach = [];
 
@@ -34,136 +33,200 @@ class ProcessesRelationManager extends RelationManager
         return 'Processes';
     }
 
-    public function form(Schema $schema): Schema // Changed from Schema
+    public function form(Schema $form): Schema
     {
-        $ownerRecord = $this->ownerRecord;
-        
-        return $schema
+        return $form
             ->schema([
-                TextInput::make('status')
-                    ->label('Process Name')
-                    ->required(),
-                Select::make('classification_id')
-                    ->relationship('classification', 'name')
-                    ->required()
-                    ->label('Classification')
-                    ->preload()
-                    ->searchable()
-                    ->placeholder('Select Classification'),
+                Section::make('Process Details')
+                    ->description('Define the process workflow for document handling')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Process Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('e.g., Budget Review Process')
+                            ->helperText('Provide a clear, descriptive name for this process'),
+                        
+                        Select::make('classification_id')
+                            ->label('Document Classification')
+                            ->relationship('classification', 'name')
+                            ->required()
+                            ->placeholder('Select document classification')
+                            ->helperText('Choose the type of documents this process will handle'),
+                    ])
+                    ->columns(2)
+                    ->columnSpan(2),
                 
-                Select::make('action_type_id')
-                    ->label('Action')
-                    ->options(fn () => ActionType::where('office_id', $this->ownerRecord->id)
-                        ->where('is_active', true)
-                        ->pluck('name', 'id'))
-                    ->multiple()
-                    ->required()
-                    ->searchable()
-                    ->placeholder('Select Action'),
+                Section::make('Workflow Configuration')
+                    ->description('Configure the actions that will be performed in this process')
+                    ->schema([
+                        Select::make('action_type_id')
+                            ->label('Workflow Actions')
+                            ->multiple()
+                            ->placeholder('Select actions for this process workflow')
+                            ->options(function () {
+                                return ActionType::where('office_id', $this->ownerRecord->id)
+                                    ->where('is_active', true)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->helperText('Select the actions that will be performed in this process workflow. Actions will be executed in the order selected.')
+                            ->searchable()
+                            ->optionsLimit(50)
+                            ->noSearchResultsMessage('No actions found. Please create action types first.')
+                            ->minItems(1)
+                            ->maxItems(10),
+                    ])
+                    ->columnSpan(2),
             ])
-            ->columns(1);
+            ->columns(2);
     }
 
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['actions', 'classification']))
             ->columns([
-                TextColumn::make('status')
+                TextColumn::make('name')
                     ->label('Process Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(function ($record) {
+                        return "For " . ($record->classification->name ?? 'Unknown') . " documents";
+                    }),
                 TextColumn::make('classification.name')
-                    ->label('Classification')
+                    ->label('Document Classification')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('actions_count')
+                    ->label('Actions Count')
+                    ->counts('actions')
+                    ->badge()
+                    ->sortable()
+                    ->description('Number of workflow actions'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable(),
             ])
-            ->recordTitleAttribute('status') 
+            ->recordTitleAttribute('name') 
             ->headerActions([
                 CreateAction::make()
-                    ->modalWidth('md'),
+                    ->modalWidth('lg')
+                    ->modalHeading('Create Document Process Workflow')
+                    ->mutateDataUsing(function (array $data): array {
+                        // Set process creator and office per ER diagram relationships
+                        $data['user_id'] = Auth::id(); 
+                        $data['office_id'] = $this->ownerRecord->id;
+                        
+                        // Store action types for workflow sequence (follows document flowchart)
+                        if (isset($data['action_type_id']) && is_array($data['action_type_id'])) {
+                            $this->actionTypesToAttach = $data['action_type_id'];
+                            unset($data['action_type_id']);
+                        }
+                        
+                        return $data;
+                    })
+                    ->after(function (Model $record) {
+                        // Create workflow sequence per document processing flowchart
+                        if (!empty($this->actionTypesToAttach)) {
+                            foreach ($this->actionTypesToAttach as $index => $actionTypeId) {
+                                $record->actions()->attach($actionTypeId, [
+                                    'sequence_order' => $index + 1,
+                                    'completed_at' => null,
+                                    'completed_by' => null,
+                                    'notes' => null,
+                                ]);
+                            }
+                            
+                            // Clear the stored actions
+                            $this->actionTypesToAttach = [];
+                        }
+                    }),
             ])
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make()
                         ->label('Edit')
-                        ->modalWidth('md')
+                        ->modalWidth('lg')
+                        ->modalHeading('Edit Process Workflow')
                         ->hidden(fn () => !Auth::user()->can('update', $this->ownerRecord)),
                     ViewAction::make()
                         ->label('View')
-                        ->modalWidth('lg') 
+                        ->modalWidth('lg')
+                        ->modalHeading('Process Workflow Details')
                         ->schema([
-                                Section::make('Process Details')
-                                    ->schema([
-                                        Grid::make(2)
-                                            ->schema([
-                                                TextInput::make('status')
-                                                    ->label('Process Name')
-                                                    ->disabled(), // Read-only
-                                                Select::make('classification_id')
-                                                    ->relationship('classification', 'name')
-                                                    ->label('Classification')
-                                                    ->disabled(), // Read-only
-                                            ]),
-                                    ])
-                                    ->compact(),
+                            Section::make('Process Information')
+                                ->description('Process details for document workflow tracking')
+                                ->schema([
+                                    Grid::make(2)
+                                        ->schema([
+                                            TextInput::make('name')
+                                                ->label('Process Name')
+                                                ->disabled(),
+                                            Select::make('classification_id')
+                                                ->relationship('classification', 'name')
+                                                ->label('Document Classification')
+                                                ->disabled(),
+                                        ]),
+                                ])
+                                ->compact(),
 
-                                Section::make('Associated Actions')
-                                    ->schema([
-                                        Repeater::make('actions')
-                                            ->label('')
-                                            ->relationship('actions') 
-                                            ->schema([
-                                                TextInput::make('name')
-                                                    ->label('Action Name')
-                                                    ->disabled(),
-                                                TextInput::make('status_name')
-                                                    ->label('Status')
-                                                    ->disabled(),
-                                                TextInput::make('slug')
-                                                    ->label('Slug')
-                                                    ->disabled(),
-                                            ]),
-                            ])
+                            Section::make('Workflow Actions')
+                                ->description('Actions that will be performed in this process')
+                                ->schema([
+                                    Textarea::make('actions_list')
+                                        ->label('Process Workflow')
+                                        ->disabled()
+                                        ->dehydrated(false)
+                                        ->formatStateUsing(function ($record) {
+                                            if (!$record) {
+                                                return 'No record found';
+                                            }
+                                            
+                                            // Force load the actions if not already loaded
+                                            if (!$record->relationLoaded('actions')) {
+                                                $record->load('actions');
+                                            }
+                                            
+                                            if ($record->actions->isEmpty()) {
+                                                return "📋 No workflow actions assigned to this process.\n\nTo add actions:\n1. Click Edit to modify this process\n2. Select the workflow actions needed\n3. Save to update the process";
+                                            }
+                                            
+                                            $actionsList = $record->actions
+                                                ->sortBy('pivot.sequence_order')
+                                                ->map(function ($action, $index) {
+                                                    $order = $action->pivot->sequence_order ?? ($index + 1);
+                                                    $status = $action->status_name ?? 'Pending';
+                                                    $statusIcon = match($status) {
+                                                        'Completed' => '✅',
+                                                        'In Progress' => '🔄',
+                                                        'Pending' => '⏳',
+                                                        default => '📋'
+                                                    };
+                                                    return "{$statusIcon} Step {$order}: {$action->name}\n   Status: {$status}";
+                                                })
+                                                ->join("\n\n");
+                                                
+                                            $totalActions = $record->actions->count();
+                                            $header = "🔄 WORKFLOW SEQUENCE ({$totalActions} actions)\n" . str_repeat("─", 40) . "\n\n";
+                                            
+                                            return $header . $actionsList;
+                                        })
+                                        ->rows(10)
+                                        ->extraAttributes(['style' => 'font-family: monospace; line-height: 1.4;']),
+                                ])
+                                ->collapsible()
+                                ->collapsed(false),
                         ])
                         ->hidden(fn () => !Auth::user()->can('view', $this->ownerRecord)),
                     DeleteAction::make()
                         ->label('Delete')
                         ->requiresConfirmation()
+                        ->modalHeading('Delete Process Workflow')
+                        ->modalDescription('Are you sure you want to delete this process workflow? This action cannot be undone.')
                         ->hidden(fn () => !Auth::user()->can('delete', $this->ownerRecord)),
                 ]),
             ]);
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['user_id'] = Auth::id(); 
-        $data['processed_at'] = now(); 
-        $data['office_id'] = $this->ownerRecord->id;
-        $data['status'] = 'in_progress'; // Set initial status
-        
-        // Store action types separately to attach after creation
-        if (isset($data['action_type_id'])) {
-            $this->actionTypesToAttach = $data['action_type_id'];
-            unset($data['action_type_id']);
-        }
-        
-        return $data;
-    }
-
-    protected function handleRecordCreation(array $data): Model
-    {
-        $record = parent::handleRecordCreation($data);
-        
-        // Attach action types with sequence order
-        if (!empty($this->actionTypesToAttach)) {
-            foreach ($this->actionTypesToAttach as $index => $actionTypeId) {
-                $record->actions()->attach($actionTypeId, [
-                    'sequence_order' => $index + 1,
-                    'completed_at' => null, // Will be set when action is completed
-                ]);
-            }
-        }
-        
-        return $record;
     }
 }

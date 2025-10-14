@@ -19,12 +19,7 @@ class Process extends Model
         'user_id',
         'office_id',
         'classification_id',
-        'status',
-        'processed_at',
-    ];
-
-    protected $casts = [
-        'processed_at' => 'datetime',
+        'name',
     ];
 
     public function document(): BelongsTo

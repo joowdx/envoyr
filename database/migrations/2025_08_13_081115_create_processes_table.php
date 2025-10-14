@@ -17,10 +17,8 @@ return new class extends Migration
             $table->ulid('office_id')->nullable();
             $table->ulid('classification_id')->nullable();
             $table->string(column: 'name')->nullable();
-            $table->string('status');
             $table->softDeletes();
             $table->timestamps();
-            $table->timestamp('processed_at')->nullable();
             
 
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
