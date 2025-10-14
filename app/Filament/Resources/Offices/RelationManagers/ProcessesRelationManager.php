@@ -4,21 +4,22 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 
 use App\Models\ActionType;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Schemas\Schema;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\View;
-use Filament\Forms\Components\Repeater;
+use Filament\Schemas\Components\Grid;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 
 class ProcessesRelationManager extends RelationManager
 {
@@ -33,12 +34,11 @@ class ProcessesRelationManager extends RelationManager
         return 'Processes';
     }
 
-    public function form(Schema $schema): Schema
+    public function form(Schema $schema): Schema // Changed from Schema
     {
         $ownerRecord = $this->ownerRecord;
         
         return $schema
-            ->columns(1)
             ->schema([
                 TextInput::make('status')
                     ->label('Process Name')
@@ -52,19 +52,17 @@ class ProcessesRelationManager extends RelationManager
                     ->placeholder('Select Classification'),
                 
                 Select::make('action_type_id')
-                            ->label('Action')
-                            ->options(function () use ($ownerRecord) {
-                                return ActionType::where('office_id', $ownerRecord->id)
-                                    ->where('is_active', true)
-                                    ->pluck('name', 'id');
-                            })
-                            ->multiple()
-                            ->required()
-                            ->searchable()
-                            ->placeholder('Select Action'),
-                    ])
-                    ->columns(1);
-                    }
+                    ->label('Action')
+                    ->options(fn () => ActionType::where('office_id', $this->ownerRecord->id)
+                        ->where('is_active', true)
+                        ->pluck('name', 'id'))
+                    ->multiple()
+                    ->required()
+                    ->searchable()
+                    ->placeholder('Select Action'),
+            ])
+            ->columns(1);
+    }
 
     public function table(Table $table): Table
     {
@@ -92,7 +90,41 @@ class ProcessesRelationManager extends RelationManager
                         ->hidden(fn () => !Auth::user()->can('update', $this->ownerRecord)),
                     ViewAction::make()
                         ->label('View')
-                        ->modalWidth('md')
+                        ->modalWidth('lg') 
+                        ->schema([
+                                Section::make('Process Details')
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                TextInput::make('status')
+                                                    ->label('Process Name')
+                                                    ->disabled(), // Read-only
+                                                Select::make('classification_id')
+                                                    ->relationship('classification', 'name')
+                                                    ->label('Classification')
+                                                    ->disabled(), // Read-only
+                                            ]),
+                                    ])
+                                    ->compact(),
+
+                                Section::make('Associated Actions')
+                                    ->schema([
+                                        Repeater::make('actions')
+                                            ->label('')
+                                            ->relationship('actions') 
+                                            ->schema([
+                                                TextInput::make('name')
+                                                    ->label('Action Name')
+                                                    ->disabled(),
+                                                TextInput::make('status_name')
+                                                    ->label('Status')
+                                                    ->disabled(),
+                                                TextInput::make('slug')
+                                                    ->label('Slug')
+                                                    ->disabled(),
+                                            ]),
+                            ])
+                        ])
                         ->hidden(fn () => !Auth::user()->can('view', $this->ownerRecord)),
                     DeleteAction::make()
                         ->label('Delete')
@@ -107,11 +139,12 @@ class ProcessesRelationManager extends RelationManager
         $data['user_id'] = Auth::id(); 
         $data['processed_at'] = now(); 
         $data['office_id'] = $this->ownerRecord->id;
+        $data['status'] = 'in_progress'; // Set initial status
         
         // Store action types separately to attach after creation
-        if (isset($data['action_types'])) {
-            $this->actionTypesToAttach = collect($data['action_types'])->pluck('action_type_id')->toArray();
-            unset($data['action_types']); // Remove from main data as it's not a Process field
+        if (isset($data['action_type_id'])) {
+            $this->actionTypesToAttach = $data['action_type_id'];
+            unset($data['action_type_id']);
         }
         
         return $data;
@@ -121,9 +154,14 @@ class ProcessesRelationManager extends RelationManager
     {
         $record = parent::handleRecordCreation($data);
         
-        // Attach action types if they exist
-        if (isset($this->actionTypesToAttach) && !empty($this->actionTypesToAttach)) {
-            $record->actions()->attach($this->actionTypesToAttach);
+        // Attach action types with sequence order
+        if (!empty($this->actionTypesToAttach)) {
+            foreach ($this->actionTypesToAttach as $index => $actionTypeId) {
+                $record->actions()->attach($actionTypeId, [
+                    'sequence_order' => $index + 1,
+                    'completed_at' => null, // Will be set when action is completed
+                ]);
+            }
         }
         
         return $record;
