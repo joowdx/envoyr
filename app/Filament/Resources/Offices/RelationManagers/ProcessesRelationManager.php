@@ -174,6 +174,111 @@ class ProcessesRelationManager extends RelationManager
                         ->label('Edit')
                         ->modalWidth(Width::SevenExtraLarge)
                         ->modalHeading('Edit Process Workflow')
+                        ->schema([
+                            Section::make('Process Details')
+                                ->description('Update the process workflow for document handling')
+                                ->schema([
+                                    TextInput::make('name')
+                                        ->label('Process Name')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->placeholder('e.g., Budget Review Process')
+                                        ->helperText('Provide a clear, descriptive name for this process'),
+                                    
+                                    Select::make('classification_id')
+                                        ->label('Document Classification')
+                                        ->relationship('classification', 'name')
+                                        ->required()
+                                        ->placeholder('Select document classification')
+                                        ->helperText('Choose the type of documents this process will handle'),
+                                ])
+                                ->columns(2)
+                                ->columnSpan(2),
+                            
+                            Section::make('Workflow Configuration')
+                                ->description('Update the actions that will be performed in this process')
+                                ->schema([
+                                    Select::make('action_type_id')
+                                        ->label('Workflow Actions')
+                                        ->multiple()
+                                        ->placeholder('Select actions for this process workflow')
+                                        ->options(function () {
+                                            return ActionType::where('office_id', $this->ownerRecord->id)
+                                                ->where('is_active', true)
+                                                ->pluck('name', 'id')
+                                                ->toArray();
+                                        })
+                                        ->helperText('Select the actions that will be performed in this process workflow. Actions will be executed in the order selected.')
+                                        ->searchable()
+                                        ->optionsLimit(50)
+                                        ->noSearchResultsMessage('No actions found. Please create action types first.')
+                                        ->minItems(1)
+                                        ->maxItems(10)
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, $set) {
+                                            // Trigger stepper update
+                                            $set('stepper_data', $state);
+                                        }),
+                                    
+                                    ViewField::make('workflow_preview')
+                                        ->view('components.workflow-stepper')
+                                        ->viewData(function ($get) {
+                                            $selectedActions = $get('action_type_id') ?? [];
+                                            $actionTypes = ActionType::where('office_id', $this->ownerRecord->id)
+                                                ->where('is_active', true)
+                                                ->get()
+                                                ->keyBy('id');
+                                            
+                                            return [
+                                                'selectedActions' => $selectedActions,
+                                                'actionTypes' => $actionTypes,
+                                            ];
+                                        })
+                                        ->visible(fn ($get) => !empty($get('action_type_id'))),
+                                ])
+                                ->columnSpan(2),
+                        ])
+                        ->fillForm(function ($record) {
+                            // Load the current actions for the process
+                            if (!$record->relationLoaded('actions')) {
+                                $record->load('actions');
+                            }
+                            
+                            return [
+                                'name' => $record->name,
+                                'classification_id' => $record->classification_id,
+                                'action_type_id' => $record->actions->sortBy('pivot.sequence_order')->pluck('id')->toArray(),
+                            ];
+                        })
+                        ->mutateDataUsing(function (array $data): array {
+                            // Store action types for later sync
+                            if (isset($data['action_type_id']) && is_array($data['action_type_id'])) {
+                                $this->actionTypesToAttach = $data['action_type_id'];
+                                unset($data['action_type_id']);
+                            }
+                            
+                            return $data;
+                        })
+                        ->after(function (Model $record) {
+                            // Sync workflow actions (this will add/remove actions as needed)
+                            if (isset($this->actionTypesToAttach)) {
+                                // Detach all existing actions first
+                                $record->actions()->detach();
+                                
+                                // Attach new actions with sequence order
+                                foreach ($this->actionTypesToAttach as $index => $actionTypeId) {
+                                    $record->actions()->attach($actionTypeId, [
+                                        'sequence_order' => $index + 1,
+                                        'completed_at' => null,
+                                        'completed_by' => null,
+                                        'notes' => null,
+                                    ]);
+                                }
+                                
+                                // Clear the stored actions
+                                $this->actionTypesToAttach = [];
+                            }
+                        })
                         ->hidden(fn () => !Auth::user()->can('update', $this->ownerRecord)),
                     ViewAction::make()
                         ->label('View')
