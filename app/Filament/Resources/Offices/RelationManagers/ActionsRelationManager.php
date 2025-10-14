@@ -36,11 +36,12 @@ class ActionsRelationManager extends RelationManager
     {
         return $schema
             ->schema([
-                Select::make('prerequisite_action_type_id')
-                    ->label('Prerequisite Action')
+                Select::make('prerequisites')
+                    ->label('Prerequisite Actions')
                     ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                    ->multiple()
                     ->searchable()
-                    ->helperText('Select an action that must be performed before this one'),
+                    ->helperText('Select actions that must be performed before this one (multiple allowed)'),
                 TextInput::make('name')
                     ->label('Action Name')
                     ->required()
@@ -69,11 +70,12 @@ class ActionsRelationManager extends RelationManager
                     ->badge()
                     ->color('success')
                     ->description('Status applied to documents'),
-                TextColumn::make('prerequisiteActionType.name')
-                    ->label('Prerequisite')
+                TextColumn::make('prerequisites_count')
+                    ->label('Prerequisites')
                     ->badge()
                     ->color('gray')
-                    ->placeholder('None'),
+                    ->getStateUsing(fn (ActionType $record) => $record->prerequisites->count())
+                    ->description(fn (ActionType $record) => $record->prerequisites->pluck('name')->join(', ') ?: 'None'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -114,9 +116,10 @@ class ActionsRelationManager extends RelationManager
                     ViewAction::make()
                         ->modalWidth('md')
                         ->schema([
-                            Select::make('prerequisite_action_type_id')
-                                ->label('Prerequisite Action')
+                            Select::make('prerequisites')
+                                ->label('Prerequisite Actions')
                                 ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                                ->multiple()
                                 ->disabled(), 
                             TextInput::make('name')
                                 ->label('Action Name')
@@ -130,14 +133,29 @@ class ActionsRelationManager extends RelationManager
                 ])
             ]);
     }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['office_id'] = $this->ownerRecord->id;
         $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = $data['is_active'] ??= true;
+        $data['is_active'] = $data['is_active'] ?? true;
         
         return $data;
     }
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Handle prerequisites attachment after save
+        return $data;
+    }
 
+    protected function afterCreate(): void
+    {
+        $this->record->prerequisites()->attach($this->form->getState()['prerequisites'] ?? []);
+    }
+
+    protected function afterSave(): void
+    {
+        $this->record->prerequisites()->sync($this->form->getState()['prerequisites'] ?? []);
+    }
 }
