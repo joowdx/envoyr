@@ -1,8 +1,5 @@
 <?php
 
-use App\Models\Document;
-use App\Models\Transmittal;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,6 +17,7 @@ return new class extends Migration
             $table->ulid('office_id')->nullable();
             $table->ulid('classification_id')->nullable();
             $table->string(column: 'name')->nullable();
+            $table->string('status');
             $table->softDeletes();
             $table->timestamps();
             $table->timestamp('processed_at')->nullable();

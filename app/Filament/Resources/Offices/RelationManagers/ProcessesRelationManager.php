@@ -50,23 +50,20 @@ class ProcessesRelationManager extends RelationManager
                     ->preload()
                     ->searchable()
                     ->placeholder('Select Classification'),
-                Repeater::make('action_types') 
-                    ->label('Actions')
-                    ->schema([
-                        Select::make('action_type_id')
+                
+                Select::make('action_type_id')
                             ->label('Action')
                             ->options(function () use ($ownerRecord) {
                                 return ActionType::where('office_id', $ownerRecord->id)
                                     ->where('is_active', true)
                                     ->pluck('name', 'id');
                             })
+                            ->multiple()
                             ->required()
                             ->searchable()
                             ->placeholder('Select Action'),
                     ])
-                    ->addActionLabel('Add Action')
-                    ->columns(1),
-                ]);
+                    ->columns(1);
                     }
 
     public function table(Table $table): Table
