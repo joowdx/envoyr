@@ -36,6 +36,109 @@ class ProcessesRelationManager extends RelationManager
         return 'Processes';
     }
 
+    /**
+     * Validate and reorder actions based on prerequisites
+     */
+    private function validateAndReorderActions(array $actionIds): array
+    {
+        $actionTypes = ActionType::whereIn('id', $actionIds)
+            ->with('prerequisites')
+            ->get()
+            ->keyBy('id');
+        
+        // Check if all prerequisites are included
+        $missingPrerequisites = $this->findMissingPrerequisites($actionIds, $actionTypes);
+        
+        if (!empty($missingPrerequisites)) {
+            throw new \Exception(
+                'Missing prerequisites: ' . implode(', ', $missingPrerequisites) . 
+                '. Please include all required prerequisite actions.'
+            );
+        }
+        
+        // Auto-order actions based on dependency graph
+        return $this->topologicalSort($actionIds, $actionTypes);
+    }
+
+    /**
+     * Find missing prerequisites for selected actions
+     */
+    private function findMissingPrerequisites(array $actionIds, $actionTypes): array
+    {
+        $missing = [];
+        
+        foreach ($actionIds as $actionId) {
+            $action = $actionTypes->get($actionId);
+            if (!$action) continue;
+            
+            foreach ($action->prerequisites as $prerequisite) {
+                if (!in_array($prerequisite->id, $actionIds)) {
+                    $missing[] = $action->name . ' requires ' . $prerequisite->name;
+                }
+            }
+        }
+        
+        return array_unique($missing);
+    }
+
+    /**
+     * Sort actions using topological sort to respect dependencies
+     */
+    private function topologicalSort(array $actionIds, $actionTypes): array
+    {
+        $graph = [];
+        $inDegree = [];
+        
+        // Initialize graph and in-degree count
+        foreach ($actionIds as $actionId) {
+            $graph[$actionId] = [];
+            $inDegree[$actionId] = 0;
+        }
+        
+        // Build dependency graph
+        foreach ($actionIds as $actionId) {
+            $action = $actionTypes->get($actionId);
+            if (!$action) continue;
+            
+            foreach ($action->prerequisites as $prerequisite) {
+                if (in_array($prerequisite->id, $actionIds)) {
+                    $graph[$prerequisite->id][] = $actionId;
+                    $inDegree[$actionId]++;
+                }
+            }
+        }
+        
+        // Topological sort using Kahn's algorithm
+        $queue = [];
+        $result = [];
+        
+        // Find all nodes with no incoming edges
+        foreach ($inDegree as $node => $degree) {
+            if ($degree == 0) {
+                $queue[] = $node;
+            }
+        }
+        
+        while (!empty($queue)) {
+            $current = array_shift($queue);
+            $result[] = $current;
+            
+            foreach ($graph[$current] as $neighbor) {
+                $inDegree[$neighbor]--;
+                if ($inDegree[$neighbor] == 0) {
+                    $queue[] = $neighbor;
+                }
+            }
+        }
+        
+        // Check for circular dependencies
+        if (count($result) != count($actionIds)) {
+            throw new \Exception('Circular dependency detected in action prerequisites.');
+        }
+        
+        return $result;
+    }
+
     public function form(Schema $form): Schema
     {
         return $form
@@ -70,33 +173,68 @@ class ProcessesRelationManager extends RelationManager
                             ->options(function () {
                                 return ActionType::where('office_id', $this->ownerRecord->id)
                                     ->where('is_active', true)
-                                    ->pluck('name', 'id')
+                                    ->with('prerequisites')
+                                    ->get()
+                                    ->mapWithKeys(function ($action) {
+                                        $prereqText = '';
+                                        if ($action->prerequisites->isNotEmpty()) {
+                                            $prereqNames = $action->prerequisites->pluck('name')->join(', ');
+                                            $prereqText = " (requires: {$prereqNames})";
+                                        }
+                                        return [$action->id => $action->name . $prereqText];
+                                    })
                                     ->toArray();
                             })
-                            ->helperText('Select the actions that will be performed in this process workflow. Actions will be executed in the order selected.')
+                            ->helperText('Actions will be automatically ordered based on prerequisites. Make sure to include all required prerequisite actions.')
                             ->searchable()
                             ->optionsLimit(50)
                             ->noSearchResultsMessage('No actions found. Please create action types first.')
                             ->minItems(1)
                             ->maxItems(10)
                             ->live()
-                            ->afterStateUpdated(function ($state, $set) {
-                                // Trigger stepper update
-                                $set('stepper_data', $state);
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                // Validate selections in real-time
+                                if (!empty($state)) {
+                                    try {
+                                        $orderedActions = $this->validateAndReorderActions($state);
+                                        // Update the stepper to show the corrected order
+                                        $set('stepper_data', $orderedActions);
+                                        $set('original_order', $state !== $orderedActions);
+                                    } catch (\Exception $e) {
+                                        // Clear stepper on validation error
+                                        $set('stepper_data', []);
+                                        $set('validation_error', $e->getMessage());
+                                    }
+                                } else {
+                                    $set('stepper_data', []);
+                                    $set('validation_error', null);
+                                }
                             }),
                         
                         ViewField::make('workflow_preview')
                             ->view('components.workflow-stepper')
                             ->viewData(function ($get) {
-                                $selectedActions = $get('action_type_id') ?? [];
+                                $orderedActions = $get('stepper_data') ?? [];
+                                $validationError = $get('validation_error');
+                                $wasReordered = $get('original_order') ?? false;
+                                
+                                if ($validationError) {
+                                    return [
+                                        'selectedActions' => [],
+                                        'actionTypes' => collect(),
+                                        'validationError' => $validationError,
+                                    ];
+                                }
+                                
                                 $actionTypes = ActionType::where('office_id', $this->ownerRecord->id)
                                     ->where('is_active', true)
                                     ->get()
                                     ->keyBy('id');
                                 
                                 return [
-                                    'selectedActions' => $selectedActions,
+                                    'selectedActions' => $orderedActions,
                                     'actionTypes' => $actionTypes,
+                                    'wasReordered' => $wasReordered,
                                 ];
                             })
                             ->visible(fn ($get) => !empty($get('action_type_id'))),
@@ -145,7 +283,15 @@ class ProcessesRelationManager extends RelationManager
                         
                         // Store action types for workflow sequence (follows document flowchart)
                         if (isset($data['action_type_id']) && is_array($data['action_type_id'])) {
-                            $this->actionTypesToAttach = $data['action_type_id'];
+                            // Validate and auto-order actions based on prerequisites
+                            try {
+                                $this->actionTypesToAttach = $this->validateAndReorderActions($data['action_type_id']);
+                            } catch (\Exception $e) {
+                                // Use Laravel's validation exception
+                                throw \Illuminate\Validation\ValidationException::withMessages([
+                                    'action_type_id' => $e->getMessage()
+                                ]);
+                            }
                             unset($data['action_type_id']);
                         }
                         
@@ -205,33 +351,68 @@ class ProcessesRelationManager extends RelationManager
                                         ->options(function () {
                                             return ActionType::where('office_id', $this->ownerRecord->id)
                                                 ->where('is_active', true)
-                                                ->pluck('name', 'id')
+                                                ->with('prerequisites')
+                                                ->get()
+                                                ->mapWithKeys(function ($action) {
+                                                    $prereqText = '';
+                                                    if ($action->prerequisites->isNotEmpty()) {
+                                                        $prereqNames = $action->prerequisites->pluck('name')->join(', ');
+                                                        $prereqText = " (requires: {$prereqNames})";
+                                                    }
+                                                    return [$action->id => $action->name . $prereqText];
+                                                })
                                                 ->toArray();
                                         })
-                                        ->helperText('Select the actions that will be performed in this process workflow. Actions will be executed in the order selected.')
+                                        ->helperText('Actions will be automatically ordered based on prerequisites. Make sure to include all required prerequisite actions.')
                                         ->searchable()
                                         ->optionsLimit(50)
                                         ->noSearchResultsMessage('No actions found. Please create action types first.')
                                         ->minItems(1)
                                         ->maxItems(10)
                                         ->live()
-                                        ->afterStateUpdated(function ($state, $set) {
-                                            // Trigger stepper update
-                                            $set('stepper_data', $state);
+                                        ->afterStateUpdated(function ($state, $set, $get) {
+                                            // Validate selections in real-time
+                                            if (!empty($state)) {
+                                                try {
+                                                    $orderedActions = $this->validateAndReorderActions($state);
+                                                    // Update the stepper to show the corrected order
+                                                    $set('stepper_data', $orderedActions);
+                                                    $set('original_order', $state !== $orderedActions);
+                                                } catch (\Exception $e) {
+                                                    // Clear stepper on validation error
+                                                    $set('stepper_data', []);
+                                                    $set('validation_error', $e->getMessage());
+                                                }
+                                            } else {
+                                                $set('stepper_data', []);
+                                                $set('validation_error', null);
+                                            }
                                         }),
                                     
                                     ViewField::make('workflow_preview')
                                         ->view('components.workflow-stepper')
                                         ->viewData(function ($get) {
-                                            $selectedActions = $get('action_type_id') ?? [];
+                                            $orderedActions = $get('stepper_data') ?? [];
+                                            $validationError = $get('validation_error');
+                                            $wasReordered = $get('original_order') ?? false;
+                                            
+                                            if ($validationError) {
+                                                return [
+                                                    'selectedActions' => [],
+                                                    'actionTypes' => collect(),
+                                                    'validationError' => $validationError,
+                                                ];
+                                            }
+                                            
                                             $actionTypes = ActionType::where('office_id', $this->ownerRecord->id)
                                                 ->where('is_active', true)
                                                 ->get()
                                                 ->keyBy('id');
                                             
                                             return [
-                                                'selectedActions' => $selectedActions,
+                                                'selectedActions' => $orderedActions,
                                                 'actionTypes' => $actionTypes,
+                                                'wasReordered' => $wasReordered,
                                             ];
                                         })
                                         ->visible(fn ($get) => !empty($get('action_type_id'))),
@@ -253,7 +434,15 @@ class ProcessesRelationManager extends RelationManager
                         ->mutateDataUsing(function (array $data): array {
                             // Store action types for later sync
                             if (isset($data['action_type_id']) && is_array($data['action_type_id'])) {
-                                $this->actionTypesToAttach = $data['action_type_id'];
+                                // Validate and auto-order actions based on prerequisites
+                                try {
+                                    $this->actionTypesToAttach = $this->validateAndReorderActions($data['action_type_id']);
+                                } catch (\Exception $e) {
+                                    // Use Laravel's validation exception
+                                    throw \Illuminate\Validation\ValidationException::withMessages([
+                                        'action_type_id' => $e->getMessage()
+                                    ]);
+                                }
                                 unset($data['action_type_id']);
                             }
                             
