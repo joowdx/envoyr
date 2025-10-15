@@ -210,7 +210,12 @@ class ProcessesRelationManager extends RelationManager
                                     $set('validation_error', null);
                                 }
                             }),
-                        
+                    ])
+                    ->columnSpan(2),
+
+                Section::make('Workflow Preview')
+                    ->description('Visual representation of the configured workflow sequence')
+                    ->schema([
                         ViewField::make('workflow_preview')
                             ->view('components.workflow-stepper')
                             ->viewData(function ($get) {
@@ -388,7 +393,12 @@ class ProcessesRelationManager extends RelationManager
                                                 $set('validation_error', null);
                                             }
                                         }),
-                                    
+                                ])
+                                ->columnSpan(2),
+
+                            Section::make('Workflow Preview')
+                                ->description('Visual representation of the configured workflow sequence')
+                                ->schema([
                                     ViewField::make('workflow_preview')
                                         ->view('components.workflow-stepper')
                                         ->viewData(function ($get) {
