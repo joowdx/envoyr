@@ -115,6 +115,19 @@ class ActionType extends Model
         return $allPrereqs->unique('id');
     }
 
+    /**
+     * Get all dependent actions recursively (including dependents of dependents)
+     */
+    public function getAllDependents(): \Illuminate\Support\Collection
+    {
+        $allDependents = collect();
+        $visited = collect();
+        
+        $this->collectDependents($this, $allDependents, $visited);
+        
+        return $allDependents->unique('id');
+    }
+
     private function collectPrerequisites(ActionType $action, \Illuminate\Support\Collection &$allPrereqs, \Illuminate\Support\Collection &$visited): void
     {
         if ($visited->contains('id', $action->id)) {
@@ -126,6 +139,20 @@ class ActionType extends Model
         foreach ($action->prerequisites as $prerequisite) {
             $allPrereqs->push($prerequisite);
             $this->collectPrerequisites($prerequisite, $allPrereqs, $visited);
+        }
+    }
+
+    private function collectDependents(ActionType $action, \Illuminate\Support\Collection &$allDependents, \Illuminate\Support\Collection &$visited): void
+    {
+        if ($visited->contains('id', $action->id)) {
+            return; // Prevent infinite recursion
+        }
+        
+        $visited->push($action);
+        
+        foreach ($action->dependentActions as $dependent) {
+            $allDependents->push($dependent);
+            $this->collectDependents($dependent, $allDependents, $visited);
         }
     }
 }
