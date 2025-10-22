@@ -4,23 +4,22 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 
 use App\Models\ActionType;
 use App\Models\Process;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Auth;
 
 class ProcessesRelationManager extends RelationManager
 {
     protected static string $relationship = 'processes';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public function form(Schema $schema): Schema
@@ -55,11 +54,6 @@ class ProcessesRelationManager extends RelationManager
                     ->label('Classification')
                     ->sortable(),
 
-                TextColumn::make('actions_count')
-                    ->label('Actions')
-                    ->counts('actions')
-                    ->badge(),
-
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -71,9 +65,10 @@ class ProcessesRelationManager extends RelationManager
             ])
             ->headerActions($this->getHeaderActions())
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([])
             ->modifyQueryUsing(fn (Builder $query) => $query->where('office_id', $this->ownerRecord->id))
@@ -86,6 +81,7 @@ class ProcessesRelationManager extends RelationManager
             CreateAction::make()
                 ->mutateDataUsing(function (array $data): array {
                     $data['office_id'] = $this->ownerRecord->id;
+
                     return $data;
                 })
                 ->after(function (Process $record) {
@@ -128,13 +124,13 @@ class ProcessesRelationManager extends RelationManager
     {
         $graph = [];
         $inDegree = [];
-        
+
         // Build dependency graph
         foreach ($actions as $action) {
             $graph[$action->id] = [];
             $inDegree[$action->id] = 0;
         }
-        
+
         // Add edges for prerequisites
         foreach ($actions as $action) {
             foreach ($action->prerequisites as $prerequisite) {
@@ -144,22 +140,22 @@ class ProcessesRelationManager extends RelationManager
                 }
             }
         }
-        
+
         // Kahn's algorithm for topological sort
         $queue = [];
         $result = [];
-        
+
         // Start with actions that have no prerequisites
         foreach ($inDegree as $actionId => $degree) {
             if ($degree === 0) {
                 $queue[] = $actionId;
             }
         }
-        
-        while (!empty($queue)) {
+
+        while (! empty($queue)) {
             $current = array_shift($queue);
             $result[] = $current;
-            
+
             // Remove edges and update in-degrees
             foreach ($graph[$current] as $neighbor) {
                 $inDegree[$neighbor]--;
@@ -168,12 +164,12 @@ class ProcessesRelationManager extends RelationManager
                 }
             }
         }
-        
+
         // If we couldn't order all actions, just return them as-is
         if (count($result) !== count($actions)) {
             return $actions->pluck('id')->toArray();
         }
-        
+
         return $result;
     }
 
