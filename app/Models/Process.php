@@ -52,8 +52,7 @@ class Process extends Model
     {
         return $this->belongsToMany(ActionType::class, 'process_actions', 'process_id', 'action_type_id')
             ->withPivot(['completed_at', 'completed_by', 'notes', 'sequence_order'])
-            ->withTimestamps()
-            ->orderBy('process_actions.sequence_order'); // Fixed: use table.column syntax
+            ->withTimestamps();
     }
 
     // Get available actions for this process based on office and classification
