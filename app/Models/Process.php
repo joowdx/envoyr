@@ -55,6 +55,24 @@ class Process extends Model
             ->withTimestamps();
     }
 
+    // Scope for ordering actions by sequence
+    public function actionsOrdered(): BelongsToMany
+    {
+        return $this->actions()->orderBy('process_actions.sequence_order');
+    }
+
+    // Scope for getting completed actions only
+    public function actionsCompleted(): BelongsToMany
+    {
+        return $this->actions()->whereNotNull('process_actions.completed_at');
+    }
+
+    // Scope for getting pending actions only
+    public function actionsPending(): BelongsToMany
+    {
+        return $this->actions()->whereNull('process_actions.completed_at');
+    }
+
     // Get available actions for this process based on office and classification
     public function getAvailableActions()
     {
@@ -71,9 +89,21 @@ class Process extends Model
             ->where('is_active', true)
             ->count();
         
-        $completedActions = $this->actions()->whereNotNull('process_actions.completed_at')->count();
+        $completedActions = $this->actionsCompleted()->count();
         
         return $completedActions >= $requiredActions;
+    }
+
+    // Get next pending action in sequence
+    public function getNextPendingAction(): ?ActionType
+    {
+        return $this->actionsPending()->orderBy('process_actions.sequence_order')->first();
+    }
+
+    // Get actions in workflow order (commonly used scenario)
+    public function getWorkflowActions()
+    {
+        return $this->actionsOrdered()->get();
     }
 
     // Get the workflow name based on classification and office

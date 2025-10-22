@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Offices\RelationManagers;
 
 use App\Models\ActionType;
 use App\Models\Process;
+use App\Services\ActionTopologicalSorter;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -105,8 +106,9 @@ class ProcessesRelationManager extends RelationManager
             return;
         }
 
-        // Simple topological sort to respect prerequisites
-        $orderedActionIds = $this->simpleTopologicalSort($actions);
+        // Use the dedicated service for topological sorting
+        $sorter = new ActionTopologicalSorter();
+        $orderedActionIds = $sorter->sortByKahnsAlgorithm($actions);
 
         // Associate actions to process with sequence order
         $pivotData = [];
@@ -117,61 +119,7 @@ class ProcessesRelationManager extends RelationManager
         $process->actions()->sync($pivotData);
     }
 
-    /**
-     * Simple topological sort for action prerequisites
-     */
-    private function simpleTopologicalSort($actions): array
-    {
-        $graph = [];
-        $inDegree = [];
 
-        // Build dependency graph
-        foreach ($actions as $action) {
-            $graph[$action->id] = [];
-            $inDegree[$action->id] = 0;
-        }
-
-        // Add edges for prerequisites
-        foreach ($actions as $action) {
-            foreach ($action->prerequisites as $prerequisite) {
-                if (isset($graph[$prerequisite->id])) {
-                    $graph[$prerequisite->id][] = $action->id;
-                    $inDegree[$action->id]++;
-                }
-            }
-        }
-
-        // Kahn's algorithm for topological sort
-        $queue = [];
-        $result = [];
-
-        // Start with actions that have no prerequisites
-        foreach ($inDegree as $actionId => $degree) {
-            if ($degree === 0) {
-                $queue[] = $actionId;
-            }
-        }
-
-        while (! empty($queue)) {
-            $current = array_shift($queue);
-            $result[] = $current;
-
-            // Remove edges and update in-degrees
-            foreach ($graph[$current] as $neighbor) {
-                $inDegree[$neighbor]--;
-                if ($inDegree[$neighbor] === 0) {
-                    $queue[] = $neighbor;
-                }
-            }
-        }
-
-        // If we couldn't order all actions, just return them as-is
-        if (count($result) !== count($actions)) {
-            return $actions->pluck('id')->toArray();
-        }
-
-        return $result;
-    }
 
     public function isReadOnly(): bool
     {
