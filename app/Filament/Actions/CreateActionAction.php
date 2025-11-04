@@ -2,16 +2,16 @@
 
 namespace App\Filament\Actions;
 
-use App\Models\ActionType;
+use App\Models\Action as ActionModel;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Log;
 
-class CreateActionTypeAction extends Action
+class CreateActionAction extends Action
 {
     public static function getDefaultName(): ?string
     {
-        return 'createActionType';
+        return 'createAction';
     }
 
     public function setUp(): void
@@ -19,9 +19,9 @@ class CreateActionTypeAction extends Action
         parent::setUp();
 
         $this
-            ->label('Create New Action Type')
+            ->label('Create New Action')
             ->icon('heroicon-o-plus')
-            ->modalHeading('Create Action Type')
+            ->modalHeading('Create Action')
             ->modalWidth('md')
             ->form([
                 TextInput::make('name')
@@ -36,20 +36,20 @@ class CreateActionTypeAction extends Action
                     ->placeholder('e.g., Under Review, Approved, Processing'),
             ])
             ->action(function (array $data) {
-                Log::info('CreateActionTypeAction called with data:', $data);
-                
+                Log::info('CreateActionAction called with data:', $data);
+
                 $officeId = $this->getLivewire()->ownerRecord->id;
                 Log::info('Office ID:', ['office_id' => $officeId]);
-                
-                $actionType = ActionType::create([
+
+                $action = ActionModel::create([
                     'office_id' => $officeId,
                     'name' => $data['name'],
                     'status_name' => $data['status_name'],
                     'is_active' => true,
                 ]);
-                
-                Log::info('ActionType created:', ['id' => $actionType->id]);
-                
+
+                Log::info('Action created:', ['id' => $action->id]);
+
                 // Optionally refresh the page or show success notification
                 $this->success();
             });

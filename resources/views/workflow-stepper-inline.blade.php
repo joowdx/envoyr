@@ -12,7 +12,7 @@
         <div class="relative flex items-center min-w-max py-8">
             @foreach($selectedActions as $index => $actionId)
                 @php
-                    $action = $actionTypes->get($actionId);
+                    $action = $actions->get($actionId);
                     $stepNumber = $index + 1;
                     $isLast = $index === count($selectedActions) - 1;
                 @endphp
@@ -47,7 +47,7 @@
         <div class="grid gap-2">
             @foreach($selectedActions as $index => $actionId)
                 @php
-                    $action = $actionTypes->get($actionId);
+                    $action = $actions->get($actionId);
                 @endphp
                 <div class="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded text-xs">
                     <span class="w-6 h-6 rounded-full bg-pink-500 text-white flex items-center justify-center text-[10px] font-bold">{{ $index + 1 }}</span>

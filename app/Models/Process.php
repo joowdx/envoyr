@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Process extends Model
 {
@@ -47,10 +47,10 @@ class Process extends Model
         return $this->belongsTo(Classification::class);
     }
 
-    // Actions performed in this process (many-to-many with ActionType)
+    // Actions performed in this process (many-to-many with Action via steps)
     public function actions(): BelongsToMany
     {
-        return $this->belongsToMany(ActionType::class, 'process_actions', 'process_id', 'action_type_id')
+        return $this->belongsToMany(Action::class, 'steps', 'process_id', 'action_id')
             ->withPivot(['completed_at', 'completed_by', 'notes', 'sequence_order'])
             ->withTimestamps();
     }
@@ -58,46 +58,46 @@ class Process extends Model
     // Scope for ordering actions by sequence
     public function actionsOrdered(): BelongsToMany
     {
-        return $this->actions()->orderBy('process_actions.sequence_order');
+        return $this->actions()->orderBy('steps.sequence_order');
     }
 
     // Scope for getting completed actions only
     public function actionsCompleted(): BelongsToMany
     {
-        return $this->actions()->whereNotNull('process_actions.completed_at');
+        return $this->actions()->whereNotNull('steps.completed_at');
     }
 
     // Scope for getting pending actions only
     public function actionsPending(): BelongsToMany
     {
-        return $this->actions()->whereNull('process_actions.completed_at');
+        return $this->actions()->whereNull('steps.completed_at');
     }
 
     // Get available actions for this process based on office and classification
     public function getAvailableActions()
     {
-        return ActionType::where('office_id', $this->office_id)
+        return Action::where('office_id', $this->office_id)
             ->where('is_active', true)
-            ->whereNotIn('id', $this->actions()->pluck('action_types.id'))
+            ->whereNotIn('id', $this->actions()->pluck('actions.id'))
             ->get();
     }
 
     // Check if process is complete (all required actions done)
     public function isComplete(): bool
     {
-        $requiredActions = ActionType::where('office_id', $this->office_id)
+        $requiredActions = Action::where('office_id', $this->office_id)
             ->where('is_active', true)
             ->count();
-        
+
         $completedActions = $this->actionsCompleted()->count();
-        
+
         return $completedActions >= $requiredActions;
     }
 
     // Get next pending action in sequence
-    public function getNextPendingAction(): ?ActionType
+    public function getNextPendingAction(): ?Action
     {
-        return $this->actionsPending()->orderBy('process_actions.sequence_order')->first();
+        return $this->actionsPending()->orderBy('steps.sequence_order')->first();
     }
 
     // Get actions in workflow order (commonly used scenario)
@@ -109,7 +109,7 @@ class Process extends Model
     // Get the workflow name based on classification and office
     public function getWorkflowName(): string
     {
-        return ($this->classification->name ?? 'Unknown') . ' - ' . ($this->office->acronym ?? 'Unknown');
+        return ($this->classification->name ?? 'Unknown').' - '.($this->office->acronym ?? 'Unknown');
     }
 
     public static function booted()
@@ -118,9 +118,9 @@ class Process extends Model
             if (Auth::check()) {
                 $model->user_id = Auth::id();
             }
-            
+
             // Auto-set classification from document if not provided (per flowchart)
-            if (!$model->classification_id && $model->document_id) {
+            if (! $model->classification_id && $model->document_id) {
                 $document = Document::find($model->document_id);
                 if ($document) {
                     $model->classification_id = $document->classification_id;

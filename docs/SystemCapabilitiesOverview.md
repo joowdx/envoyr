@@ -1,5 +1,15 @@
 # Envoyr Document Tracking System - Complete Capabilities Overview
 
+> **⚠️ DOCUMENTATION CONSOLIDATED**
+>
+> This documentation has been reorganized for better clarity and maintainability:
+> - **Database Schema**: See [DatabaseSchema.md](./DatabaseSchema.md) for complete schema documentation including ER diagrams, table definitions, relationships, and constraints
+> - **System Documentation**: See [SystemDocumentation.md](./SystemDocumentation.md) for comprehensive system capabilities, business logic, and implementation details
+>
+> This file is kept for reference but may not be updated going forward.
+
+---
+
 ## 🏛️ System Overview
 
 **Envoyr** is a comprehensive government document tracking system designed to manage the complete lifecycle of official documents as they flow through various offices and departments. The system provides end-to-end tracking, workflow automation, and audit trails for document processing in governmental organizations.
@@ -233,13 +243,14 @@ $process->actionsOrdered()          // Actions in sequence order
 
 #### Process-Action Relationships
 ```php
-// Many-to-many with rich pivot data
-process_actions {
+// Many-to-many with rich pivot data (sequential steps)
+steps {
+    id: ULID
     process_id: ULID
-    action_type_id: bigint
-    completed_at: timestamp     // When action was completed
-    completed_by: ULID         // Who completed the action
-    notes: text               // Action completion notes
+    action_id: ULID
+    completed_at: timestamp     // When step was completed
+    completed_by: ULID         // Who completed the step
+    notes: text               // Step completion notes
     sequence_order: integer   // Order in workflow
 }
 ```

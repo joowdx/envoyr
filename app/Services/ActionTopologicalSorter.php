@@ -9,8 +9,8 @@ class ActionTopologicalSorter
     /**
      * Sort actions using Kahn's algorithm for topological sorting.
      * This approach is suitable for collections of actions with prerequisites.
-     * 
-     * @param Collection $actions Collection of ActionType models with prerequisites relationship loaded
+     *
+     * @param  Collection  $actions  Collection of Action models with prerequisites relationship loaded
      * @return array Array of action IDs in topologically sorted order
      */
     public function sortByKahnsAlgorithm(Collection $actions): array
@@ -49,7 +49,7 @@ class ActionTopologicalSorter
             }
         }
 
-        while (!empty($queue)) {
+        while (! empty($queue)) {
             $current = array_shift($queue);
             $result[] = $current;
 
@@ -73,9 +73,9 @@ class ActionTopologicalSorter
     /**
      * Sort actions using DFS-based topological sorting.
      * This approach is suitable when you have specific action IDs to sort from a larger collection.
-     * 
-     * @param array $actionIds Array of action IDs to sort
-     * @param Collection|array $actionTypes Collection or array of ActionType models with prerequisites
+     *
+     * @param  array  $actionIds  Array of action IDs to sort
+     * @param  Collection|array  $actionTypes  Collection or array of Action models with prerequisites
      * @return array Array of action IDs in topologically sorted order
      */
     public function sortByDepthFirstSearch(array $actionIds, $actionTypes): array
@@ -92,8 +92,8 @@ class ActionTopologicalSorter
         $temp = [];
 
         foreach ($actionIds as $actionId) {
-            if (!in_array($actionId, $visited)) {
-                if (!$this->dfsTopologicalSortHelper($actionId, $actionTypes, $visited, $temp, $sorted, $actionIds)) {
+            if (! in_array($actionId, $visited)) {
+                if (! $this->dfsTopologicalSortHelper($actionId, $actionTypes, $visited, $temp, $sorted, $actionIds)) {
                     // Circular dependency detected, return original order
                     return $actionIds;
                 }
@@ -131,7 +131,7 @@ class ActionTopologicalSorter
                 // Convert allowedIds elements to strings for comparison
                 $allowedIdsStrings = array_map('strval', $allowedIds);
                 if (in_array($prereqId, $allowedIdsStrings)) {
-                    if (!$this->dfsTopologicalSortHelper($prereqId, $actionTypes, $visited, $temp, $sorted, $allowedIds)) {
+                    if (! $this->dfsTopologicalSortHelper($prereqId, $actionTypes, $visited, $temp, $sorted, $allowedIds)) {
                         return false;
                     }
                 }
@@ -162,9 +162,9 @@ class ActionTopologicalSorter
     /**
      * Convenience method that automatically chooses the best sorting algorithm
      * based on the input parameters.
-     * 
-     * @param Collection|array $actions Either a Collection of actions or array of action IDs
-     * @param Collection|array|null $actionTypes Optional collection/array of ActionType models (required if first param is array of IDs)
+     *
+     * @param  Collection|array  $actions  Either a Collection of actions or array of action IDs
+     * @param  Collection|array|null  $actionTypes  Optional collection/array of Action models (required if first param is array of IDs)
      * @return array Array of action IDs in topologically sorted order
      */
     public function sort($actions, $actionTypes = null): array

@@ -1,5 +1,15 @@
 # Envoyr Document Tracking System - Business Logic Deep Dive
 
+> **⚠️ DOCUMENTATION CONSOLIDATED**
+>
+> This documentation has been reorganized for better clarity and maintainability:
+> - **Database Schema**: See [DatabaseSchema.md](./DatabaseSchema.md) for complete schema documentation including ER diagrams, table definitions, relationships, and constraints
+> - **System Documentation**: See [SystemDocumentation.md](./SystemDocumentation.md) for comprehensive system capabilities, business logic, and implementation details
+>
+> This file is kept for reference but may not be updated going forward.
+
+---
+
 ## 🧠 Business Logic Overview
 
 The Envoyr system implements sophisticated business logic that automates document workflows, enforces business rules, and maintains data integrity throughout the document lifecycle. The business logic is distributed across model events, service classes, action classes, and validation layers.
@@ -241,10 +251,10 @@ public function isComplete(): bool
 }
 
 // Next action identification
-public function getNextPendingAction(): ?ActionType
+public function getNextPendingAction(): ?Action
 {
     return $this->actionsPending()
-        ->orderBy('process_actions.sequence_order')
+        ->orderBy('steps.sequence_order')
         ->first();
 }
 ```
