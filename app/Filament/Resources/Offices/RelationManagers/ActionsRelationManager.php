@@ -2,28 +2,27 @@
 
 namespace App\Filament\Resources\Offices\RelationManagers;
 
-use App\Models\ActionType;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use App\Models\Action as ActionModel;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\RestoreAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ActionsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'actionTypes';
+    protected static string $relationship = 'actions';
 
     protected static ?string $recordTitleAttribute = 'name';
 
@@ -38,7 +37,7 @@ class ActionsRelationManager extends RelationManager
             ->schema([
                 Select::make('prerequisites')
                     ->label('Prerequisite Actions')
-                    ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                    ->options(ActionModel::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
                     ->multiple()
                     ->searchable()
                     ->helperText('Select actions that must be performed before this one (multiple allowed)'),
@@ -74,8 +73,8 @@ class ActionsRelationManager extends RelationManager
                     ->label('Prerequisites')
                     ->badge()
                     ->color('gray')
-                    ->getStateUsing(fn (ActionType $record) => $record->prerequisites->count())
-                    ->description(fn (ActionType $record) => $record->prerequisites->pluck('name')->join(', ') ?: 'None'),
+                    ->getStateUsing(fn (ActionModel $record) => $record->prerequisites->count())
+                    ->description(fn (ActionModel $record) => $record->prerequisites->pluck('name')->join(', ') ?: 'None'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -93,10 +92,10 @@ class ActionsRelationManager extends RelationManager
                     ->modalWidth('lg')
                     ->modalDescription('Define a new action for this office.')
                     ->before(function (CreateAction $action, array $data) {
-                        $exists = ActionType::where('office_id', $this->ownerRecord->id)
+                        $exists = ActionModel::where('office_id', $this->ownerRecord->id)
                             ->where('name', $data['name'])
                             ->exists();
-                            
+
                         if ($exists) {
                             Notification::make()
                                 ->title('Action Already Exists')
@@ -104,8 +103,8 @@ class ActionsRelationManager extends RelationManager
                                 ->warning()
                                 ->persistent()
                                 ->send();
-                                
-                            $action->halt(); 
+
+                            $action->halt();
                         }
                     }),
             ])
@@ -118,19 +117,19 @@ class ActionsRelationManager extends RelationManager
                         ->schema([
                             Select::make('prerequisites')
                                 ->label('Prerequisite Actions')
-                                ->options(ActionType::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
+                                ->options(ActionModel::where('office_id', $this->ownerRecord->id)->pluck('name', 'id'))
                                 ->multiple()
-                                ->disabled(), 
+                                ->disabled(),
                             TextInput::make('name')
                                 ->label('Action Name')
-                                ->disabled(), 
+                                ->disabled(),
                             TextInput::make('status_name')
                                 ->label('Document Status')
                                 ->disabled(),
                         ]),
                     DeleteAction::make(),
                     RestoreAction::make(),
-                ])
+                ]),
             ]);
     }
 
@@ -139,7 +138,7 @@ class ActionsRelationManager extends RelationManager
         $data['office_id'] = $this->ownerRecord->id;
         $data['slug'] = Str::slug($data['name']);
         $data['is_active'] = $data['is_active'] ?? true;
-        
+
         return $data;
     }
 

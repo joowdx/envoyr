@@ -1,4 +1,4 @@
-@props(['selectedActions' => [], 'actionTypes' => collect(), 'title' => 'Workflow Preview', 'validationError' => null, 'wasReordered' => false])
+@props(['selectedActions' => [], 'actions' => collect(), 'title' => 'Workflow Preview', 'validationError' => null, 'wasReordered' => false])
 
 @if($validationError)
 <div class="workflow-stepper-container mt-4 mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -36,7 +36,7 @@
         <ul class="steps w-full" style="--p: #ec4899; --pc: #ffffff;">
             @foreach($selectedActions as $index => $actionId)
                 @php
-                    $action = $actionTypes->get($actionId);
+                    $action = $actions->get($actionId);
                 @endphp
                 <li class="step step-primary">
                     {{ $action?->name ?? 'Unknown Action' }}

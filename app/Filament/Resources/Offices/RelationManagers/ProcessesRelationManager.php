@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Offices\RelationManagers;
 
-use App\Models\ActionType;
+use App\Models\Action;
 use App\Models\Process;
 use App\Services\ActionTopologicalSorter;
 use Filament\Actions\ActionGroup;
@@ -97,7 +97,7 @@ class ProcessesRelationManager extends RelationManager
     private function associateAllActionsToProcess(Process $process): void
     {
         // Get all active actions for this office
-        $actions = ActionType::where('office_id', $process->office_id)
+        $actions = Action::where('office_id', $process->office_id)
             ->where('is_active', true)
             ->with('prerequisites')
             ->get();
@@ -107,7 +107,7 @@ class ProcessesRelationManager extends RelationManager
         }
 
         // Use the dedicated service for topological sorting
-        $sorter = new ActionTopologicalSorter();
+        $sorter = new ActionTopologicalSorter;
         $orderedActionIds = $sorter->sortByKahnsAlgorithm($actions);
 
         // Associate actions to process with sequence order
@@ -118,8 +118,6 @@ class ProcessesRelationManager extends RelationManager
 
         $process->actions()->sync($pivotData);
     }
-
-
 
     public function isReadOnly(): bool
     {

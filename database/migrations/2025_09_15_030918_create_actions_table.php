@@ -11,19 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('action_types', function (Blueprint $table) {
-            $table->id();
+        Schema::create('actions', function (Blueprint $table) {
+            $table->ulid('id')->primary();
             $table->ulid('office_id');
             $table->string('name');
             $table->string('status_name');
             $table->string('slug')->unique();
+            $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['office_id', 'slug']);
-            $table->foreignId('prerequisite_action_type_id')->nullable()->constrained('action_types');
             $table->foreign('office_id')->references('id')->on('offices')->cascadeOnDelete();
+            $table->index(['office_id', 'is_active']);
         });
     }
 
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('action_types');
+        Schema::dropIfExists('actions');
     }
 };

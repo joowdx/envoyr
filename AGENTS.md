@@ -106,22 +106,13 @@ Attachment {
   json paths
   ulid enclosure_id
 }
-ActionType {
-    bigint id
+Action {
+    ulid id
     ulid office_id
     string name
     string status_name
     string slug
     boolean is_active
-    datetime deleted_at
-    datetime created_at
-    datetime updated_at
-}
-OfficeAction {
-    bigint id
-    ulid office_id
-    bigint action_type_id
-    ulid user_id
     datetime deleted_at
     datetime created_at
     datetime updated_at
@@ -154,10 +145,8 @@ Document }| -- o| Source : "can have"
 Document ||--|| Attachment : "has"
 Transmittal ||--|| Attachment : "has"
 Attachment ||--|{ Content : "has"
-Office ||--|{ ActionType : "defines"
-ActionType ||--|{ OfficeAction : "used in"
-Office ||--|{ OfficeAction : "performs"
-User ||--|{ OfficeAction : "performs"
+Office ||--|{ Action : "defines"
+Action ||--o{ Action : "has prerequisites"
 Document ||--|{ Process : "processed in"
 Transmittal ||--|{ Process : "processed in"
 User ||--|{ Process : "processes"

@@ -2,7 +2,7 @@
     @if(!empty($getSelectedActions()))
         @include('components.workflow-stepper', [
             'selectedActions' => $getSelectedActions(),
-            'actionTypes' => $getActionTypes()
+            'actions' => $getActions()
         ])
     @else
         <div class="text-sm text-gray-500 italic p-4 text-center bg-gray-50 rounded-lg">

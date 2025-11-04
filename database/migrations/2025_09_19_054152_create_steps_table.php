@@ -8,10 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('process_actions', function (Blueprint $table) {
-            $table->id();
+        Schema::create('steps', function (Blueprint $table) {
+            $table->ulid('id')->primary();
             $table->ulid('process_id');
-            $table->unsignedBigInteger('action_type_id');
+            $table->ulid('action_id');
             $table->integer('sequence_order')->default(1);
             $table->datetime('completed_at')->nullable();
             $table->ulid('completed_by')->nullable();
@@ -19,15 +19,17 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('process_id')->references('id')->on('processes')->cascadeOnDelete();
-            $table->foreign('action_type_id')->references('id')->on('action_types')->cascadeOnDelete();
+            $table->foreign('action_id')->references('id')->on('actions')->cascadeOnDelete();
             $table->foreign('completed_by')->references('id')->on('users')->nullOnDelete();
-            
-            $table->unique(['process_id', 'action_type_id']);
+
+            $table->unique(['process_id', 'action_id']);
+            $table->index(['process_id', 'sequence_order']);
+            $table->index(['action_id', 'completed_at']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('process_actions');
+        Schema::dropIfExists('steps');
     }
 };
