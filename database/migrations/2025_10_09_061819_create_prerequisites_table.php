@@ -20,7 +20,6 @@ return new class extends Migration
             $table->foreign('action_id')->references('id')->on('actions')->cascadeOnDelete();
             $table->foreign('required_action_id')->references('id')->on('actions')->cascadeOnDelete();
             $table->primary(['action_id', 'required_action_id']);
-            $table->index('action_id');
             $table->index('required_action_id');
         });
     }

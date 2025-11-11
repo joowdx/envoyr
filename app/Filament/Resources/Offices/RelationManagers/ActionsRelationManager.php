@@ -117,7 +117,7 @@ class ActionsRelationManager extends RelationManager
                     ViewAction::make()
                         ->modalWidth('md')
                         ->fillForm(fn (ActionModel $record): array => [
-                            'prerequisites' => $record->prerequisites()->get()->pluck('id')->toArray(),
+                            'prerequisites' => $record->prerequisites()->pluck('id')->toArray(),
                             'name' => $record->name,
                             'status_name' => $record->status_name,
                         ])
