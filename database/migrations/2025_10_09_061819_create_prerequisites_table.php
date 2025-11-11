@@ -12,15 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('prerequisites', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            // Proper pivot table - no separate primary key
             $table->ulid('action_id');
             $table->ulid('required_action_id');
             $table->timestamps();
 
             $table->foreign('action_id')->references('id')->on('actions')->cascadeOnDelete();
             $table->foreign('required_action_id')->references('id')->on('actions')->cascadeOnDelete();
-            $table->unique(['action_id', 'required_action_id'], 'unique_prerequisite');
-            $table->index('action_id');
+            $table->primary(['action_id', 'required_action_id']);
             $table->index('required_action_id');
         });
     }

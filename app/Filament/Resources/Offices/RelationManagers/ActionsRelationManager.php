@@ -59,22 +59,24 @@ class ActionsRelationManager extends RelationManager
     {
         return $table
             ->heading('Actions')
+            ->modifyQueryUsing(fn ($query) => $query->with('prerequisites'))
             ->columns([
                 TextColumn::make('name')
                     ->label('Action Name')
                     ->badge()
                     ->color('primary'),
+                TextColumn::make('prerequisites.name')
+                    ->label('Prerequisites')
+                    ->badge()
+                    ->color('gray')
+                    ->separator(', ')
+                    ->placeholder('None')
+                    ->tooltip('Actions that must be completed before this one'),
                 TextColumn::make('status_name')
                     ->label('Document Status')
                     ->badge()
                     ->color('success')
-                    ->description('Status applied to documents'),
-                TextColumn::make('prerequisites_count')
-                    ->label('Prerequisites')
-                    ->badge()
-                    ->color('gray')
-                    ->getStateUsing(fn (ActionModel $record) => $record->prerequisites->count())
-                    ->description(fn (ActionModel $record) => $record->prerequisites->pluck('name')->join(', ') ?: 'None'),
+                    ->tooltip('Status applied to documents'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
@@ -114,6 +116,11 @@ class ActionsRelationManager extends RelationManager
                         ->modalWidth('md'),
                     ViewAction::make()
                         ->modalWidth('md')
+                        ->fillForm(fn (ActionModel $record): array => [
+                            'prerequisites' => $record->prerequisites()->pluck('id')->toArray(),
+                            'name' => $record->name,
+                            'status_name' => $record->status_name,
+                        ])
                         ->schema([
                             Select::make('prerequisites')
                                 ->label('Prerequisite Actions')
