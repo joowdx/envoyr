@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('steps', function (Blueprint $table) {
-            // Proper pivot table - no separate primary key
+            // Proper pivot table - uses composite primary key
             $table->ulid('process_id');
             $table->ulid('action_id');
             $table->integer('sequence_order')->default(1);
