@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('steps', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            // Proper pivot table - uses composite primary key
             $table->ulid('process_id');
             $table->ulid('action_id');
             $table->integer('sequence_order')->default(1);
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreign('action_id')->references('id')->on('actions')->cascadeOnDelete();
             $table->foreign('completed_by')->references('id')->on('users')->nullOnDelete();
 
-            $table->unique(['process_id', 'action_id']);
+            $table->primary(['process_id', 'action_id']);
             $table->index(['process_id', 'sequence_order']);
             $table->index(['action_id', 'completed_at']);
         });
