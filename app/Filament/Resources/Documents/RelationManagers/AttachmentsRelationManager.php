@@ -2,18 +2,25 @@
 
 namespace App\Filament\Resources\Documents\RelationManagers;
 
+use App\Filament\Forms\Components\Counter;
 use App\Models\Attachment;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class AttachmentsRelationManager extends RelationManager
 {
@@ -27,24 +34,54 @@ class AttachmentsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Forms\Components\Repeater::make('contents')
+                Repeater::make('contents')
                     ->relationship('contents')
                     ->label('Files')
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        TextInput::make('title')
                             ->required()
                             ->label('File Title')
                             ->columnSpanFull(),
-                        Forms\Components\FileUpload::make('file')
+                        Counter::make('copies')
+                            ->label('Number of Copies')
+                            ->minValue(1)
+                            ->maxValue(100)
+                            ->required()
+                            ->disabled(fn (string $operation): bool => $operation === 'view'),
+                        Counter::make('pages_per_copy')
+                            ->label('Pages per Copy')
+                            ->minValue(1)
+                            ->maxValue(100)
+                            ->required()
+                            ->disabled(fn (string $operation): bool => $operation === 'view'),
+
+                        // Document Fields
+                        TextInput::make('control_number')
+                            ->label('Control Number'),
+
+                        TextInput::make('particulars')
+                            ->label('Particulars'),
+
+                        TextInput::make('payee')
+                            ->label('Payee'),
+
+                        TextInput::make('amount')
+                            ->label('Amount')
+                            ->numeric()
+                            ->prefix('₱')
+                            ->step(0.01),
+
+                        FileUpload::make('file')
                             ->multiple()
                             ->label('Upload Files')
                             ->preserveFilenames()
                             ->columnSpanFull()
                             ->directory('attachments')
-                            ->visibility('private'),
-                        Forms\Components\Hidden::make('sort')
+                            ->visibility('private')
+                            ->visible(fn (): bool => $this->getOwnerRecord()->electronic),
+                        Hidden::make('sort')
                             ->default(0),
-                        Forms\Components\Textarea::make('context')
+                        Textarea::make('context')
                             ->label('Notes/Context')
                             ->rows(3)
                             ->columnSpanFull(),
@@ -62,19 +99,44 @@ class AttachmentsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->columns([
-                Tables\Columns\TextColumn::make('contents_count')
+                TextColumn::make('contents_count')
                     ->label('Files Count')
                     ->counts('contents')
                     ->badge(),
-                Tables\Columns\TextColumn::make('contents.title')
+                TextColumn::make('contents.title')
                     ->label('File Titles')
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('contents.copies')
+                    ->label('Copies')
+                    ->badge()
+                    ->separator(', '),
+                TextColumn::make('contents.pages_per_copy')
+                    ->label('Pages/Copy')
+                    ->badge()
+                    ->separator(', '),
+                // Document Columns
+                TextColumn::make('contents.control_number')
+                    ->label('Control Number')
+                    ->listWithLineBreaks()
+                    ->limitList(2),
+                TextColumn::make('contents.particulars')
+                    ->label('Particulars')
+                    ->listWithLineBreaks()
+                    ->limit(30),
+                TextColumn::make('contents.payee')
+                    ->label('Payee')
+                    ->listWithLineBreaks(),
+                TextColumn::make('contents.amount')
+                    ->label('Amount')
+                    ->money('PHP')
+                    ->listWithLineBreaks(),
+                TextColumn::make('created_at')
                     ->label('Added')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -86,20 +148,23 @@ class AttachmentsRelationManager extends RelationManager
                     ->slideOver()
                     ->modalHeading('Add New Attachment')
                     ->modalWidth('lg')
-                    ->mutateFormDataUsing(function (array $data): array {
+                    ->mutateDataUsing(function (array $data): array {
                         // Ensure the attachment is created as a draft (no transmittal_id)
                         $data['transmittal_id'] = null;
+
                         return $data;
                     }),
             ])
-            ->actions([
-                ViewAction::make(),
-                EditAction::make()
-                    ->slideOver()
-                    ->modalWidth('lg'),
-                DeleteAction::make(),
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make()
+                        ->slideOver()
+                        ->modalWidth('lg'),
+                    DeleteAction::make(),
+                ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
@@ -113,11 +178,11 @@ class AttachmentsRelationManager extends RelationManager
     public function isReadOnly(): bool
     {
         $document = $this->getOwnerRecord();
-        
+
         if ($document->activeTransmittal()->exists()) {
             return true;
         }
-        
-        return !$document->isOwnedByOffice(auth()->user()->office_id);
+
+        return ! $document->isOwnedByOffice(Auth::user()->office_id);
     }
 }

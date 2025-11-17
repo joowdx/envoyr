@@ -30,7 +30,7 @@ class ModifyAttachmentsAction extends Action
 
         $this->modalWidth('lg');
 
-        $this->form([
+        $this->schema([
             Forms\Components\Repeater::make('current_contents')
                 ->label('Current Files (received with document)')
                 ->helperText('Review and modify the attachments received with this document.')
@@ -50,10 +50,10 @@ class ModifyAttachmentsAction extends Action
                 ])
                 ->defaultItems(function (Document $record) {
                     $activeTransmittal = $record->activeTransmittal;
-                    if (!$activeTransmittal || !$activeTransmittal->attachments->first()) {
+                    if (! $activeTransmittal || ! $activeTransmittal->attachments->first()) {
                         return [];
                     }
-                    
+
                     return $activeTransmittal->attachments->first()->contents->map(function ($content) {
                         return [
                             'id' => $content->id,
@@ -114,11 +114,11 @@ class ModifyAttachmentsAction extends Action
 
         $this->visible(function (Document $record): bool {
             $activeTransmittal = $record->activeTransmittal;
-            
+
             // Only show if document is owned by current office and has been received
             return $record->isOwnedByOffice(Auth::user()->office_id) &&
-                   $activeTransmittal && 
-                   $activeTransmittal->received_at && 
+                   $activeTransmittal &&
+                   $activeTransmittal->received_at &&
                    $activeTransmittal->to_office_id === Auth::user()->office_id;
         });
 
@@ -129,8 +129,8 @@ class ModifyAttachmentsAction extends Action
     {
         // Get the current draft attachment or create one
         $draftAttachment = $document->attachment;
-        
-        if (!$draftAttachment) {
+
+        if (! $draftAttachment) {
             $draftAttachment = $document->attachments()->create([
                 'transmittal_id' => null, // Draft attachment
             ]);

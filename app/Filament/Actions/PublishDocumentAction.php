@@ -19,8 +19,6 @@ class PublishDocumentAction extends Action
 
         $this->icon('heroicon-o-arrow-up-tray');
 
-        $this->color('success');
-
         $this->requiresConfirmation();
 
         $this->modalHeading('Publish document');

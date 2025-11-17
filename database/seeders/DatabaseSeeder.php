@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\UserRole;
-use App\Models\User;
+use App\Models\Classification;
 use App\Models\Office;
 use App\Models\Section;
-use App\Models\Classification;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -53,11 +53,29 @@ class DatabaseSeeder extends Seeder
             'designation' => $admin->designation,
         ]);
 
-        // 5. Create one classification
+        // 5. Create classifications
         Classification::create([
             'id' => Str::ulid(),
             'name' => 'Memo',
             'description' => 'Memorandum classification for official documents',
+        ]);
+
+        Classification::create([
+            'id' => Str::ulid(),
+            'name' => 'Financial Documents',
+            'description' => 'Budget reports, invoices, and financial statements',
+        ]);
+
+        Classification::create([
+            'id' => Str::ulid(),
+            'name' => 'Budget Reports',
+            'description' => 'Quarterly and annual budget reports',
+        ]);
+
+        Classification::create([
+            'id' => Str::ulid(),
+            'name' => 'General Correspondence',
+            'description' => 'Regular office correspondence and letters',
         ]);
 
         // 6. Create HR office

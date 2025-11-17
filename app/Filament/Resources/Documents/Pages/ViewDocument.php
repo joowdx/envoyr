@@ -7,8 +7,11 @@ use App\Actions\GenerateQR;
 use App\Filament\Actions\ModifyAttachmentsAction;
 use App\Filament\Actions\PublishDocumentAction;
 use App\Filament\Actions\TransmitDocumentAction;
+use App\Filament\Actions\UnpublishDocumentAction;
 use App\Filament\Resources\Documents\DocumentResource;
 use Filament\Actions;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,6 +25,7 @@ class ViewDocument extends ViewRecord
             TransmitDocumentAction::make(),
             ModifyAttachmentsAction::make(),
             PublishDocumentAction::make(),
+            UnpublishDocumentAction::make(),
             Actions\Action::make('generateQR')
                 ->label('QR')
                 ->icon('heroicon-o-qr-code')
@@ -51,9 +55,9 @@ class ViewDocument extends ViewRecord
                             );
                         }),
                 ]),
-            Actions\EditAction::make()
+            EditAction::make()
                 ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
-            Actions\DeleteAction::make()
+            DeleteAction::make()
                 ->visible(fn (): bool => $this->record->isDraft() && $this->record->user_id === Auth::id()),
         ];
     }

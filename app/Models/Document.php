@@ -53,12 +53,12 @@ class Document extends Model
 
     public function isDraft(): bool
     {
-        return is_null($this->published_at);
+        return $this->published_at === null;
     }
 
     public function isPublished(): bool
     {
-        return ! is_null($this->published_at);
+        return $this->published_at !== null;
     }
 
     public function publish(): bool
@@ -169,17 +169,33 @@ class Document extends Model
         if ($this->activeTransmittal) {
             return $this->activeTransmittal->to_office_id === $officeId;
         }
-        
+
         $lastReceivedTransmittal = $this->transmittals()
             ->whereNotNull('received_at')
             ->orderBy('received_at', 'desc')
             ->first();
-            
+
         if ($lastReceivedTransmittal) {
             return $lastReceivedTransmittal->to_office_id === $officeId;
         }
-        
+
         return $this->office_id === $officeId;
     }
 
+    public function hasTransmittals(): bool
+    {
+        return $this->transmittals()->exists();
+    }
+
+    public function contents()
+    {
+        return $this->hasManyThrough(
+            Content::class,
+            Attachment::class,
+            'document_id',    // Foreign key on attachments table
+            'attachment_id',  // Foreign key on contents table
+            'id',            // Local key on documents table
+            'id'             // Local key on attachments table
+        )->whereNull('attachments.transmittal_id'); // Only main document attachments
+    }
 }

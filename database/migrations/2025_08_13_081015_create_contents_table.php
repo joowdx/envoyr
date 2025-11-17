@@ -20,6 +20,12 @@ return new class extends Migration
             $table->jsonb('file')->nullable();
             $table->jsonb('path')->nullable();
             $table->string('hash', 64)->nullable();
+            $table->integer('copies')->default(1);
+            $table->integer('pages_per_copy')->default(1);
+            $table->string('control_number')->nullable();
+            $table->text('particulars')->nullable();
+            $table->string('payee')->nullable();
+            $table->decimal('amount', 15, 2)->nullable();
             $table->foreignIdFor(Attachment::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

@@ -23,7 +23,7 @@ class CreateActionAction extends Action
             ->icon('heroicon-o-plus')
             ->modalHeading('Create Action')
             ->modalWidth('md')
-            ->form([
+            ->schema([
                 TextInput::make('name')
                     ->label('Action Name')
                     ->required()
